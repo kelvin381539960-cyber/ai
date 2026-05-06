@@ -2,8 +2,8 @@
 
 ## Current Phase
 
-Phase: Post Gate 2
-Status: Ready for Implementation Planning
+Phase: Implementation Planning
+Status: Ready for Scaffold Implementation
 
 ---
 
@@ -27,6 +27,10 @@ Status: Ready for Implementation Planning
 - Created security-boundary.md.
 - Created prompts.md.
 - Created gate-2-review.md.
+- Created implementation-task-list.md.
+- Created scaffold-plan.md.
+- Created migration-plan.md.
+- Created fixture-plan.md.
 
 ---
 
@@ -60,11 +64,12 @@ Gate 2: Conditional Pass
 
 Allowed next:
 
-- implementation planning
-- repository scaffolding
+- code scaffold
+- safe config templates
 - synthetic fixtures
-- mock harness setup
+- mock harness skeleton
 - migration draft
+- OpenAPI validation harness
 
 Not allowed yet:
 
@@ -102,14 +107,23 @@ Current recommendation:
 
 ## Next Recommended Step
 
-Start implementation planning:
+Create code scaffold under:
 
-1. Create implementation-task-list.md.
-2. Create scaffold-plan.md.
-3. Create migration-plan.md.
-4. Create fixture-plan.md.
-5. Create first code scaffold only after those files exist.
+```text
+feishu-message-bridge/
+```
+
+Execution order:
+
+1. Scaffold root workspace.
+2. Add .gitignore and safe config templates.
+3. Add package directories.
+4. Add synthetic fixtures.
+5. Add mock harness skeleton.
+6. Add migration draft.
+7. Add OpenAPI validation harness.
+8. Run Gate 3 scaffold review.
 
 Codex / Agent handoff note:
 
-Do not use chat history as execution source. Read README.md, task-ledger.md, decisions.md, handoff.md, and gate-2-review.md first.
+Do not use chat history as execution source. Read README.md, task-ledger.md, decisions.md, handoff.md, gate-2-review.md, and implementation-task-list.md first.
