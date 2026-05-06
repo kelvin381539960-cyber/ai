@@ -44,3 +44,6 @@ export interface OcrResult {
   engine?: string;
   error?: string;
 }
+
+export * from "./validation.js";
+export * from "./hashing.js";
