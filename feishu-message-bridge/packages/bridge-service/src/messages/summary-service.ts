@@ -1,19 +1,13 @@
-import type { InMemoryMessageRepository } from "./in-memory-message-repository.js";
+import type { MessageRepository } from "./message-repository.js";
 import type { MessageSearchQuery, SummaryResponse } from "./types.js";
+import { toSummaryResponse } from "../routes/response-mappers.js";
 
 export class SummaryService {
-  constructor(private readonly repository: InMemoryMessageRepository) {}
+  constructor(private readonly repository: MessageRepository) {}
 
-  summarize(query: MessageSearchQuery = {}): SummaryResponse {
+  summarize(query: MessageSearchQuery = {}, scope: "messages" | "threads" = "messages"): SummaryResponse {
     const result = this.repository.search({ ...query, limit: query.limit ?? 50 });
     const threadCount = new Set(result.items.map((item) => item.threadKey).filter(Boolean)).size;
-
-    return {
-      summary: result.items.length === 0 ? "No synthetic records matched the summary query." : `Synthetic summary skeleton over ${result.items.length} record(s).`,
-      source: "synthetic-skeleton",
-      itemCount: result.items.length,
-      threadCount,
-      caveats: ["Mock response only; no real Feishu data was read.", "Summary text is a skeleton and not an LLM-generated production summary."]
-    };
+    return toSummaryResponse(result.items.length, threadCount, scope);
   }
 }
