@@ -2,7 +2,7 @@
 
 ## 1. Current Phase
 
-Phase: Post-Gate-7 mock-only API boundary hardening
+Phase: Post-Gate-8 mock-only API & boundary hardening
 Status: In Progress
 
 Gate status:
@@ -14,13 +14,14 @@ Gate status:
 - Gate 5: Conditional Pass
 - Gate 6: Conditional Pass
 - Gate 7: Conditional Pass
+- Gate 8: Conditional Pass
 
 Allowed work:
 
 - mock-only OpenAPI validation hardening
-- synthetic auth wrapper tests around route handlers
-- synthetic rate-limit boundary helpers and tests
-- database-backed repository design notes without production ingestion
+- expand synthetic auth wrapper tests around route handlers
+- expand synthetic rate-limit boundary helpers and tests
+- prepare design notes for database-backed repository without implementing production ingestion
 
 Not allowed yet:
 
@@ -52,7 +53,8 @@ Not allowed yet:
 | I-011 | Run Gate 5 API skeleton review | Completed |
 | I-012 | Post-Gate-5 response schema hardening | Completed |
 | I-013 | Post-Gate-6 edge-case fixture hardening | Completed |
-| I-014 | Post-Gate-7 API boundary hardening | Todo |
+| I-014 | Post-Gate-7 API boundary hardening | Completed |
+| I-015 | Post-Gate-8 mock-only API & boundary hardening | Todo |
 
 ---
 
@@ -89,6 +91,12 @@ Post-Gate-6 hardening outputs:
 - synthetic auth boundary helper and tests
 - Gate 7 edge-case hardening review
 
+Post-Gate-7 hardening outputs:
+
+- synthetic rate-limit helper and tests
+- full Phase 8 edge-case, cursor, auth, and OpenAPI boundary tests
+- Gate 8 edge-case & API boundary review
+
 Acceptance:
 
 - synthetic-only data
@@ -103,8 +111,8 @@ Acceptance:
 Recommended order:
 
 1. Continue mock-only OpenAPI validation hardening.
-2. Add synthetic auth wrapper tests around route handlers.
-3. Add synthetic rate-limit boundary helpers and tests.
+2. Expand synthetic auth wrapper tests around route handlers.
+3. Expand synthetic rate-limit boundary helpers and tests.
 4. Prepare design notes for database-backed repository without implementing production ingestion.
 
 ---

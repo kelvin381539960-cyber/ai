@@ -7,7 +7,7 @@
 | Task ID | FMB-001 |
 | 任务 | 飞书消息采集与 GPT 工作助手系统 |
 | 状态 | In Progress |
-| 当前阶段 | Post-Gate-7 mock-only API boundary hardening |
+| 当前阶段 | Post-Gate-8 mock-only API & boundary hardening |
 | 仓库 | kelvin381539960-cyber/ai |
 | 任务目录 | tasks/feishu-message-bridge |
 
@@ -106,11 +106,29 @@
 
 ---
 
+### T-009：Post-Gate-7 API & boundary hardening
+
+状态：Completed
+执行角色：Backend / Harness Agent
+输出：synthetic rate-limit helper、rate-limit tests、full edge-case tests、OpenAPI boundary tests、gate-8-review.md
+完成标准：
+- mock / synthetic only
+- no real Feishu reads
+- no real browser automation
+- no real message collection
+- no Tencent Cloud deployment
+- no production data import
+- no database-backed production ingestion
+- no production authentication integration
+结果回填：已完成，Gate 8 Conditional Pass
+
+---
+
 ## 下一步
 
-继续 post-Gate-7 mock-only API boundary hardening：
+继续 post-Gate-8 mock-only API boundary扩展：
 
 1. Continue mock-only OpenAPI validation hardening.
-2. Add synthetic auth wrapper tests around route handlers.
-3. Add synthetic rate-limit boundary helpers and tests.
+2. Expand synthetic auth wrapper tests around route handlers.
+3. Expand synthetic rate-limit boundary helpers and tests.
 4. Prepare design notes for database-backed repository without implementing production ingestion.

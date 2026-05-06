@@ -2,8 +2,8 @@
 
 ## Current Phase
 
-Phase: Post-Gate-6 mock-only edge-case hardening
-Status: Completed with Gate 7 Conditional Pass
+Phase: Post-Gate-8 mock-only API & boundary hardening
+Status: Completed with Gate 8 Conditional Pass
 
 ---
 
@@ -62,6 +62,9 @@ Status: Completed with Gate 7 Conditional Pass
 - Added empty-result and cursor-boundary tests.
 - Added synthetic GPT Action bearer auth boundary helper and tests.
 - Created gate-7-review.md.
+- Added synthetic rate-limit helper and tests.
+- Added full Phase 8 edge-case, cursor, auth, and OpenAPI boundary tests.
+- Created gate-8-review.md.
 
 ---
 
@@ -97,14 +100,14 @@ Gate 4: Conditional Pass
 Gate 5: Conditional Pass
 Gate 6: Conditional Pass
 Gate 7: Conditional Pass
+Gate 8: Conditional Pass
 
 Allowed next:
 
 - Continue mock-only OpenAPI validation hardening.
-- Add minimal real OpenAPI parser dependency only if kept offline and fixture-based.
-- Add synthetic auth wrapper tests around route handlers.
-- Add synthetic rate-limit boundary helpers and tests.
-- Prepare next design notes for database-backed repository without implementing production ingestion.
+- Expand synthetic auth wrapper coverage.
+- Expand synthetic rate-limit edge cases.
+- Prepare design notes for database-backed repository without implementing production ingestion.
 
 Not allowed yet:
 
@@ -147,13 +150,9 @@ Current recommendation:
 
 ## Next Recommended Step
 
-Start post-Gate-7 mock-only API boundary hardening:
+Start post-Gate-8 mock-only API boundary continuation:
 
 1. Continue mock-only OpenAPI validation hardening.
-2. Add synthetic auth wrapper tests around route handlers.
-3. Add synthetic rate-limit boundary helpers and tests.
+2. Expand synthetic auth wrapper tests around route handlers.
+3. Expand synthetic rate-limit boundary helpers and tests.
 4. Prepare design notes for database-backed repository without implementing production ingestion.
-
-Codex / Agent handoff note:
-
-Do not use chat history as execution source. Read README.md, task-ledger.md, decisions.md, handoff.md, gate-6-review.md, gate-7-review.md, and implementation-task-list.md first.
