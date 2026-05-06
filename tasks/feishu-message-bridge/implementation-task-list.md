@@ -2,7 +2,7 @@
 
 ## 1. Current Phase
 
-Phase: Post-Gate-6 mock-only edge-case hardening
+Phase: Post-Gate-7 mock-only API boundary hardening
 Status: In Progress
 
 Gate status:
@@ -13,13 +13,14 @@ Gate status:
 - Gate 4: Conditional Pass
 - Gate 5: Conditional Pass
 - Gate 6: Conditional Pass
+- Gate 7: Conditional Pass
 
 Allowed work:
 
-- mock-only edge-case fixture hardening
-- missing-root, nested-reply, OCR-only, empty-result, unknown-type, and cursor-boundary tests
-- continued mock-only OpenAPI schema validation hardening
-- synthetic handler auth boundary tests
+- mock-only OpenAPI validation hardening
+- synthetic auth wrapper tests around route handlers
+- synthetic rate-limit boundary helpers and tests
+- database-backed repository design notes without production ingestion
 
 Not allowed yet:
 
@@ -30,6 +31,7 @@ Not allowed yet:
 - real message collection
 - live Tencent Cloud deployment
 - database-backed production ingestion
+- production authentication integration
 
 ---
 
@@ -49,7 +51,8 @@ Not allowed yet:
 | I-010 | Implement Phase 4B API and service skeleton | Completed |
 | I-011 | Run Gate 5 API skeleton review | Completed |
 | I-012 | Post-Gate-5 response schema hardening | Completed |
-| I-013 | Post-Gate-6 edge-case fixture hardening | Todo |
+| I-013 | Post-Gate-6 edge-case fixture hardening | Completed |
+| I-014 | Post-Gate-7 API boundary hardening | Todo |
 
 ---
 
@@ -74,12 +77,24 @@ Post-Gate-5 hardening outputs:
 - response fixture shape tests
 - Gate 6 response schema hardening review
 
+Post-Gate-6 hardening outputs:
+
+- edge-case synthetic records
+- missing-root tests
+- nested-reply tests
+- OCR-only tests
+- empty-result tests
+- unknown-type tests
+- cursor-boundary tests
+- synthetic auth boundary helper and tests
+- Gate 7 edge-case hardening review
+
 Acceptance:
 
 - synthetic-only data
 - pure route handler functions
 - no server deployment
-- no external Feishu, browser, cloud, or production data access
+- no external Feishu, browser, cloud, database, or production data access
 
 ---
 
@@ -87,10 +102,10 @@ Acceptance:
 
 Recommended order:
 
-1. Expand synthetic fixtures for edge cases.
-2. Add missing-root, nested-reply, OCR-only, empty-result, unknown-type, and cursor-boundary tests.
-3. Continue mock-only OpenAPI schema validation hardening.
-4. Add auth boundary tests for GPT Action calls using synthetic handler inputs.
+1. Continue mock-only OpenAPI validation hardening.
+2. Add synthetic auth wrapper tests around route handlers.
+3. Add synthetic rate-limit boundary helpers and tests.
+4. Prepare design notes for database-backed repository without implementing production ingestion.
 
 ---
 
