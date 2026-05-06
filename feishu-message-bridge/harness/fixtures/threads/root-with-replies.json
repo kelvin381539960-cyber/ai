@@ -1,0 +1,27 @@
+{
+  "items": [
+    {
+      "source_item_key": "synthetic-root-001",
+      "thread_key": "synthetic-thread-001",
+      "root_item_key": "synthetic-root-001",
+      "parent_item_key": null,
+      "sender_name": "Synthetic Alice",
+      "sent_at": "2026-05-06T10:00:00+08:00",
+      "text": "Synthetic thread root."
+    },
+    {
+      "source_item_key": "synthetic-reply-001",
+      "thread_key": "synthetic-thread-001",
+      "root_item_key": "synthetic-root-001",
+      "parent_item_key": "synthetic-root-001",
+      "sender_name": "Synthetic Bob",
+      "sent_at": "2026-05-06T10:05:00+08:00",
+      "text": "Synthetic thread reply."
+    }
+  ],
+  "expected": {
+    "thread_key": "synthetic-thread-001",
+    "reply_count": 1,
+    "is_partial": false
+  }
+}
