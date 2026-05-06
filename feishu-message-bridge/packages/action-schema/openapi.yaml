@@ -1,0 +1,85 @@
+openapi: 3.1.0
+info:
+  title: Feishu Message Bridge Action API
+  version: 0.1.0
+  description: Bounded query and sync API for GPT Action integration.
+servers:
+  - url: https://example.com
+security:
+  - bearerAuth: []
+paths:
+  /health:
+    get:
+      operationId: getHealth
+      summary: Health check
+      security: []
+      responses:
+        '200':
+          description: Service health
+  /sync/request:
+    post:
+      operationId: requestSync
+      summary: Request a bounded sync job
+      responses:
+        '202':
+          description: Sync request accepted
+  /messages/search:
+    get:
+      operationId: searchMessages
+      summary: Search bounded message records
+      responses:
+        '200':
+          description: Search results
+  /messages/summary:
+    get:
+      operationId: summarizeMessages
+      summary: Summarize bounded message records
+      responses:
+        '200':
+          description: Summary response
+  /messages/tasks:
+    get:
+      operationId: extractMessageTasks
+      summary: Extract work items from bounded records
+      responses:
+        '200':
+          description: Extracted work items
+  /threads/search:
+    get:
+      operationId: searchThreads
+      summary: Search bounded threaded records
+      responses:
+        '200':
+          description: Thread search results
+  /threads/{thread_key}:
+    get:
+      operationId: getThread
+      summary: Get one bounded thread view
+      parameters:
+        - name: thread_key
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Thread detail
+  /threads/summary:
+    get:
+      operationId: summarizeThreads
+      summary: Summarize bounded threaded records
+      responses:
+        '200':
+          description: Thread summary response
+  /threads/tasks:
+    get:
+      operationId: extractThreadTasks
+      summary: Extract work items from bounded threaded records
+      responses:
+        '200':
+          description: Extracted thread work items
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
