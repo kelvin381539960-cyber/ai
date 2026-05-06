@@ -12,10 +12,11 @@ export interface HealthResponse {
 export function getHealth(): HealthResponse {
   return {
     status: "ok",
-    version: "0.1.0-post-gate-5-hardening"
+    version: "0.1.0-post-gate-6-edge-cases"
   };
 }
 
+export * from "./auth/action-auth.js";
 export * from "./messages/types.js";
 export * from "./messages/message-repository.js";
 export * from "./messages/in-memory-message-repository.js";
