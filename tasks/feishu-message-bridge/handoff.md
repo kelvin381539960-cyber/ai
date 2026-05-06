@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase: Phase 4A - Mock Module Implementation
+Phase: Phase 4B - API and Service Skeleton Implementation
 Status: Ready to Start
 
 ---
@@ -37,6 +37,14 @@ Status: Ready to Start
 - Created mock harness skeletons.
 - Created initial PostgreSQL migration draft.
 - Created gate-3-review.md.
+- Implemented shared validation helpers.
+- Implemented hash / dedup helpers.
+- Implemented thread reconstruction helper.
+- Implemented in-memory sync lock mock.
+- Implemented API response limit helper.
+- Hardened OpenAPI validation scaffold.
+- Added package-level tests for mock modules.
+- Created gate-4-review.md.
 
 ---
 
@@ -68,15 +76,16 @@ Confirmed V1 capabilities:
 Gate 1: Conditional Pass
 Gate 2: Conditional Pass
 Gate 3: Conditional Pass
+Gate 4: Conditional Pass
 
 Allowed next:
 
-- shared schema validation
-- hash / dedup helper
-- thread reconstruction from synthetic fixtures
-- in-memory sync lock mock
-- API response limit helper
-- OpenAPI validation hardening
+- API and service skeleton implementation
+- in-memory repository for synthetic records
+- route-level handler functions without server deployment
+- synthetic query tests
+- thread detail response tests
+- work item response shape tests
 
 Not allowed yet:
 
@@ -85,6 +94,7 @@ Not allowed yet:
 - production data import
 - real browser automation
 - real message collection
+- live Tencent Cloud deployment
 
 ---
 
@@ -116,18 +126,19 @@ Current recommendation:
 
 ## Next Recommended Step
 
-Start Phase 4A: Mock Module Implementation.
+Start Phase 4B: API and Service Skeleton Implementation.
 
 Recommended order:
 
-1. Shared validation helpers.
-2. Hash / dedup helper.
-3. Thread reconstruction function.
-4. In-memory sync lock mock.
-5. API response limit helper.
-6. OpenAPI validation hardening.
-7. Gate 4 mock implementation review.
+1. Add in-memory message repository.
+2. Add search service over synthetic records.
+3. Add thread query service.
+4. Add summary response skeleton.
+5. Add work item extraction response skeleton.
+6. Add route handler functions.
+7. Add synthetic API tests.
+8. Gate 5 API skeleton review.
 
 Codex / Agent handoff note:
 
-Do not use chat history as execution source. Read README.md, task-ledger.md, decisions.md, handoff.md, gate-3-review.md, and implementation-task-list.md first.
+Do not use chat history as execution source. Read README.md, task-ledger.md, decisions.md, handoff.md, gate-4-review.md, and implementation-task-list.md first.
