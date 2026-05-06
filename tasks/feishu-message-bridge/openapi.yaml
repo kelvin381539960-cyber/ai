@@ -1,0 +1,356 @@
+openapi: 3.1.0
+info:
+  title: Feishu Message Bridge Action API
+  version: 0.1.0
+  description: Bounded query and sync API for GPT Action integration.
+servers:
+  - url: https://example.com
+    description: Placeholder server. Replace during deployment.
+security:
+  - bearerAuth: []
+paths:
+  /health:
+    get:
+      operationId: getHealth
+      summary: Health check
+      security: []
+      responses:
+        '200':
+          description: Service health
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+  /sync/request:
+    post:
+      operationId: requestSync
+      summary: Request a bounded sync job
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SyncRequest'
+      responses:
+        '202':
+          description: Sync request accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncResponse'
+  /messages/search:
+    get:
+      operationId: searchMessages
+      summary: Search bounded message records
+      parameters:
+        - $ref: '#/components/parameters/Keyword'
+        - $ref: '#/components/parameters/Conversation'
+        - $ref: '#/components/parameters/Sender'
+        - $ref: '#/components/parameters/FromTime'
+        - $ref: '#/components/parameters/ToTime'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageSearchResponse'
+  /messages/summary:
+    get:
+      operationId: summarizeMessages
+      summary: Summarize bounded message records
+      parameters:
+        - $ref: '#/components/parameters/Keyword'
+        - $ref: '#/components/parameters/Conversation'
+        - $ref: '#/components/parameters/FromTime'
+        - $ref: '#/components/parameters/ToTime'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Summary response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SummaryResponse'
+  /messages/tasks:
+    get:
+      operationId: extractMessageTasks
+      summary: Extract tasks, decisions, risks, and blockers from bounded records
+      parameters:
+        - $ref: '#/components/parameters/Keyword'
+        - $ref: '#/components/parameters/Conversation'
+        - $ref: '#/components/parameters/FromTime'
+        - $ref: '#/components/parameters/ToTime'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Extracted work items
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkItemResponse'
+  /threads/search:
+    get:
+      operationId: searchThreads
+      summary: Search bounded threaded records
+      parameters:
+        - $ref: '#/components/parameters/Keyword'
+        - $ref: '#/components/parameters/Conversation'
+        - $ref: '#/components/parameters/FromTime'
+        - $ref: '#/components/parameters/ToTime'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Thread search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThreadSearchResponse'
+  /threads/{thread_key}:
+    get:
+      operationId: getThread
+      summary: Get one bounded thread view
+      parameters:
+        - name: thread_key
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Thread detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThreadDetailResponse'
+  /threads/summary:
+    get:
+      operationId: summarizeThreads
+      summary: Summarize bounded threaded records
+      parameters:
+        - $ref: '#/components/parameters/Keyword'
+        - $ref: '#/components/parameters/Conversation'
+        - $ref: '#/components/parameters/FromTime'
+        - $ref: '#/components/parameters/ToTime'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Thread summary response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SummaryResponse'
+  /threads/tasks:
+    get:
+      operationId: extractThreadTasks
+      summary: Extract tasks, decisions, risks, and blockers from bounded threaded records
+      parameters:
+        - $ref: '#/components/parameters/Keyword'
+        - $ref: '#/components/parameters/Conversation'
+        - $ref: '#/components/parameters/FromTime'
+        - $ref: '#/components/parameters/ToTime'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Extracted thread work items
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkItemResponse'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  parameters:
+    Keyword:
+      name: keyword
+      in: query
+      required: false
+      schema:
+        type: string
+        maxLength: 200
+    Conversation:
+      name: conversation
+      in: query
+      required: false
+      schema:
+        type: string
+        maxLength: 100
+    Sender:
+      name: sender
+      in: query
+      required: false
+      schema:
+        type: string
+        maxLength: 100
+    FromTime:
+      name: from_time
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date-time
+    ToTime:
+      name: to_time
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date-time
+    Limit:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 50
+        default: 20
+  schemas:
+    HealthResponse:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+        version:
+          type: string
+    SyncRequest:
+      type: object
+      required: [mode]
+      properties:
+        device_id:
+          type: string
+        mode:
+          type: string
+          enum: [incremental, bounded]
+        max_minutes:
+          type: integer
+          minimum: 1
+          maximum: 60
+          default: 10
+    SyncResponse:
+      type: object
+      required: [accepted, sync_job_id]
+      properties:
+        accepted:
+          type: boolean
+        sync_job_id:
+          type: string
+        status:
+          type: string
+    MessageItem:
+      type: object
+      required: [id, conversation_name, sender_name, sent_at, item_type]
+      properties:
+        id:
+          type: string
+        conversation_name:
+          type: string
+        sender_name:
+          type: string
+        sent_at:
+          type: string
+          format: date-time
+        item_type:
+          type: string
+        text_snippet:
+          type: string
+        ocr_snippet:
+          type: string
+        thread_key:
+          type: string
+        source_metadata:
+          type: object
+          additionalProperties: true
+    MessageSearchResponse:
+      type: object
+      required: [items, limit]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MessageItem'
+        limit:
+          type: integer
+        next_cursor:
+          type: string
+    ThreadItem:
+      type: object
+      required: [thread_key, conversation_name, last_reply_at]
+      properties:
+        thread_key:
+          type: string
+        thread_title:
+          type: string
+        conversation_name:
+          type: string
+        reply_count:
+          type: integer
+        last_reply_at:
+          type: string
+          format: date-time
+        root_snippet:
+          type: string
+        source_metadata:
+          type: object
+          additionalProperties: true
+    ThreadSearchResponse:
+      type: object
+      required: [items, limit]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ThreadItem'
+        limit:
+          type: integer
+        next_cursor:
+          type: string
+    ThreadDetailResponse:
+      type: object
+      required: [thread, items]
+      properties:
+        thread:
+          $ref: '#/components/schemas/ThreadItem'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MessageItem'
+    SummaryResponse:
+      type: object
+      required: [summary, source_count]
+      properties:
+        summary:
+          type: string
+        key_points:
+          type: array
+          items:
+            type: string
+        source_count:
+          type: integer
+    WorkItemResponse:
+      type: object
+      required: [tasks, decisions, risks, blockers]
+      properties:
+        tasks:
+          type: array
+          items:
+            type: string
+        decisions:
+          type: array
+          items:
+            type: string
+        risks:
+          type: array
+          items:
+            type: string
+        blockers:
+          type: array
+          items:
+            type: string
+        source_count:
+          type: integer
