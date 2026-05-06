@@ -11,15 +11,34 @@ const content = readFileSync(schemaPath, "utf8");
 const requiredFragments = [
   "openapi: 3.1.0",
   "/messages/search:",
+  "/messages/summary:",
+  "/messages/tasks:",
   "/threads/search:",
   "/threads/{thread_key}:",
-  "bearerAuth:"
+  "/threads/summary:",
+  "/threads/tasks:",
+  "bearerAuth:",
+  "operationId: searchMessages",
+  "operationId: searchThreads"
 ];
 
 const missing = requiredFragments.filter((fragment) => !content.includes(fragment));
 
 if (missing.length > 0) {
   console.error(`OpenAPI scaffold validation failed. Missing: ${missing.join(", ")}`);
+  process.exit(1);
+}
+
+const forbiddenFragments = [
+  "unbounded",
+  "dumpAll",
+  "exportAll"
+];
+
+const forbidden = forbiddenFragments.filter((fragment) => content.includes(fragment));
+
+if (forbidden.length > 0) {
+  console.error(`OpenAPI scaffold validation failed. Forbidden fragments: ${forbidden.join(", ")}`);
   process.exit(1);
 }
 
