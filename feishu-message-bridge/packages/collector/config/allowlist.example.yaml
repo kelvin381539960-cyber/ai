@@ -1,0 +1,13 @@
+conversations:
+  - name: synthetic-core-project
+    type: group
+    tier: core
+    initial_days: 90
+    ocr_enabled: true
+    thread_enabled: true
+  - name: synthetic-normal-sync
+    type: group
+    tier: normal
+    initial_days: 30
+    ocr_enabled: false
+    thread_enabled: true
