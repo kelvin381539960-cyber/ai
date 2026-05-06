@@ -1,0 +1,11 @@
+{
+  "name": "@fmb/action-schema",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node ./scripts/validate-openapi.mjs",
+    "typecheck": "node ./scripts/validate-openapi.mjs",
+    "lint": "node ./scripts/validate-openapi.mjs"
+  }
+}
