@@ -6,8 +6,8 @@
 |---|---|
 | Task ID | FMB-001 |
 | 任务 | 飞书消息采集与 GPT 工作助手系统 |
-| 状态 | Confirming |
-| 当前阶段 | 架构与任务规划 |
+| 状态 | In Progress |
+| 当前阶段 | Post-Gate-5 mock-only hardening |
 | 仓库 | kelvin381539960-cyber/ai |
 | 任务目录 | tasks/feishu-message-bridge |
 
@@ -27,66 +27,71 @@
 
 ### T-001：Feishu Message Bridge 架构设计
 
-状态：Confirming
+状态：Completed
 执行角色：PM / Architect
-输入：用户需求、飞书限制、双电脑场景
 输出：architecture.md
-完成标准：
-- 明确 Collector / Cloud / GPT Action 架构
-- 明确同步机制
-- 明确 OCR 范围
-- 明确风险边界
-结果回填：待开始
-问题 / Gap：
-- 是否支持首扫 90 天
-- OCR 存储策略
-- 是否需要本地全文缓存
-下一步：输出 architecture.md
+结果回填：已完成，Gate 1 Conditional Pass
 
 ---
 
 ### T-002：同步与去重机制设计
 
-状态：Todo
+状态：Completed
 执行角色：Architect
-输入：双电脑轮换场景
-输出：sync lock + dedup 方案
-完成标准：
-- 避免重复扫描
-- 避免重复入库
-- 支持断点续扫
-结果回填：未开始
-问题 / Gap：待分析
-下一步：设计 sync lock
+输出：sync lock + dedup 方案、mock helper
+结果回填：已完成，Gate 4 Conditional Pass
 
 ---
 
 ### T-003：OCR 与消息模型设计
 
-状态：Todo
+状态：Completed
 执行角色：Data Architect
-输入：飞书消息类型
-输出：统一消息结构
-完成标准：
-- 文本 / 图片 OCR 统一结构
-- 可用于 GPT 检索
-- 可用于任务提取
-结果回填：未开始
-问题 / Gap：待分析
-下一步：设计 message schema
+输出：统一消息结构、OCR text boundary、synthetic fixtures
+结果回填：已完成，Gate 4 Conditional Pass
 
 ---
 
 ### T-004：GPT Action API 设计
 
-状态：Todo
+状态：Completed
 执行角色：Backend Architect
-输入：GPT 使用场景
-输出：OpenAPI schema
+输出：api-design.md、openapi.yaml
+结果回填：已完成，Gate 2 Conditional Pass
+
+---
+
+### T-005：Mock module implementation
+
+状态：Completed
+执行角色：Backend / Harness Agent
+输出：shared helpers、thread reconstructor、sync lock mock、limit helper、package tests
+结果回填：已完成，Gate 4 Conditional Pass
+
+---
+
+### T-006：Phase 4B API and Service Skeleton Implementation
+
+状态：Completed
+执行角色：Backend / Harness Agent
+输出：in-memory message repository、search service、thread query service、summary skeleton、work item skeleton、route handlers、synthetic API tests、gate-5-review.md
 完成标准：
-- 支持查询
-- 支持摘要
-- 支持同步触发
-结果回填：未开始
-问题 / Gap：待分析
-下一步：设计 API
+- mock / synthetic only
+- no real Feishu reads
+- no real browser automation
+- no real message collection
+- no Tencent Cloud deployment
+- no production data import
+结果回填：已完成，Gate 5 Conditional Pass
+
+---
+
+## 下一步
+
+继续 post-Gate-5 mock-only hardening：
+
+1. Align route response shapes with `openapi.yaml` examples.
+2. Add response schema validation fixtures.
+3. Add repository interface abstraction before database-backed implementation.
+4. Expand synthetic fixtures for edge cases.
+5. Continue mock-only service tests.

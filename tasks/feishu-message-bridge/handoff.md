@@ -3,7 +3,7 @@
 ## Current Phase
 
 Phase: Phase 4B - API and Service Skeleton Implementation
-Status: Ready to Start
+Status: Completed with Gate 5 Conditional Pass
 
 ---
 
@@ -45,6 +45,14 @@ Status: Ready to Start
 - Hardened OpenAPI validation scaffold.
 - Added package-level tests for mock modules.
 - Created gate-4-review.md.
+- Implemented in-memory message repository for synthetic records.
+- Implemented search service over synthetic records.
+- Implemented thread query service.
+- Implemented summary response skeleton.
+- Implemented work item extraction response skeleton.
+- Implemented route-level handler functions without server deployment.
+- Added synthetic API skeleton tests.
+- Created gate-5-review.md.
 
 ---
 
@@ -77,15 +85,15 @@ Gate 1: Conditional Pass
 Gate 2: Conditional Pass
 Gate 3: Conditional Pass
 Gate 4: Conditional Pass
+Gate 5: Conditional Pass
 
 Allowed next:
 
-- API and service skeleton implementation
-- in-memory repository for synthetic records
-- route-level handler functions without server deployment
-- synthetic query tests
-- thread detail response tests
-- work item response shape tests
+- Align route response shapes with `openapi.yaml` examples.
+- Add response schema validation fixtures.
+- Add repository interface abstraction before database-backed implementation.
+- Expand synthetic fixtures for edge cases.
+- Continue mock-only service tests.
 
 Not allowed yet:
 
@@ -95,6 +103,7 @@ Not allowed yet:
 - real browser automation
 - real message collection
 - live Tencent Cloud deployment
+- database-backed production ingestion
 
 ---
 
@@ -126,19 +135,14 @@ Current recommendation:
 
 ## Next Recommended Step
 
-Start Phase 4B: API and Service Skeleton Implementation.
+Start post-Gate-5 mock-only hardening:
 
-Recommended order:
-
-1. Add in-memory message repository.
-2. Add search service over synthetic records.
-3. Add thread query service.
-4. Add summary response skeleton.
-5. Add work item extraction response skeleton.
-6. Add route handler functions.
-7. Add synthetic API tests.
-8. Gate 5 API skeleton review.
+1. Align route response shapes with `openapi.yaml` examples.
+2. Add response schema validation fixtures.
+3. Add repository interface abstraction before database-backed implementation.
+4. Expand synthetic fixtures for edge cases.
+5. Continue mock-only service tests.
 
 Codex / Agent handoff note:
 
-Do not use chat history as execution source. Read README.md, task-ledger.md, decisions.md, handoff.md, gate-4-review.md, and implementation-task-list.md first.
+Do not use chat history as execution source. Read README.md, task-ledger.md, decisions.md, handoff.md, gate-4-review.md, gate-5-review.md, and implementation-task-list.md first.
