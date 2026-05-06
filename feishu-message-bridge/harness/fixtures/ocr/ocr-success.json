@@ -1,0 +1,10 @@
+{
+  "input": {
+    "message_key": "synthetic-image-001",
+    "image_label": "synthetic-image-placeholder"
+  },
+  "expected": {
+    "status": "success",
+    "text": "Synthetic OCR text"
+  }
+}
