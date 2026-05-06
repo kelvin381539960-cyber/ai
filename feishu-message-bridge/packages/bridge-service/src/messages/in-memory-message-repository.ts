@@ -1,4 +1,4 @@
-import { applyLimit } from "../api/limit.js";
+import { boundedItems } from "../api/limit.js";
 import type { MessageSearchQuery, MessageSearchResult, SyntheticMessageRecord } from "./types.js";
 
 function normalize(value: string): string {
@@ -43,7 +43,7 @@ export class InMemoryMessageRepository {
     });
 
     const page = matched.slice(offset);
-    const limited = applyLimit(page, query.limit ?? 20, 100);
+    const limited = boundedItems(page, query.limit ?? 20, 20, 100);
     const consumed = offset + limited.items.length;
 
     return {
