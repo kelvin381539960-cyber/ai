@@ -82,3 +82,39 @@ Decision:
 - tasks/feishu-message-bridge is the single source of truth.
 - Any Agent or Codex handoff must read README.md, task-ledger.md, decisions.md, and handoff.md first.
 - Chat history is not the execution source of truth.
+
+---
+
+## D-007: Threaded Conversation Capability
+
+Status: Confirmed
+
+Decision:
+
+- V1 must support threaded conversation structures.
+- The system must preserve root item, replies, parent-child relation, and thread-level summary context.
+- Thread search and thread summary are first-class GPT Action use cases.
+
+Required model fields:
+
+- thread_key
+- root_item_key
+- parent_item_key
+- thread_title
+- reply_count
+- last_reply_at
+
+Required future APIs:
+
+- GET /threads/search
+- GET /threads/{thread_key}
+- GET /threads/summary
+- GET /threads/tasks
+
+Required harness:
+
+- thread reconstruction
+- reply assignment
+- nested reply handling
+- OCR inside threaded items
+- thread summary validation
