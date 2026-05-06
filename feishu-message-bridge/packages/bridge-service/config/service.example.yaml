@@ -1,0 +1,13 @@
+server:
+  port: 8787
+
+database:
+  url_env: DATABASE_URL
+
+auth:
+  action_bearer_token_env: ACTION_BEARER_TOKEN
+
+limits:
+  max_search_results: 50
+  default_search_results: 20
+  max_sync_minutes: 10
