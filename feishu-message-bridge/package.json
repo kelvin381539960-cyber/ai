@@ -1,0 +1,19 @@
+{
+  "name": "feishu-message-bridge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "pnpm -r test",
+    "test:collector": "pnpm --filter @fmb/collector test",
+    "test:service": "pnpm --filter @fmb/bridge-service test",
+    "test:shared": "pnpm --filter @fmb/shared test",
+    "test:openapi": "pnpm --filter @fmb/action-schema test",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.8"
+  }
+}
