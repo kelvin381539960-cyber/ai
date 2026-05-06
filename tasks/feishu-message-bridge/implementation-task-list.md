@@ -2,7 +2,7 @@
 
 ## 1. Current Phase
 
-Phase: Post-Gate-5 mock-only hardening
+Phase: Post-Gate-6 mock-only edge-case hardening
 Status: In Progress
 
 Gate status:
@@ -12,15 +12,14 @@ Gate status:
 - Gate 3: Conditional Pass
 - Gate 4: Conditional Pass
 - Gate 5: Conditional Pass
+- Gate 6: Conditional Pass
 
 Allowed work:
 
-- mock-only API skeleton hardening
-- response shape alignment with `openapi.yaml`
-- synthetic response schema fixtures
-- repository interface abstraction
-- expanded synthetic fixtures
-- route-level handler tests without server deployment
+- mock-only edge-case fixture hardening
+- missing-root, nested-reply, OCR-only, empty-result, unknown-type, and cursor-boundary tests
+- continued mock-only OpenAPI schema validation hardening
+- synthetic handler auth boundary tests
 
 Not allowed yet:
 
@@ -49,11 +48,14 @@ Not allowed yet:
 | I-009 | Run Gate 4 mock module review | Completed |
 | I-010 | Implement Phase 4B API and service skeleton | Completed |
 | I-011 | Run Gate 5 API skeleton review | Completed |
-| I-012 | Post-Gate-5 response schema hardening | Todo |
+| I-012 | Post-Gate-5 response schema hardening | Completed |
+| I-013 | Post-Gate-6 edge-case fixture hardening | Todo |
 
 ---
 
-## 3. Phase 4B Completed Outputs
+## 3. Completed Outputs
+
+Phase 4B outputs:
 
 - in-memory message repository for synthetic records
 - search service over synthetic records
@@ -63,6 +65,14 @@ Not allowed yet:
 - route handler functions
 - synthetic API tests
 - Gate 5 API skeleton review
+
+Post-Gate-5 hardening outputs:
+
+- OpenAPI-aligned response mappers
+- repository interface abstraction
+- synthetic response fixtures
+- response fixture shape tests
+- Gate 6 response schema hardening review
 
 Acceptance:
 
@@ -77,11 +87,10 @@ Acceptance:
 
 Recommended order:
 
-1. Align route response shapes with `openapi.yaml` examples.
-2. Add response schema validation fixtures.
-3. Add repository interface abstraction before database-backed implementation.
-4. Expand synthetic fixtures for edge cases.
-5. Continue mock-only service tests.
+1. Expand synthetic fixtures for edge cases.
+2. Add missing-root, nested-reply, OCR-only, empty-result, unknown-type, and cursor-boundary tests.
+3. Continue mock-only OpenAPI schema validation hardening.
+4. Add auth boundary tests for GPT Action calls using synthetic handler inputs.
 
 ---
 

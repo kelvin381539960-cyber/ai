@@ -2,8 +2,8 @@
 
 ## Current Phase
 
-Phase: Phase 4B - API and Service Skeleton Implementation
-Status: Completed with Gate 5 Conditional Pass
+Phase: Post-Gate-5 mock-only hardening
+Status: Completed with Gate 6 Conditional Pass
 
 ---
 
@@ -53,6 +53,11 @@ Status: Completed with Gate 5 Conditional Pass
 - Implemented route-level handler functions without server deployment.
 - Added synthetic API skeleton tests.
 - Created gate-5-review.md.
+- Aligned mock route response shapes with `openapi.yaml` schema names.
+- Added synthetic response fixtures for message search, thread search, thread detail, summary, and work items.
+- Added repository interface abstraction before database-backed implementation.
+- Added response fixture shape tests.
+- Created gate-6-review.md.
 
 ---
 
@@ -86,14 +91,14 @@ Gate 2: Conditional Pass
 Gate 3: Conditional Pass
 Gate 4: Conditional Pass
 Gate 5: Conditional Pass
+Gate 6: Conditional Pass
 
 Allowed next:
 
-- Align route response shapes with `openapi.yaml` examples.
-- Add response schema validation fixtures.
-- Add repository interface abstraction before database-backed implementation.
 - Expand synthetic fixtures for edge cases.
-- Continue mock-only service tests.
+- Add missing-root, nested-reply, OCR-only, empty-result, unknown-type, and cursor-boundary tests.
+- Continue mock-only OpenAPI schema validation hardening.
+- Add auth boundary tests for GPT Action calls using synthetic handler inputs.
 
 Not allowed yet:
 
@@ -135,14 +140,13 @@ Current recommendation:
 
 ## Next Recommended Step
 
-Start post-Gate-5 mock-only hardening:
+Start post-Gate-6 mock-only edge-case hardening:
 
-1. Align route response shapes with `openapi.yaml` examples.
-2. Add response schema validation fixtures.
-3. Add repository interface abstraction before database-backed implementation.
-4. Expand synthetic fixtures for edge cases.
-5. Continue mock-only service tests.
+1. Expand synthetic fixtures for edge cases.
+2. Add missing-root, nested-reply, OCR-only, empty-result, unknown-type, and cursor-boundary tests.
+3. Continue mock-only OpenAPI schema validation hardening.
+4. Add auth boundary tests for GPT Action calls using synthetic handler inputs.
 
 Codex / Agent handoff note:
 
-Do not use chat history as execution source. Read README.md, task-ledger.md, decisions.md, handoff.md, gate-4-review.md, gate-5-review.md, and implementation-task-list.md first.
+Do not use chat history as execution source. Read README.md, task-ledger.md, decisions.md, handoff.md, gate-5-review.md, gate-6-review.md, and implementation-task-list.md first.

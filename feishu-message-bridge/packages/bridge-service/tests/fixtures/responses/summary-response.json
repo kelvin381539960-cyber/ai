@@ -1,0 +1,8 @@
+{
+  "summary": "Synthetic messages summary skeleton over 3 source item(s).",
+  "key_points": [
+    "Mock response only; no real Feishu data was read.",
+    "Synthetic thread count: 1."
+  ],
+  "source_count": 3
+}

@@ -1,0 +1,10 @@
+{
+  "tasks": [
+    "Please review the API skeleton for the Feishu Message Bridge mock search endpoint.",
+    "I will add synthetic tests for search, thread detail, summary, and work item response shapes."
+  ],
+  "decisions": [],
+  "risks": [],
+  "blockers": [],
+  "source_count": 2
+}

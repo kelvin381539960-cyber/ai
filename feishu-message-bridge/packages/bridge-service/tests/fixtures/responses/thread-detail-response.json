@@ -1,0 +1,32 @@
+{
+  "thread": {
+    "thread_key": "thread-api-skeleton",
+    "thread_title": "API skeleton review",
+    "conversation_name": "Synthetic Product Alpha",
+    "reply_count": 2,
+    "last_reply_at": "2026-01-01T09:10:00.000Z",
+    "root_snippet": "Please review the API skeleton for the Feishu Message Bridge mock search endpoint.",
+    "source_metadata": {
+      "synthetic": true,
+      "root_item_key": "msg-001",
+      "partial": false
+    }
+  },
+  "items": [
+    {
+      "id": "msg-001",
+      "conversation_name": "Synthetic Product Alpha",
+      "sender_name": "Synthetic Alice",
+      "sent_at": "2026-01-01T09:00:00.000Z",
+      "item_type": "text",
+      "text_snippet": "Please review the API skeleton for the Feishu Message Bridge mock search endpoint.",
+      "thread_key": "thread-api-skeleton",
+      "source_metadata": {
+        "synthetic": true,
+        "conversation_key": "conv-product-alpha",
+        "sender_id": "user-a",
+        "root_item_key": "msg-001"
+      }
+    }
+  ]
+}

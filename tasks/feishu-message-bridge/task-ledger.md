@@ -7,7 +7,7 @@
 | Task ID | FMB-001 |
 | 任务 | 飞书消息采集与 GPT 工作助手系统 |
 | 状态 | In Progress |
-| 当前阶段 | Post-Gate-5 mock-only hardening |
+| 当前阶段 | Post-Gate-6 mock-only edge-case hardening |
 | 仓库 | kelvin381539960-cyber/ai |
 | 任务目录 | tasks/feishu-message-bridge |
 
@@ -75,6 +75,15 @@
 状态：Completed
 执行角色：Backend / Harness Agent
 输出：in-memory message repository、search service、thread query service、summary skeleton、work item skeleton、route handlers、synthetic API tests、gate-5-review.md
+结果回填：已完成，Gate 5 Conditional Pass
+
+---
+
+### T-007：Post-Gate-5 response schema hardening
+
+状态：Completed
+执行角色：Backend / Harness Agent
+输出：OpenAPI-aligned response mappers、repository interface、synthetic response fixtures、response fixture tests、gate-6-review.md
 完成标准：
 - mock / synthetic only
 - no real Feishu reads
@@ -82,16 +91,16 @@
 - no real message collection
 - no Tencent Cloud deployment
 - no production data import
-结果回填：已完成，Gate 5 Conditional Pass
+- no database-backed production ingestion
+结果回填：已完成，Gate 6 Conditional Pass
 
 ---
 
 ## 下一步
 
-继续 post-Gate-5 mock-only hardening：
+继续 post-Gate-6 mock-only edge-case hardening：
 
-1. Align route response shapes with `openapi.yaml` examples.
-2. Add response schema validation fixtures.
-3. Add repository interface abstraction before database-backed implementation.
-4. Expand synthetic fixtures for edge cases.
-5. Continue mock-only service tests.
+1. Expand synthetic fixtures for edge cases.
+2. Add missing-root, nested-reply, OCR-only, empty-result, unknown-type, and cursor-boundary tests.
+3. Continue mock-only OpenAPI schema validation hardening.
+4. Add auth boundary tests for GPT Action calls using synthetic handler inputs.

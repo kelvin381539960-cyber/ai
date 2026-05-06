@@ -1,0 +1,18 @@
+{
+  "items": [
+    {
+      "thread_key": "thread-api-skeleton",
+      "thread_title": "API skeleton review",
+      "conversation_name": "Synthetic Product Alpha",
+      "reply_count": 2,
+      "last_reply_at": "2026-01-01T09:10:00.000Z",
+      "root_snippet": "Please review the API skeleton for the Feishu Message Bridge mock search endpoint.",
+      "source_metadata": {
+        "synthetic": true,
+        "root_item_key": "msg-001",
+        "partial": false
+      }
+    }
+  ],
+  "limit": 20
+}

@@ -1,0 +1,22 @@
+{
+  "items": [
+    {
+      "id": "msg-003",
+      "conversation_name": "Synthetic Product Alpha",
+      "sender_name": "Synthetic Casey",
+      "sent_at": "2026-01-01T09:10:00.000Z",
+      "item_type": "image",
+      "text_snippet": "Synthetic image attachment",
+      "ocr_snippet": "TODO confirm API response shape before Gate 5 review",
+      "thread_key": "thread-api-skeleton",
+      "source_metadata": {
+        "synthetic": true,
+        "conversation_key": "conv-product-alpha",
+        "sender_id": "user-c",
+        "root_item_key": "msg-001",
+        "parent_item_key": "msg-002"
+      }
+    }
+  ],
+  "limit": 5
+}
