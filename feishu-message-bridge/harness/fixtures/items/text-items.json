@@ -1,0 +1,18 @@
+{
+  "items": [
+    {
+      "conversation_name": "synthetic-core-project",
+      "sender_name": "Synthetic Alice",
+      "sent_at": "2026-05-06T10:00:00+08:00",
+      "item_type": "text",
+      "text": "Synthetic requirement discussion message."
+    }
+  ],
+  "expected": [
+    {
+      "item_type": "text",
+      "has_text": true,
+      "has_thread": false
+    }
+  ]
+}
