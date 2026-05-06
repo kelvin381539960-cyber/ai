@@ -1,0 +1,14 @@
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+!.env.example
+.collector-state/
+runtime-cache/
+*.sqlite
+*.db
+*.log
+tmp/
+ocr-temp/
+.DS_Store
