@@ -22,7 +22,7 @@
 
 | 顺序 | Action Code | Action 含义 | 能否查 | 清晰数据来源 / 查询条件 |
 |---:|---|---|---|---|
-| 1 | `kyc_launch_enter` | 进入 KYC Launch loading | ⚠️ 需确认埋点落表 | 前端自动 PageEvent；路由 `/aix/kyc/launch`。代码确认有页面，但 `PageNameMap` 未看到 KycLaunch 映射 |
+| 1 | `kyc_launch_enter` | 进入 KYC Launch loading | ❌ 不能直接查 | 暂无确定 SQL 来源。该动作只是进入前端 Launch loading 页，业务库不落表；`PageNameMap` 未映射 KycLaunch，因此不能确认有可按 PageName 查询的前端埋点。若后续确认前端事件落表，只能尝试按 `pathname = '/aix/kyc/launch'` 查 PageEvent；当前可落地近似入口是下一步 `kyc_start_api_called`，即 Doris 后端日志 `/api/wallet/kyc/start`。 |
 | 2 | `kyc_start_api_called` | 调用 KYC start 接口 | ✅ 可直接查 | Doris 后端日志：`/api/wallet/kyc/start`；日志关键词 `WalletController#startKyc` |
 | 3 | `kyc_start_route_decided` | 后端返回下一步 route code | ✅ 可直接查 | Doris 后端日志：`WalletController#startKyc` result；返回 code 如 `ROUTE_KYC_START_PAGE / ROUTE_PASSPORT_PAGE / ROUTE_POA_PAGE` |
 | 4 | `kyc_start_page_view` | 进入 KYC Start Page | ⚠️ 需确认埋点落表 | 前端自动 PageEvent；路由 `/aix/kyc/start`；PageName = `StartIdentityVerification` |
