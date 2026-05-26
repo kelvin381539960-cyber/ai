@@ -7,7 +7,7 @@
 | 标记 | 含义 |
 |---|---|
 | ✅ 可直接查 | 业务表或后端接口日志能明确查询 |
-| ⚠️ 需确认埋点落表 | AIX 前端代码已确认有 PageEvent 或 sendEvent，但尚未确认具体 Doris / 事件表 |
+| 前端埋点仅代码可证 | AIX 前端代码可确认 PageEvent / sendEvent 发送到 Native Bridge，但当前无确定 SQL 表名/字段；不作为可直接查节点 |
 | 🟡 可推断查 | 没有独立事件，只能用页面曝光、接口调用或状态组合近似 |
 | ❌ 不能直接查 | 仅前端临时状态，未看到明确埋点或业务落库 |
 
@@ -16,7 +16,7 @@
 - `/aix/kyc/success` / `OpenWalletSubmitResult` 不是最终 KYC 通过，只能视为「提交结果页 / 已进入审核」。
 - 最终 KYC 通过必须以 `aixpay_wallet.wallet_application.kyc_status = 5` 为准。
 - POA 是条件分支，不能默认放进所有用户的主漏斗。
-- 前端行为类 action 需要先确认埋点最终落表，才能写统计 SQL。
+- 前端行为类 action 当前未找到确定 SQL 落表；不作为可直接查节点，优先使用后端接口日志或业务状态字段替代。
 
 ## KYC Action 可查询性核查表
 
@@ -25,26 +25,26 @@
 | 1 | `kyc_launch_enter` | 进入 KYC Launch loading | ❌ 不能直接查 | 暂无确定 SQL 来源。该动作只是进入前端 Launch loading 页，业务库不落表；`PageNameMap` 未映射 KycLaunch，因此不能确认有可按 PageName 查询的前端埋点。若后续确认前端事件落表，只能尝试按 `pathname = '/aix/kyc/launch'` 查 PageEvent；当前可落地近似入口是下一步 `kyc_start_api_called`，即 Doris 后端日志 `/api/wallet/kyc/start`。 |
 | 2 | `kyc_start_api_called` | 调用 KYC start 接口 | ✅ 可直接查 | Doris 后端日志：`/api/wallet/kyc/start`；日志关键词 `WalletController#startKyc` |
 | 3 | `kyc_start_route_decided` | 后端返回下一步 route code | ✅ 可直接查 | Doris 后端日志：`WalletController#startKyc` result；返回 code 如 `ROUTE_KYC_START_PAGE / ROUTE_PASSPORT_PAGE / ROUTE_POA_PAGE` |
-| 4 | `kyc_start_page_view` | 进入 KYC Start Page | ⚠️ 需确认埋点落表 | 前端自动 PageEvent；路由 `/aix/kyc/start`；PageName = `StartIdentityVerification` |
+| 4 | `kyc_start_page_view` | 进入 KYC Start Page | 🟡 可推断查 | 无确定页面曝光 SQL 来源。前端会发 PageEvent，路由 `/aix/kyc/start`，PageName = `StartIdentityVerification`，但当前无确定落表。可用上一节点 `kyc_start_route_decided` 中返回 `ROUTE_KYC_START_PAGE` 的后端日志近似。 |
 | 5 | `kyc_country_select_open` | 点击国家输入框进入国家列表 | 🟡 可推断查 | 没看到独立 click 埋点；可用国家选择页 PageEvent 近似：路由 `/aix/kyc/supported-region-select` |
 | 6 | `kyc_region_list_loaded` | 国家列表加载成功 | ✅ 可直接查接口日志 | 接口：`GET /api/config/phone-area-list/kyc-start-page`；不能代表用户选择，只代表列表请求 |
-| 7 | `kyc_region_click` | 点击选择国家 | ⚠️ 需确认埋点落表 | 前端手动埋点：`Action.RegionClick`，extra.region = countryISO |
+| 7 | `kyc_region_click` | 点击选择国家 | ❌ 不能直接查 | 无确定 SQL 来源。代码仅确认前端 `Action.RegionClick` 会发送到 Native Bridge，当前无事件表名/字段；业务库不记录点击。可用后续 `wallet_application.nationality IS NOT NULL` 只近似“国家已提交成功”。 |
 | 8 | `kyc_region_selected_back_to_start` | 国家回填 Start 页 | ❌ 不能直接查 | 只是 `DeviceEventEmitter` 前端状态回传，无独立业务落库 |
 | 9 | `kyc_agreement_checkbox_click` | 点选协议 checkbox | ❌ 不能直接查 | Contract 组件有 checkbox UI，但未看到独立 `sendEvent` |
 | 10 | `kyc_agreement_all_selected` | 协议全部勾选完成 | ❌ 不能直接查 | 只是前端 `isAgreed` 状态，无业务落库 |
-| 11 | `kyc_start_continue_click` | Start 页点击 Continue | ⚠️ 需确认埋点落表 | 前端手动埋点：`Action.NextClick`，extra.region = selectedCountry |
+| 11 | `kyc_start_continue_click` | Start 页点击 Continue | 🟡 可推断查 | 无确定点击 SQL 来源。代码有 `Action.NextClick`，但未确认落表；可用后续接口日志 `/api/wallet/kyc/start-page/submit`，或 `user_agreement_consent.location = 'KYC_START'`、`wallet_application.nationality IS NOT NULL` 近似提交成功。 |
 | 12 | `kyc_start_page_submit_api` | 提交国家 + 协议确认 | ✅ 可直接查 | Doris 后端日志：`/api/wallet/kyc/start-page/submit`；日志关键词 `WalletController#startKycPageSubmit` |
 | 13 | `kyc_agreement_saved` | KYC_START 协议落库 | ✅ 可直接查 | `aixpay_app.user_agreement_consent`：`location = 'KYC_START'`，时间字段 `consented_at` |
 | 14 | `wallet_application_created_or_loaded` | 创建或获取 KYC 主申请 | ✅ 可直接查 | `aixpay_wallet.wallet_application`：按 `user_id` 查记录；时间字段 `create_time` |
 | 15 | `kyc_country_saved_to_wallet_application` | 国家写入 KYC 申请 | ✅ 可直接查 | `aixpay_wallet.wallet_application`：`nationality IS NOT NULL`；Start 页 submit 后写入 |
 | 16 | `route_to_passport_guide` | 跳转 Passport Guide | 🟡 可推断查 | 后端返回 `ROUTE_PASSPORT_PAGE` 可在接口日志查；页面曝光需前端埋点表 |
-| 17 | `passport_guide_page_view` | 进入证件引导页 | ⚠️ 需确认埋点落表 | 前端自动 PageEvent；路由 `/aix/kyc/passport-guide`；PageName = `TakeIdPhoto` |
-| 18 | `passport_start_verify_click` | 点击开始证件验证 | ⚠️ 需确认埋点落表 | 前端手动埋点：`Action.StartVerifyClick` |
+| 17 | `passport_guide_page_view` | 进入证件引导页 | 🟡 可推断查 | 无确定页面曝光 SQL 来源。前端 PageEvent 路由 `/aix/kyc/passport-guide`、PageName = `TakeIdPhoto` 未确认落表；可用 `route_to_passport_guide` 的后端返回 `ROUTE_PASSPORT_PAGE` 近似。 |
+| 18 | `passport_start_verify_click` | 点击开始证件验证 | 🟡 可推断查 | 无确定点击 SQL 来源。代码有 `Action.StartVerifyClick`，但未确认落表；可用后续接口日志 `/api/wallet/kyc/passport/get-url` 或 `wallet_application.passport_request_id IS NOT NULL` 近似。 |
 | 19 | `passport_get_url_api` | 请求 passport AAI URL | ✅ 可直接查 | Doris 后端日志：`/api/wallet/kyc/passport/get-url`；日志关键词 `WalletController#getPassportUrl` |
 | 20 | `passport_request_id_saved` | 写入 passport_request_id | ✅ 可直接查 | `aixpay_wallet.wallet_application`：`passport_request_id IS NOT NULL`；同时 `passport_status` 初始化、`kyc_status = 1/PROCESSING` |
-| 21 | `passport_scan_page_view` | 进入 passport WebView 扫描页 | ⚠️ 需确认埋点落表 | 前端自动 PageEvent；路由 `/aix/kyc/passport-scan`；PageName = `TakeIdPhotoResult` |
-| 22 | `passport_verify_result_success` | Passport WebView 成功 | ⚠️ 需确认埋点落表 | 前端手动埋点：`Action.VerifyResult` + `status = Success`；业务侧可用 passport 状态成功近似 |
-| 23 | `passport_verify_result_failed` | Passport WebView 失败 | ⚠️ 需确认埋点落表 | 前端手动埋点：`Action.VerifyResult` + `status = Failure`；业务侧可用 passport 状态失败近似 |
+| 21 | `passport_scan_page_view` | 进入 passport WebView 扫描页 | 🟡 可推断查 | 无确定页面曝光 SQL 来源。前端 PageEvent 路由 `/aix/kyc/passport-scan`、PageName = `TakeIdPhotoResult` 未确认落表；可用 `/api/wallet/kyc/passport/get-url` 成功或 `passport_request_id IS NOT NULL` 近似。 |
+| 22 | `passport_verify_result_success` | Passport WebView 成功 | 🟡 可推断查 | 无确定 WebView 回调事件 SQL 来源。前端 `Action.VerifyResult` 未确认落表；业务侧可用 `wallet_application.passport_status` 成功状态或 `kyc_info_record.type = 1 AND status = 3` 近似。 |
+| 23 | `passport_verify_result_failed` | Passport WebView 失败 | 🟡 可推断查 | 无确定 WebView 回调事件 SQL 来源。前端 `Action.VerifyResult` 未确认落表；业务侧可用 `wallet_application.passport_status` 失败状态或 `kyc_info_record.type = 1 AND status = 2` 近似。 |
 | 24 | `face_guide_page_view` | 进入 Face Guide | ❌ 不能确认直接查 | 页面存在，路由 `/aix/kyc/face-guide`；但 `PageNameMap` 没有 KycFaceGuide 映射 |
 | 25 | `face_continue_click` | Face Guide 点击 Continue | ❌ 不能直接查 | 代码有点击逻辑，但未看到 `sendEvent` |
 | 26 | `liveness_get_url_api` | 请求 liveness AAI URL | ✅ 可直接查 | Doris 后端日志：`/api/wallet/kyc/liveness/get-url`；日志关键词 `WalletController#getLivenessUrl` |
@@ -55,17 +55,17 @@
 | 31 | `passport_or_liveness_processing` | 证件/活体处理中 | ✅ 可直接查 | 接口日志返回 `PROCESSING`；业务表可查 `passport_status=1` 或 `liveness_status=1` |
 | 32 | `passport_or_liveness_failed` | 证件/活体失败 | ✅ 可直接查 | `wallet_application.passport_status=2` 或 `liveness_status=2`；也可查 `kyc_info_record.status=2` |
 | 33 | `route_to_poa_page` | 进入 POA 分支 | 🟡 可推断查 | 接口日志返回 `ROUTE_POA_PAGE` 最准；业务表可用 passport/liveness 成功且 POA 需要处理近似 |
-| 34 | `poa_page_view` | 进入 POA 页面 | ⚠️ 需确认埋点落表 | 前端自动 PageEvent；路由 `/aix/kyc/poa`；PageName = `AddressUpload` |
+| 34 | `poa_page_view` | 进入 POA 页面 | 🟡 可推断查 | 无确定页面曝光 SQL 来源。前端 PageEvent 路由 `/aix/kyc/poa`、PageName = `AddressUpload` 未确认落表；可用接口日志返回 `ROUTE_POA_PAGE`，或后续 `/api/wallet/kyc/poa/upload` / `/poa/confirm` 近似进入 POA 分支。 |
 | 35 | `poa_country_select_open` | POA 页打开国家选择 | 🟡 可推断查 | 没看到独立 click 埋点；可用国家选择页 PageEvent 近似 |
-| 36 | `poa_upload_click` | 点击 POA Upload | ⚠️ 需确认埋点落表 | 前端手动埋点：`Action.UploadClick` |
-| 37 | `poa_select_upload_type` | 选择上传类型 files/album | ⚠️ 需确认埋点落表 | 前端手动埋点：`Action.SelectUploadType`，extra.fileType |
-| 38 | `poa_take_photo_click` | 点击拍照上传 | ⚠️ 需确认埋点落表 | 前端手动埋点：`Action.TakePhotoClick` |
+| 36 | `poa_upload_click` | 点击 POA Upload | ❌ 不能直接查 | 无确定 SQL 来源。代码仅确认前端 `Action.UploadClick` 会发送到 Native Bridge，当前无事件表名/字段；后端 `/api/wallet/kyc/poa/upload` 只能说明文件上传发生，不能还原点击 Upload。 |
+| 37 | `poa_select_upload_type` | 选择上传类型 files/album | ❌ 不能直接查 | 无确定 SQL 来源。代码仅确认前端 `Action.SelectUploadType` 会发送到 Native Bridge，当前无事件表名/字段；后端上传接口不稳定表达用户选择的是 files 还是 album。 |
+| 38 | `poa_take_photo_click` | 点击拍照上传 | ❌ 不能直接查 | 无确定 SQL 来源。代码仅确认前端 `Action.TakePhotoClick` 会发送到 Native Bridge，当前无事件表名/字段；后端上传接口只能说明 POA 文件上传，不区分拍照点击。 |
 | 39 | `poa_file_upload_api` | POA 文件上传 | ✅ 可直接查 | Doris 后端日志：`/api/wallet/kyc/poa/upload`；日志关键词 `WalletController#poaUpload` |
 | 40 | `poa_upload_success_frontend` | 前端上传成功，拿到 fileId/fileUrl | 🟡 可推断查 | 后端接口 `/poa/upload` 成功返回可近似；前端 state 本身不能直接查 |
-| 41 | `poa_submit_click` | 点击 POA Continue/Submit | ⚠️ 需确认埋点落表 | 前端手动埋点：`Action.SubmitClick` |
+| 41 | `poa_submit_click` | 点击 POA Continue/Submit | 🟡 可推断查 | 无确定点击 SQL 来源。代码有 `Action.SubmitClick`，但未确认落表；可用后续接口日志 `/api/wallet/kyc/poa/confirm` 或 `wallet_application.kyc_status = 2` 近似 POA 提交成功。 |
 | 42 | `poa_confirm_api` | POA confirm 提交 | ✅ 可直接查 | Doris 后端日志：`/api/wallet/kyc/poa/confirm`；日志关键词 `WalletController#poaConfirm` |
 | 43 | `kyc_application_under_review` | KYC 完整提交，进入审核 | ✅ 可直接查 | `aixpay_wallet.wallet_application`：`kyc_status = 2`；时间字段优先 `update_time` |
-| 44 | `kyc_submit_result_page_view` | 进入提交结果页 | ⚠️ 需确认埋点落表 | 前端自动 PageEvent；路由 `/aix/kyc/success`；PageName = `OpenWalletSubmitResult`。注意不是最终 KYC 通过 |
+| 44 | `kyc_submit_result_page_view` | 进入提交结果页 | 🟡 可推断查 | 无确定页面曝光 SQL 来源。前端 PageEvent 路由 `/aix/kyc/success`、PageName = `OpenWalletSubmitResult` 未确认落表；可用 `/api/wallet/kyc/poa/confirm` 成功或 `wallet_application.kyc_status = 2` 近似。注意不是最终 KYC 通过。 |
 | 45 | `kyc_final_approved` | 最终 KYC 通过 | ✅ 可直接查 | `aixpay_wallet.wallet_application`：`kyc_status = 5`；时间字段 `finished_time` |
 | 46 | `kyc_final_failed` | 最终 KYC 失败 | ✅ 可直接查 | `aixpay_wallet.wallet_application`：`kyc_status = 3`；时间字段 `finished_time` |
 | 47 | `kyc_final_rejected` | 最终 KYC 拒绝 | ✅ 可直接查 | `aixpay_wallet.wallet_application`：`kyc_status = 4`；时间字段 `finished_time` |
