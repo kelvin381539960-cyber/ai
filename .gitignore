@@ -1,4 +1,5 @@
 .var/
+/var/
 .aix_expert/
 前端代码/
 后端代码/
