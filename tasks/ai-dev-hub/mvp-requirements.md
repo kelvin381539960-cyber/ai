@@ -5,7 +5,7 @@
 MVP 的目标是验证一个最小闭环：
 
 ```text
-创建任务 → 生成上下文 → 调用 Cursor CLI → 记录执行 → 生成 handoff → 可由下一个工具接力
+创建任务 → 声明所需能力 → 生成上下文 → 选择已配置执行器 → 记录执行 → 生成 handoff → 可由下一个执行器接力
 ```
 
 ## 2. 角色
@@ -16,20 +16,19 @@ MVP 的目标是验证一个最小闭环：
 
 - 上班使用公司电脑。
 - 下班使用个人电脑。
-- Cursor CLI 已经部署在腾讯云服务器。
-- 希望所有 AI 开发任务集中在腾讯云服务器上。
+- 希望所有 AI 开发任务集中在私有服务器上。
+- 希望工具可以替换，但工作流不被替换。
 
 ### 2.2 AI 执行器
 
-MVP 只支持：
+MVP 不绑定具体执行器。
 
-- Cursor CLI。
+执行器通过 Adapter 接入，可包括：
 
-后续支持：
-
-- Codex CLI。
-- Claude Code。
-- 公司 API。
+- CLI 工具。
+- HTTP API。
+- 手动复制 prompt 的外部工具。
+- 本地脚本。
 
 ## 3. 核心功能
 
@@ -56,6 +55,7 @@ MVP 只支持：
 - 修改任务状态。
 - 标记任务完成。
 - 保存任务目标、范围、验收标准。
+- 声明任务需要的能力。
 
 任务状态建议：
 
@@ -78,18 +78,41 @@ goal: string
 scope: string[]
 non_goals: string[]
 acceptance_criteria: string[]
+required_capabilities: string[]
+preferred_capabilities: string[]
+forbidden_capabilities: string[]
 status: string
 project_id: string
 created_at: datetime
 updated_at: datetime
 ```
 
-### 3.3 上下文生成
+### 3.3 Agent / Adapter 管理
+
+必须支持：
+
+- 添加 Agent。
+- 查看 Agent。
+- 启用 / 禁用 Agent。
+- 声明 Agent 能力。
+- 设置 Adapter 类型。
+- 设置命令或 endpoint。
+
+Agent 类型至少支持：
+
+```text
+cli
+http
+manual
+```
+
+### 3.4 上下文生成
 
 必须支持生成标准 prompt，内容包括：
 
 - 项目背景。
 - 当前任务。
+- 所需能力。
 - 技术约束。
 - 不做什么。
 - 验收标准。
@@ -103,15 +126,16 @@ updated_at: datetime
 - 保存到 `.ai/context.md`。
 - 后续 Web UI 可复制。
 
-### 3.4 Cursor CLI 执行
+### 3.5 执行能力
 
 必须支持：
 
 - 指定项目目录。
 - 指定任务。
+- 指定能力或 Agent。
 - 生成 prompt。
-- 调用 Cursor CLI。
-- 捕获 stdout / stderr。
+- 调用匹配的 Adapter。
+- 捕获 stdout / stderr 或 API 响应。
 - 保存执行开始时间、结束时间、退出码。
 - 执行前后读取 git status。
 
@@ -121,13 +145,15 @@ updated_at: datetime
 - 自动循环执行直到成功。
 - 自动提交代码。
 
-### 3.5 执行日志
+### 3.6 执行日志
 
 每次执行必须记录：
 
 - run_id。
 - task_id。
-- agent_name。
+- agent_id。
+- adapter_type。
+- capability。
 - prompt。
 - stdout。
 - stderr。
@@ -144,7 +170,7 @@ updated_at: datetime
 - 生成 review prompt。
 - 训练用户偏好和工具选择。
 
-### 3.6 Handoff 生成
+### 3.7 Handoff 生成
 
 必须支持生成交接文档，内容包括：
 
@@ -155,7 +181,7 @@ updated_at: datetime
 - 测试结果。
 - 当前风险。
 - 剩余事项。
-- 下一个 AI 工具应该怎么接手。
+- 下一个执行器应该怎么接手。
 
 输出位置：
 
@@ -169,17 +195,17 @@ updated_at: datetime
 tasks/ai-dev-hub/handoff.md
 ```
 
-### 3.7 Review Prompt 生成
+### 3.8 Review Prompt 生成
 
 必须支持基于 git diff 生成 review prompt。
 
 用途：
 
-- 给 Codex CLI 做 review。
-- 给 Claude Code 做架构检查。
-- 给 Cursor CLI 自查。
+- 给任意 Review 能力的 Adapter 使用。
+- 给手动外部工具使用。
+- 给当前执行器自查。
 
-MVP 只生成 prompt，不负责自动调用其他工具。
+MVP 可以只生成 prompt，不必须自动调用 Review 工具。
 
 ## 4. CLI 命令设计
 
@@ -198,6 +224,7 @@ aihub init
 .ai/TASKS/
 .ai/HANDOFF.md
 .ai/DECISIONS.md
+.ai/AGENTS.yaml
 ```
 
 ### 4.2 添加项目
@@ -206,37 +233,55 @@ aihub init
 aihub project add /srv/ai-workspaces/project-a
 ```
 
-### 4.3 创建任务
+### 4.3 添加 Agent
 
 ```bash
-aihub task create "实现钱包登录"
+aihub agent add --type cli --id code-agent --capabilities plan,code_edit,shell_run
 ```
 
-### 4.4 生成上下文
+### 4.4 查看 Agent
+
+```bash
+aihub agent list
+```
+
+### 4.5 创建任务
+
+```bash
+aihub task create "实现钱包登录" --capabilities plan,code_edit,test_run
+```
+
+### 4.6 生成上下文
 
 ```bash
 aihub context --task <task_id>
 ```
 
-### 4.5 执行任务
+### 4.7 执行任务
 
 ```bash
-aihub run --agent cursor --task <task_id>
+aihub run --task <task_id> --capability code_edit
 ```
 
-### 4.6 生成交接
+或指定执行器：
+
+```bash
+aihub run --task <task_id> --agent <agent_id>
+```
+
+### 4.8 生成交接
 
 ```bash
 aihub handoff --task <task_id>
 ```
 
-### 4.7 生成 Review Prompt
+### 4.9 生成 Review Prompt
 
 ```bash
 aihub review --task <task_id>
 ```
 
-### 4.8 完成任务
+### 4.10 完成任务
 
 ```bash
 aihub done --task <task_id>
@@ -246,15 +291,16 @@ aihub done --task <task_id>
 
 MVP 完成时，必须能演示：
 
-1. 在腾讯云服务器上初始化一个项目。
-2. 创建一个任务。
-3. 生成给 Cursor CLI 的上下文。
-4. 调用 Cursor CLI 执行一次。
-5. 保存执行日志。
-6. 读取 git diff。
-7. 生成 handoff。
-8. 在另一台电脑访问同一份 handoff 和任务状态。
-9. 复制 handoff 给另一个 AI 工具后，对方能理解当前进度。
+1. 在私有服务器上初始化一个项目。
+2. 注册至少一个 CLI 或 Manual Agent。
+3. 创建一个带 required_capabilities 的任务。
+4. 生成标准上下文。
+5. 通过能力选择或指定 Agent 执行一次。
+6. 保存执行日志。
+7. 读取 git diff。
+8. 生成 handoff。
+9. 在另一台电脑访问同一份 handoff 和任务状态。
+10. 复制 handoff 给另一个 AI 工具后，对方能理解当前进度。
 
 ## 6. 明确不做
 
@@ -265,7 +311,8 @@ MVP 不做：
 - 在线编辑代码。
 - 自动 PR。
 - 自动部署。
-- 多 agent 并发。
+- 多 agent 并发编排。
 - 精确 token 计费。
 - 插件市场。
 - SaaS 化。
+- 硬编码绑定单一 AI 工具。

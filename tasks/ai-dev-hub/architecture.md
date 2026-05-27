@@ -7,27 +7,29 @@
         ↓
 浏览器 / SSH / VPN / 安全隧道
         ↓
-腾讯云服务器
+私有服务器
         ↓
-AI Dev Hub Web UI + API
+AI Dev Hub Web UI + API + CLI
         ↓
-任务系统 / 上下文系统 / 执行系统 / 交接系统
+任务系统 / 上下文系统 / 能力路由 / 执行系统 / 交接系统
         ↓
-Cursor CLI
+Agent Adapter Registry
         ↓
-Git 工作区 / 测试命令 / 构建命令
+CLI Adapter / HTTP Adapter / Manual Adapter / Custom Adapter
+        ↓
+Git 工作区 / 测试命令 / 构建命令 / 外部 AI 工具 / 公司 API
 ```
 
 ## 2. 部署位置
 
-第一版部署在腾讯云服务器。
+第一版推荐部署在腾讯云服务器或其他私有服务器。
 
 原因：
 
-- 用户已有 Cursor CLI 在腾讯云服务器上的使用习惯。
 - 公司电脑和个人电脑都可以访问同一个远程工作现场。
 - 代码、任务、日志、上下文集中保存。
 - 避免两台电脑环境不一致。
+- 具体 AI 工具可以在服务器上配置，也可以通过手动 Adapter 接入外部工具。
 
 ## 3. 推荐目录结构
 
@@ -48,10 +50,14 @@ Git 工作区 / 测试命令 / 构建命令
   package.json
   .ai/
     PROJECT.md
-    TASK.md
+    RULES.md
+    COMMANDS.md
+    AGENTS.yaml
+    TASKS/
     HANDOFF.md
     DECISIONS.md
-    COMMANDS.md
+    RUNS/
+    context.md
 ```
 
 本仓库任务文档目录：
@@ -59,7 +65,11 @@ Git 工作区 / 测试命令 / 构建命令
 ```text
 tasks/ai-dev-hub/
   README.md
+  solution-overview.md
+  capability-model.md
+  agent-adapter-spec.md
   product-spec.md
+  mvp-requirements.md
   architecture.md
   implementation-plan.md
   handoff.md
@@ -75,12 +85,13 @@ tasks/ai-dev-hub/
 
 - 查看项目。
 - 查看任务。
-- 创建任务。
-- 选择执行器。
+- 查看 Agent / Adapter。
+- 选择能力。
+- 触发执行。
 - 查看执行日志。
 - 查看 git diff。
 - 查看 handoff。
-- 触发 review。
+- 触发 review prompt 生成。
 
 技术可选：
 
@@ -93,7 +104,9 @@ tasks/ai-dev-hub/
 职责：
 
 - 提供任务 CRUD。
-- 调用执行器 adapter。
+- 提供 Agent CRUD。
+- 调用能力路由。
+- 调用执行器 Adapter。
 - 读取 git 状态。
 - 保存日志。
 - 生成上下文。
@@ -113,38 +126,43 @@ MVP 用 SQLite。
 
 - projects。
 - tasks。
+- agents。
+- agent_capabilities。
 - task_events。
 - agent_runs。
 - handoffs。
 - decisions。
 - preferences。
 
-### 4.4 Agent Adapter
+### 4.4 Agent Adapter Registry
 
-统一接口：
+职责：
 
-```ts
-interface AgentAdapter {
-  name: string
-  run(input: AgentRunInput): Promise<AgentRunResult>
-}
-```
+- 注册 Adapter。
+- 启用 / 禁用 Adapter。
+- 读取 Adapter 能力。
+- 根据 capability 查找候选执行器。
 
-第一版只实现：
+Adapter 类型：
 
 ```text
-CursorCliAdapter
+cli
+http
+manual
+custom
 ```
 
-后续增加：
+### 4.5 Capability Router
 
-```text
-CodexCliAdapter
-ClaudeCodeAdapter
-ApiModelAdapter
-```
+职责：
 
-### 4.5 Git Service
+- 读取任务 required_capabilities。
+- 查找匹配 Agent。
+- 根据成本、偏好、可用性排序。
+- 生成推荐执行器。
+- 允许用户手动覆盖推荐。
+
+### 4.6 Git Service
 
 职责：
 
@@ -156,7 +174,7 @@ ApiModelAdapter
 
 第一版不要自动 push 或 merge。
 
-### 4.6 Context Builder
+### 4.7 Context Builder
 
 职责：生成给 AI 工具的标准上下文。
 
@@ -164,6 +182,7 @@ ApiModelAdapter
 
 - 项目说明。
 - 当前任务。
+- 所需能力。
 - 当前 handoff。
 - 决策记录。
 - git diff。
@@ -172,9 +191,10 @@ ApiModelAdapter
 输出：
 
 - prompt 文本。
-- 可复制给 Cursor CLI / Codex CLI / Claude Code 的上下文。
+- 可复制给任意 AI 工具的上下文。
+- 可传给 Adapter 的 `AgentRunInput`。
 
-### 4.7 Handoff Generator
+### 4.8 Handoff Generator
 
 职责：生成交接文档。
 
@@ -225,19 +245,37 @@ MVP 禁止自动执行：
   ↓
 Task Service 创建任务
   ↓
+声明 required_capabilities
+  ↓
 Context Builder 生成标准任务说明
   ↓
-写入数据库和 .ai/TASK.md
+写入数据库和 .ai/TASKS/<task_id>.md
 ```
 
-### 6.2 执行任务
+### 6.2 注册 Agent
 
 ```text
-用户点击 Run
+用户添加 Agent 配置
   ↓
-Context Builder 生成 prompt
+Adapter Registry 校验配置
   ↓
-CursorCliAdapter 调用 cursor CLI
+保存 AGENTS.yaml / 数据库
+  ↓
+Capability Router 可检索该 Agent
+```
+
+### 6.3 执行任务
+
+```text
+用户点击 Run 或执行 CLI
+  ↓
+Capability Router 选择候选 Agent
+  ↓
+用户确认或指定 Agent
+  ↓
+Context Builder 生成 AgentRunInput
+  ↓
+Adapter 执行
   ↓
 保存日志
   ↓
@@ -246,7 +284,7 @@ Git Service 读取 diff
 Handoff Generator 更新交接文档
 ```
 
-### 6.3 切换工具
+### 6.4 切换工具
 
 ```text
 用户选择另一个 Agent
@@ -255,7 +293,7 @@ Handoff Generator 更新交接文档
   ↓
 生成接力 prompt
   ↓
-交给新工具继续执行
+通过对应 Adapter 或 Manual 输出继续执行
 ```
 
 ## 7. 第一版建议技术栈
@@ -267,6 +305,7 @@ Handoff Generator 更新交接文档
 - SQLite。
 - React / Vite 或 Next.js。
 - child_process / execa 调用 CLI。
+- fetch / undici 调用 HTTP Adapter。
 - simple-git 或直接 shell 调用 git。
 
 ## 8. 非目标
@@ -280,3 +319,4 @@ Handoff Generator 更新交接文档
 - 精确 token 计费。
 - 自动发布。
 - 复杂 agent 编排图。
+- 单一工具硬编码绑定。
