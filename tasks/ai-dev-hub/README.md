@@ -4,7 +4,7 @@
 
 建设一个部署在私有环境中的 AI 开发任务中台，用来统一管理不同 AI 编程工具的任务、上下文、执行记录、交接文档、能力路由和后续接力。
 
-## 核心修正
+## 核心原则
 
 本方案不绑定任何单一 AI 工具。
 
@@ -28,7 +28,7 @@ AI Dev Hub 定义任务、上下文、能力、交接和执行协议。
 - 推荐部署位置：腾讯云服务器或其他私有服务器。
 - 使用入口：公司电脑 / 个人电脑通过浏览器、SSH、VPN 或安全隧道访问。
 - 执行器接入方式：Adapter 插件机制。
-- 可接入执行器：CLI 工具、模型 API、脚本、远程服务。
+- 可接入执行器：CLI 工具、模型 API、脚本、远程服务、手动复制 prompt 的外部工具。
 - 代码与任务状态：统一保存在服务器工作区和项目 `.ai/` 工作区中。
 
 ## 产品定位
@@ -72,10 +72,10 @@ AI Dev Hub 定义任务、上下文、能力、交接和执行协议。
 
 ## 当前状态
 
-- 状态：方案改造为能力驱动与 Adapter 扩展架构。
+- 状态：工程执行级方案补充完成。
 - 当前负责人：ChatGPT。
 - 后续执行工具：任意符合 Adapter 协议的工具。
-- 下一步：补齐数据模型、CLI 命令规格、Adapter 规范和 `.ai/` 工作区规范。
+- 下一步：进行方案评审，确认是否进入 CLI 原型实现。
 
 ## 目录说明
 
@@ -83,6 +83,10 @@ AI Dev Hub 定义任务、上下文、能力、交接和执行协议。
 - `solution-overview.md`：方案总览。
 - `capability-model.md`：能力模型。
 - `agent-adapter-spec.md`：执行器 Adapter 规范。
+- `data-model.md`：数据模型。
+- `cli-spec.md`：CLI 命令规格。
+- `workspace-spec.md`：`.ai/` 工作区规范。
+- `adapter-runtime.md`：Adapter Runtime 设计。
 - `product-spec.md`：产品需求说明。
 - `mvp-requirements.md`：MVP 需求清单。
 - `architecture.md`：技术架构设想。
@@ -93,3 +97,26 @@ AI Dev Hub 定义任务、上下文、能力、交接和执行协议。
 - `handoff.md`：给下一个 AI 工具的交接说明。
 - `decisions.md`：关键决策记录。
 - `prompts.md`：可复制给不同 AI 工具的提示词。
+
+## 后续接力建议
+
+接手工具应先阅读：
+
+```text
+tasks/ai-dev-hub/README.md
+tasks/ai-dev-hub/solution-overview.md
+tasks/ai-dev-hub/capability-model.md
+tasks/ai-dev-hub/agent-adapter-spec.md
+tasks/ai-dev-hub/data-model.md
+tasks/ai-dev-hub/cli-spec.md
+tasks/ai-dev-hub/workspace-spec.md
+tasks/ai-dev-hub/adapter-runtime.md
+tasks/ai-dev-hub/handoff.md
+```
+
+优先任务：
+
+1. 审查方案是否仍存在具体工具绑定。
+2. 审查 MVP 是否过大。
+3. 确认 CLI 原型技术栈。
+4. 开始实现 `packages/cli` 原型。
