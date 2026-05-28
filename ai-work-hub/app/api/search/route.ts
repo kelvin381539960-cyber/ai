@@ -11,3 +11,4 @@ export async function GET(request: Request) {
   } catch (error) {
     return NextResponse.json({ ok: false, error: error instanceof Error ? error.message : 'unknown error' }, { status: 500 });
   }
+}
