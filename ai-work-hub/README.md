@@ -53,6 +53,12 @@ npm run start
 /login
 ```
 
+退出：
+
+```text
+/logout
+```
+
 本地调试可以不设置。
 
 ## 验证
@@ -60,6 +66,12 @@ npm run start
 ```bash
 npm run check
 npm run smoke
+```
+
+如果启用了访问令牌：
+
+```bash
+AI_WORK_HUB_SMOKE_TOKEN='your-long-random-token' npm run smoke
 ```
 
 详见：
@@ -78,6 +90,7 @@ GET /api/health
 
 - `/` 首页任务类型入口
 - `/login` 访问令牌登录
+- `/logout` 退出登录
 - `/onboarding` 初始化
 - `/tasks/new?type=research` 创建任务
 - `/tasks/[id]` 任务详情

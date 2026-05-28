@@ -65,6 +65,12 @@ AI_WORK_HUB_ACCESS_TOKEN='your-long-random-token' npm run dev
 
 输入访问令牌后继续使用。
 
+退出登录：
+
+```text
+/logout
+```
+
 ## 6. API Smoke Test
 
 应用启动后，新开终端：
@@ -74,7 +80,17 @@ cd ai-work-hub
 npm run smoke
 ```
 
-如果启用了访问令牌，`npm run smoke` 暂时不会自动登录，建议先用浏览器验证。
+如果启用了访问令牌：
+
+```bash
+AI_WORK_HUB_SMOKE_TOKEN='your-long-random-token' npm run smoke
+```
+
+或：
+
+```bash
+AI_WORK_HUB_ACCESS_TOKEN='your-long-random-token' npm run smoke
+```
 
 如果服务不是本地 3000 端口：
 

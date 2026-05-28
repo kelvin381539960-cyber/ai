@@ -56,10 +56,24 @@ GET /api/outputs
 GET /api/search?q=AI
 ```
 
+如果启用了访问令牌：
+
+```bash
+AI_WORK_HUB_SMOKE_TOKEN='your-long-random-token' npm run smoke
+```
+
 如果服务不是 `localhost:3000`：
 
 ```bash
 AI_WORK_HUB_BASE_URL=http://your-host:3000 npm run smoke
+```
+
+可以组合：
+
+```bash
+AI_WORK_HUB_BASE_URL=http://your-host:3000 \
+AI_WORK_HUB_SMOKE_TOKEN='your-long-random-token' \
+npm run smoke
 ```
 
 ## 6. Demo 验收
@@ -101,4 +115,5 @@ better-sqlite3 是否安装成功
 AI_WORK_HUB_DATA_DIR 是否可写
 Next.js params/searchParams 类型是否报错
 涉及 SQLite 页面是否 force-dynamic
+如果启用访问令牌，smoke 是否传入 AI_WORK_HUB_SMOKE_TOKEN
 ```
