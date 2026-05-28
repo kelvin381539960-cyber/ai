@@ -12,6 +12,9 @@ import { LocalIntelligence } from '../local/local-intelligence.js';
 import { OllamaClient } from '../local/ollama-client.js';
 import { PatchEngine } from '../patch/patch-engine.js';
 import { buildPatchPlan } from '../patch/patch-plan.js';
+import { RemoteOps } from '../remote/remote-ops.js';
+import { ServerGroupRegistry } from '../remote/server-groups.js';
+import { RemoteSessionPool } from '../remote/session-pool.js';
 import type { PatchOperation, ToolCallContext, ToolProfile } from '../types.js';
 import { toolDefinitions } from './tools.js';
 
@@ -24,6 +27,9 @@ export async function startMcpServer(): Promise<void> {
   await audit.init();
   const fileEngine = new FileEngine(DEFAULT_TASK_SCOPE.allowedRoots);
   const patchEngine = new PatchEngine(fileEngine);
+  const remote = new RemoteOps();
+  const sessions = new RemoteSessionPool();
+  const groups = new ServerGroupRegistry();
   const ollama = new OllamaClient({ baseUrl: process.env.OLLAMA_BASE_URL ?? 'http://127.0.0.1:11434', embeddingModel: process.env.OLLAMA_EMBEDDING_MODEL ?? 'nomic-embed-text', instructModel: process.env.OLLAMA_INSTRUCT_MODEL ?? 'qwen2.5-coder:7b' });
   const local = new LocalIntelligence(ollama);
   const server = new Server({ name: 'aix-rootops-mcp', version: '0.1.0' }, { capabilities: { tools: {} } });
@@ -50,6 +56,14 @@ export async function startMcpServer(): Promise<void> {
         case 'patch.plan': { const parsed = PatchPlanArgs.parse(args); const patches = parsed.patches.map(toPatchOperation); return jsonToolResult({ ok: true, plan: await buildPatchPlan(patchEngine, { patches, maxFilesChanged: parsed.max_files_changed, maxLinesChanged: parsed.max_lines_changed }) }); }
         case 'patch.apply': { const parsed = PatchApplyArgs.parse(args); return jsonToolResult({ ok: true, result: await patchEngine.apply(toPatchOperation(parsed)) }); }
         case 'patch.verify': { const parsed = PatchVerifyArgs.parse(args); return jsonToolResult({ ok: true, verify: await patchEngine.verify(parsed.path, parsed.expected_text, parsed.old_text) }); }
+        case 'remote.session.open': { const parsed = RemoteSessionOpenArgs.parse(args); return jsonToolResult({ ok: true, session: sessions.open(parsed.target, parsed.cwd) }); }
+        case 'remote.session.list': return jsonToolResult({ ok: true, sessions: sessions.list() });
+        case 'remote.session.close': { const parsed = RemoteSessionCloseArgs.parse(args); return jsonToolResult(sessions.close(parsed.session_id)); }
+        case 'remote.exec': { const parsed = RemoteExecArgs.parse(args); const session = parsed.session_id ? sessions.get(parsed.session_id) : undefined; const target = parsed.target ?? session?.target; if (!target) throw new Error('target or session_id required'); return jsonToolResult({ ok: true, result: await remote.sshExec(target, parsed.command, { cwd: parsed.cwd ?? session?.cwd, timeoutMs: parsed.timeout_ms }) }); }
+        case 'remote.rsync_push': { const parsed = RemoteRsyncPushArgs.parse(args); return jsonToolResult({ ok: true, result: await remote.rsyncPush(parsed.source, parsed.target, parsed.destination) }); }
+        case 'remote.rsync_pull': { const parsed = RemoteRsyncPullArgs.parse(args); return jsonToolResult({ ok: true, result: await remote.rsyncPull(parsed.target, parsed.source, parsed.destination) }); }
+        case 'remote.group.register': { const parsed = RemoteGroupRegisterArgs.parse(args); return jsonToolResult({ ok: true, group: groups.register(parsed.name, parsed.targets) }); }
+        case 'remote.group.exec': { const parsed = RemoteGroupExecArgs.parse(args); const group = groups.get(parsed.name); return jsonToolResult({ ok: true, results: await remote.groupExec(group.targets, parsed.command, { cwd: parsed.cwd, timeoutMs: parsed.timeout_ms }) }); }
         case 'local.embed': { const parsed = LocalEmbedArgs.parse(args); return jsonToolResult({ ok: true, embeddings: await local.embed(parsed.texts) }); }
         case 'local.rerank': { const parsed = LocalRerankArgs.parse(args); return jsonToolResult({ ok: true, items: await local.rerank(parsed.query, parsed.candidates) }); }
         case 'local.summarize': { const parsed = LocalSummarizeArgs.parse(args); return jsonToolResult({ ok: true, ...(await local.summarizeLargeText(parsed.text)) }); }
@@ -64,6 +78,7 @@ export async function startMcpServer(): Promise<void> {
 function jsonToolResult(value: unknown) { return { content: [{ type: 'text' as const, text: JSON.stringify(value, null, 2) }] }; }
 function toPatchOperation(parsed: z.infer<typeof PatchDryRunArgs>): PatchOperation { return { path: parsed.path, expectedHash: parsed.expected_hash, oldText: parsed.old_text, newText: parsed.new_text, risk: parsed.risk, dryRunRequired: parsed.dry_run_required, autoSnapshot: parsed.auto_snapshot }; }
 
+const SshTargetSchema = z.object({ host: z.string(), user: z.string().optional(), port: z.number().int().min(1).max(65535).optional(), identityFile: z.string().optional() });
 const PolicyCheckArgs = z.object({ tool_name: z.string(), profile: z.string().optional() as z.ZodOptional<z.ZodType<ToolProfile>>, args: z.unknown().optional() });
 const AuditListArgs = z.object({ source: z.enum(['memory', 'disk']).default('memory'), date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional() });
 const FileReadArgs = z.object({ path: z.string(), offset_line: z.number().int().min(1).default(1), limit_lines: z.number().int().min(1).max(2000).default(200), max_bytes: z.number().int().min(1).max(1024 * 1024).default(512 * 1024), with_line_numbers: z.boolean().default(true) });
@@ -77,6 +92,13 @@ const PatchDryRunArgs = z.object({ path: z.string(), expected_hash: z.string(), 
 const PatchApplyArgs = PatchDryRunArgs.omit({ with_local_risk: true });
 const PatchPlanArgs = z.object({ patches: z.array(PatchApplyArgs).min(1).max(100), max_files_changed: z.number().int().min(1).max(100).default(30), max_lines_changed: z.number().int().min(1).max(20000).default(8000) });
 const PatchVerifyArgs = z.object({ path: z.string(), expected_text: z.string(), old_text: z.string().optional() });
+const RemoteSessionOpenArgs = z.object({ target: SshTargetSchema, cwd: z.string().optional() });
+const RemoteSessionCloseArgs = z.object({ session_id: z.string() });
+const RemoteExecArgs = z.object({ target: SshTargetSchema.optional(), session_id: z.string().optional(), command: z.string(), cwd: z.string().optional(), timeout_ms: z.number().int().min(1000).max(3600000).default(300000) });
+const RemoteRsyncPushArgs = z.object({ source: z.string(), target: SshTargetSchema, destination: z.string() });
+const RemoteRsyncPullArgs = z.object({ target: SshTargetSchema, source: z.string(), destination: z.string() });
+const RemoteGroupRegisterArgs = z.object({ name: z.string(), targets: z.array(SshTargetSchema).min(1).max(100) });
+const RemoteGroupExecArgs = z.object({ name: z.string(), command: z.string(), cwd: z.string().optional(), timeout_ms: z.number().int().min(1000).max(3600000).default(300000) });
 const LocalEmbedArgs = z.object({ texts: z.array(z.string()).min(1).max(128) });
 const LocalRerankArgs = z.object({ query: z.string(), candidates: z.array(z.object({ id: z.string(), text: z.string(), metadata: z.record(z.unknown()).optional() })).min(1).max(200) });
 const LocalSummarizeArgs = z.object({ text: z.string().min(1) });

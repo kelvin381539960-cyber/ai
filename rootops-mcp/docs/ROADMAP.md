@@ -47,10 +47,14 @@
 
 ## Phase 4: Remote ops
 
-- [ ] SSH session pool
+- [x] SSH exec
+- [x] basic session records
+- [x] rsync pull
+- [x] rsync push
+- [x] server groups
+- [x] command risk screening
 - [ ] streaming exec
-- [ ] rsync pull
-- [ ] server groups
+- [ ] persistent PTY sessions
 - [ ] tunnel management
 - [ ] remote agent bootstrap
 
