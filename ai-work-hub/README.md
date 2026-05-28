@@ -12,6 +12,8 @@
 
 已补入基础 Workflow Runtime，但只支持线性流程。
 
+已补入可选访问令牌，适合私有服务器基础防护。
+
 暂不实现：CLI Assistant、MCP、ChatGPT Action、多用户权限、复杂 DAG。
 
 ## 启动
@@ -35,6 +37,24 @@ npm run dev
 AI_WORK_HUB_DATA_DIR=/srv/ai-work-hub npm run dev
 ```
 
+## 可选访问令牌
+
+服务器部署建议设置：
+
+```bash
+AI_WORK_HUB_ACCESS_TOKEN='your-long-random-token' \
+AI_WORK_HUB_DATA_DIR=/srv/ai-work-hub \
+npm run start
+```
+
+设置后访问页面会进入：
+
+```text
+/login
+```
+
+本地调试可以不设置。
+
 ## 验证
 
 ```bash
@@ -57,6 +77,7 @@ GET /api/health
 ## 主要入口
 
 - `/` 首页任务类型入口
+- `/login` 访问令牌登录
 - `/onboarding` 初始化
 - `/tasks/new?type=research` 创建任务
 - `/tasks/[id]` 任务详情

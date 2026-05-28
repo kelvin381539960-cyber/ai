@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
 import { getDataDir } from '@/lib/fs-store';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const db = getDb();
@@ -10,6 +12,7 @@ export async function GET() {
       ok: true,
       dataDir: getDataDir(),
       initialized: Boolean(workspace),
+      accessTokenEnabled: Boolean(process.env.AI_WORK_HUB_ACCESS_TOKEN),
       workspace
     });
   } catch (error) {

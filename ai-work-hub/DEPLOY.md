@@ -19,7 +19,27 @@ npm run build
 AI_WORK_HUB_DATA_DIR=/srv/ai-work-hub npm run start
 ```
 
-## 3. 数据目录
+## 3. 建议启用访问令牌
+
+当前是单用户私有工具，不建议公网裸露。
+
+如果需要通过浏览器远程访问，至少设置访问令牌：
+
+```bash
+AI_WORK_HUB_ACCESS_TOKEN='your-long-random-token' \
+AI_WORK_HUB_DATA_DIR=/srv/ai-work-hub \
+npm run start
+```
+
+启用后：
+
+- 页面访问会跳转 `/login`。
+- API 未携带 cookie 会返回 `401`。
+- `/api/health` 也会被保护。
+
+本地调试可以不设置 `AI_WORK_HUB_ACCESS_TOKEN`。
+
+## 4. 数据目录
 
 推荐：
 
@@ -41,9 +61,9 @@ templates/
 
 不要删除该目录，否则任务数据会丢失。
 
-## 4. 访问方式
+## 5. 访问方式
 
-不建议直接公网裸露。
+仍然不建议直接公网裸露。
 
 推荐：
 
@@ -54,12 +74,14 @@ Tailscale
 Cloudflare Zero Trust
 ```
 
-## 5. SSH Tunnel 示例
+## 6. SSH Tunnel 示例
 
 服务器运行：
 
 ```bash
-AI_WORK_HUB_DATA_DIR=/srv/ai-work-hub npm run start
+AI_WORK_HUB_ACCESS_TOKEN='your-long-random-token' \
+AI_WORK_HUB_DATA_DIR=/srv/ai-work-hub \
+npm run start
 ```
 
 本地电脑执行：
@@ -74,7 +96,7 @@ ssh -L 3000:localhost:3000 user@your-server
 http://localhost:3000
 ```
 
-## 6. 健康检查
+## 7. 健康检查
 
 访问：
 
@@ -87,11 +109,12 @@ http://localhost:3000
 ```json
 {
   "ok": true,
-  "initialized": true
+  "initialized": true,
+  "accessTokenEnabled": true
 }
 ```
 
-## 7. 备份
+## 8. 备份
 
 备份整个数据目录：
 
@@ -101,19 +124,19 @@ tar -czf ai-work-hub-backup.tgz /srv/ai-work-hub
 
 恢复时把目录放回同一路径，重新启动应用。
 
-## 8. 安全边界
+## 9. 安全边界
 
 当前版本：
 
 ```text
 单用户
-无登录系统
+可选访问令牌
 不建议公网裸露
 Manual Assistant 需要用户手动复制 Prompt 到外部 AI
 不会自动 push / merge / deploy
 ```
 
-## 9. 常见问题
+## 10. 常见问题
 
 ### better-sqlite3 安装失败
 

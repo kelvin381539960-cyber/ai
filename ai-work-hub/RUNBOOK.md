@@ -47,7 +47,25 @@ npm run dev
 http://localhost:3000
 ```
 
-## 5. API Smoke Test
+## 5. 可选访问令牌
+
+本地调试可以不设置。
+
+服务器访问建议设置：
+
+```bash
+AI_WORK_HUB_ACCESS_TOKEN='your-long-random-token' npm run dev
+```
+
+设置后，浏览器会进入：
+
+```text
+/login
+```
+
+输入访问令牌后继续使用。
+
+## 6. API Smoke Test
 
 应用启动后，新开终端：
 
@@ -56,13 +74,15 @@ cd ai-work-hub
 npm run smoke
 ```
 
+如果启用了访问令牌，`npm run smoke` 暂时不会自动登录，建议先用浏览器验证。
+
 如果服务不是本地 3000 端口：
 
 ```bash
 AI_WORK_HUB_BASE_URL=http://your-host:3000 npm run smoke
 ```
 
-## 6. 指定数据目录启动
+## 7. 指定数据目录启动
 
 ```bash
 AI_WORK_HUB_DATA_DIR=/srv/ai-work-hub npm run dev
@@ -75,7 +95,7 @@ AI_WORK_HUB_DATA_DIR=/srv/ai-work-hub npm run build
 AI_WORK_HUB_DATA_DIR=/srv/ai-work-hub npm run start
 ```
 
-## 7. 健康检查
+## 8. 健康检查
 
 访问：
 
@@ -101,7 +121,7 @@ http://localhost:3000/api/health
 }
 ```
 
-## 8. 初始化
+## 9. 初始化
 
 访问：
 
@@ -124,7 +144,7 @@ Workspace 名称：我的工作台
 
 成功后返回首页。
 
-## 9. 跑通第一个 Demo
+## 10. 跑通第一个 Demo
 
 ### Step 1：创建任务
 
@@ -224,7 +244,7 @@ AI 工作流
 
 确认可以搜到任务、资料或输出。
 
-## 10. 验收标准
+## 11. 验收标准
 
 必须满足：
 
@@ -242,13 +262,13 @@ AI 工作流
 可以搜索历史内容
 ```
 
-## 11. 常见问题
+## 12. 常见问题
 
-### 11.1 npm install 失败
+### 12.1 npm install 失败
 
 优先检查 Node.js 版本和编译依赖。
 
-### 11.2 /api/health 返回 500
+### 12.2 /api/health 返回 500
 
 检查：
 
@@ -258,7 +278,7 @@ better-sqlite3 是否安装成功
 AI_WORK_HUB_DATA_DIR 是否可写
 ```
 
-### 11.3 build 时读取 SQLite 报错
+### 12.3 build 时读取 SQLite 报错
 
 页面已设置：
 
@@ -268,7 +288,7 @@ force-dynamic
 
 如果仍报错，检查是否新增了静态页面直接读取数据库。
 
-### 11.4 公司电脑和个人电脑看不到同一数据
+### 12.4 公司电脑和个人电脑看不到同一数据
 
 确认两台电脑访问的是同一个服务器实例，并且服务使用同一个：
 
@@ -276,13 +296,19 @@ force-dynamic
 AI_WORK_HUB_DATA_DIR
 ```
 
-## 12. 生产使用提醒
+## 13. 生产使用提醒
 
-当前版本没有登录系统。
+当前版本是单用户私有部署版本。
 
-不要公网裸露。
+不建议公网裸露。
 
-建议使用：
+建议至少设置：
+
+```text
+AI_WORK_HUB_ACCESS_TOKEN
+```
+
+并配合：
 
 ```text
 SSH Tunnel
