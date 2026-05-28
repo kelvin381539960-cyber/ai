@@ -49,6 +49,15 @@ GET /api/health
 - `/outputs` 输出列表
 - `/search` 搜索
 
+## API 快速检查
+
+```text
+GET /api/health
+GET /api/tasks
+GET /api/outputs
+GET /api/search?q=AI
+```
+
 ## 首个 Demo 验收
 
 1. 进入 `/onboarding` 初始化。
@@ -64,6 +73,22 @@ GET /api/health
 11. 在 `/outputs` 查看输出并复制 Markdown。
 12. 基于输出创建新任务。
 13. 在 `/search` 搜索历史任务、资料、输出。
+
+## 运行手册
+
+详见：
+
+```text
+RUNBOOK.md
+```
+
+## 当前实现状态
+
+详见：
+
+```text
+STATUS.md
+```
 
 ## 部署
 
