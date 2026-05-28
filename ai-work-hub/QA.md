@@ -99,7 +99,25 @@ GET /api/health
 可以搜索历史内容
 ```
 
-## 5. 暂不验收
+## 5. 构建风险检查
+
+必须通过：
+
+```bash
+npm run typecheck
+npm run build
+```
+
+如果失败，优先检查：
+
+```text
+Next.js params/searchParams 类型
+better-sqlite3 原生依赖
+@/* 路径别名 baseUrl
+涉及 SQLite 的页面是否 force-dynamic
+```
+
+## 6. 暂不验收
 
 ```text
 Workflow Runtime 完整执行

@@ -1,6 +1,8 @@
 import { listRecentTasks } from '@/services/query-service';
 
-export default function TasksPage() {
+export const dynamic = 'force-dynamic';
+
+export default async function TasksPage() {
   const tasks = listRecentTasks(100);
   return (
     <main className="container">

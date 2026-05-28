@@ -6,6 +6,8 @@ import { runDefaultAssistant } from '@/services/run-service';
 import { completeRun } from '@/services/run-service';
 import { updateOutput, markOutputFinal, createOutputVersion, convertOutputToMaterial } from '@/services/output-service';
 
+export const dynamic = 'force-dynamic';
+
 async function addMaterialAction(formData: FormData) {
   'use server';
   const taskId = String(formData.get('taskId'));

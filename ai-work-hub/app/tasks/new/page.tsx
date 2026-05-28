@@ -2,6 +2,8 @@ import { redirect } from 'next/navigation';
 import { createTaskWithMaterial } from '@/services/task-service';
 import { ensureInitialized } from '@/services/onboarding-service';
 
+export const dynamic = 'force-dynamic';
+
 const labels: Record<string, string> = {
   research: '做需求调研',
   prd: '写 PRD',

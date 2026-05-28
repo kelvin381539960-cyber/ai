@@ -2,6 +2,8 @@ import { redirect } from 'next/navigation';
 import { initializeWorkspace } from '@/services/onboarding-service';
 import { getInitializationStatus } from '@/services/query-service';
 
+export const dynamic = 'force-dynamic';
+
 async function initAction(formData: FormData) {
   'use server';
   const workspaceName = String(formData.get('workspaceName') || '我的工作台');
@@ -10,7 +12,7 @@ async function initAction(formData: FormData) {
   redirect('/');
 }
 
-export default function OnboardingPage() {
+export default async function OnboardingPage() {
   const status = getInitializationStatus();
   return (
     <main className="container">

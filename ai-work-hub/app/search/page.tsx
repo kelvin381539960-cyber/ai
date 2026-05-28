@@ -1,8 +1,10 @@
 import { searchAll } from '@/services/search-service';
 import { CopyButton } from '@/components/CopyButton';
 
-export default function SearchPage({ searchParams }: { searchParams: { q?: string } }) {
-  const q = searchParams.q || '';
+export const dynamic = 'force-dynamic';
+
+export default async function SearchPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  const { q = '' } = await searchParams;
   const results = q ? searchAll(q) : { tasks: [], materials: [], outputs: [] };
 
   return (

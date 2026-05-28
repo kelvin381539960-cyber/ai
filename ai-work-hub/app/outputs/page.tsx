@@ -3,6 +3,8 @@ import { CopyButton } from '@/components/CopyButton';
 import { listOutputs } from '@/services/query-service';
 import { createTaskFromOutput } from '@/services/output-service';
 
+export const dynamic = 'force-dynamic';
+
 async function createTaskFromOutputAction(formData: FormData) {
   'use server';
   const task = createTaskFromOutput(String(formData.get('outputId')), {
@@ -13,7 +15,7 @@ async function createTaskFromOutputAction(formData: FormData) {
   redirect(`/tasks/${task.id}`);
 }
 
-export default function OutputsPage() {
+export default async function OutputsPage() {
   const outputs = listOutputs();
   return (
     <main className="container">

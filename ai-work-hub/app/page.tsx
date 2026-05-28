@@ -1,5 +1,7 @@
 import { getInitializationStatus, listRecentTasks } from '@/services/query-service';
 
+export const dynamic = 'force-dynamic';
+
 const taskTypes = [
   { type: 'research', title: '做需求调研', desc: '整理问题、资料和机会点，形成调研结论。' },
   { type: 'prd', title: '写 PRD', desc: '根据背景和反馈生成 PRD 草稿。' },
