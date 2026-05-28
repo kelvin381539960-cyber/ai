@@ -12,15 +12,19 @@
 
 ## Phase 1: Real MCP server
 
-- [ ] Add MCP SDK server transport
-- [ ] Register read-only tools
-- [ ] Register local intelligence tools
-- [ ] Add JSON schema validation
-- [ ] Add structured error format
+- [x] Add MCP SDK server transport
+- [x] Register read-only tools
+- [x] Register local intelligence tools
+- [x] Add JSON schema validation
+- [x] Add structured error format
+- [ ] Persist audit log to disk
+- [ ] Add MCP client config examples
 
 ## Phase 2: File intelligence
 
-- [ ] ripgrep search
+- [x] Basic file.read with line window and byte budget
+- [x] Basic file.search with glob, regex, context, byte cap
+- [ ] ripgrep backend
 - [ ] cursor pagination
 - [ ] read_many with byte budget
 - [ ] tree-sitter outline
