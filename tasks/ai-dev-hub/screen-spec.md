@@ -2,27 +2,30 @@
 
 ## 1. UI 原则
 
-第一版 UI 不是 IDE，不承载代码编辑能力。
+V0 必须有 UI。
 
-它只做任务驾驶舱：
+V0 UI 不是 IDE，不承载代码编辑能力。
 
+它只做 AI 开发任务操作台：
+
+- 看项目。
+- 管理 Agent。
+- 管理 Workflow。
 - 看任务。
-- 看上下文。
-- 触发执行。
-- 看日志。
-- 看 diff。
-- 看 handoff。
+- 运行 Agent / Workflow。
+- 看 Run。
+- 看 Handoff。
 
 ## 2. 信息架构
 
-Web UI 第一版包含 6 个页面：
+V0 UI 包含 6 个页面：
 
 1. 项目页。
-2. 任务列表页。
-3. 任务详情页。
-4. 执行日志页。
-5. Diff / Review 页。
-6. 设置页。
+2. Agent 管理页。
+3. Workflow 管理页。
+4. 任务页。
+5. Run 记录页。
+6. Handoff 页。
 
 ## 3. 项目页
 
@@ -44,37 +47,78 @@ Web UI 第一版包含 6 个页面：
 - 添加项目。
 - 进入项目。
 - 刷新 git 状态。
-- 打开终端提示命令。
+- 初始化 `.ai/` 工作区。
 
-## 4. 任务列表页
+## 4. Agent 管理页
 
 ### 4.1 目标
 
-查看所有任务状态。
+让用户手动创建和管理常用 Agent。
 
 ### 4.2 字段
 
-- 任务标题。
-- 状态。
-- 推荐执行器。
-- 最近执行时间。
-- 是否有未提交 diff。
-- 是否有 handoff。
+- Agent 名称。
+- Agent 类型：Manual / Generic CLI。
+- 能力标签。
+- Prompt 模板。
+- 是否启用。
+- 最近使用时间。
 
 ### 4.3 操作
 
-- 新建任务。
-- 筛选状态。
-- 查看任务详情。
-- 归档任务。
+- 创建 Agent。
+- 从模板创建 Agent。
+- 编辑 Agent。
+- 启用/禁用 Agent。
+- 测试 Agent。
+- 删除 Agent。
 
-## 5. 任务详情页
+### 4.4 V0 内置模板
+
+- Review Agent。
+- Security Review Agent。
+- Architecture Review Agent。
+- Research Agent。
+- Handoff Agent。
+
+## 5. Workflow 管理页
 
 ### 5.1 目标
 
+让用户创建固定流程，例如 pre-work、调研、评审。
+
+### 5.2 字段
+
+- Workflow 名称。
+- 描述。
+- 步骤列表。
+- 每个步骤类型。
+- 每个步骤绑定的 Agent。
+- 是否启用。
+
+### 5.3 操作
+
+- 创建 Workflow。
+- 从模板创建 Workflow。
+- 编辑步骤。
+- 调整步骤顺序。
+- 删除步骤。
+- 运行 Workflow。
+- 查看 Workflow Run。
+
+### 5.4 V0 内置模板
+
+- Pre-work Workflow。
+- Research Workflow。
+- Review Workflow。
+
+## 6. 任务页
+
+### 6.1 目标
+
 承载单个任务的主要操作。
 
-### 5.2 区块
+### 6.2 区块
 
 #### 任务说明
 
@@ -84,108 +128,75 @@ Web UI 第一版包含 6 个页面：
 - 范围。
 - 不做什么。
 - 验收标准。
+- 所需能力。
 
-#### 当前上下文
-
-显示：
-
-- 项目规则。
-- 当前 handoff。
-- 当前 git 状态。
-- 常用命令。
-
-#### 执行面板
+#### 操作区
 
 按钮：
 
 - 生成上下文。
-- 用 Cursor CLI 执行。
-- 生成 handoff。
-- 生成 review prompt。
-- 标记完成。
+- 运行 Agent。
+- 运行 Workflow。
+- 生成 Handoff。
 
-#### 风险提示
+#### 关联信息
 
 显示：
 
-- 是否有未提交文件。
-- 是否在 main 分支。
-- 是否有敏感文件变更。
-- 是否有测试失败。
+- 关联 Run。
+- 关联 Workflow Run。
+- 当前 Handoff。
+- Git 状态。
 
-## 6. 执行日志页
-
-### 6.1 目标
-
-复盘每一次 AI 执行。
-
-### 6.2 字段
-
-- run_id。
-- agent。
-- task。
-- 开始时间。
-- 结束时间。
-- exit_code。
-- stdout。
-- stderr。
-- 执行前 git status。
-- 执行后 git status。
-
-### 6.3 操作
-
-- 复制 prompt。
-- 复制日志。
-- 基于该日志生成 handoff。
-
-## 7. Diff / Review 页
+## 7. Run 记录页
 
 ### 7.1 目标
 
-让用户在不打开完整 IDE 的情况下了解 AI 改了什么。
+复盘每一次 Agent 执行。
 
-### 7.2 显示
+### 7.2 字段
 
-- 文件变更列表。
-- 变更摘要。
-- 高风险文件提示。
-- Review prompt。
+- run_id。
+- task。
+- agent。
+- capability。
+- 状态。
+- prompt。
+- 用户回填结果。
+- stdout。
+- stderr。
+- 开始时间。
+- 结束时间。
 
 ### 7.3 操作
 
-- 刷新 diff。
-- 生成 review prompt。
-- 复制给 Codex / Claude。
+- 查看 prompt。
+- 复制 prompt。
+- 粘贴外部 AI 输出。
+- 标记完成。
+- 生成 Handoff。
 
-第一版可以只显示 `git diff --stat` 和完整文本 diff，不需要复杂 diff viewer。
+## 8. Handoff 页
 
-## 8. 设置页
+### 8.1 目标
 
-### 8.1 Agent 设置
+展示当前任务交接文档。
 
-- Cursor CLI 路径。
-- 默认工作目录。
-- 超时时间。
+### 8.2 内容
 
-### 8.2 安全设置
+- 当前状态。
+- 已完成事项。
+- 修改文件。
+- 执行过的 Agent。
+- 执行过的 Workflow。
+- 风险。
+- 下一步建议。
 
-- 是否允许在 main 分支执行。
-- 是否允许自动 commit。
-- 是否允许自动 push。
-- 敏感文件黑名单。
+### 8.3 操作
 
-MVP 默认：
-
-- 不允许自动 push。
-- 不允许自动 merge。
-- 不允许自动 deploy。
-
-### 8.3 用户偏好
-
-- 默认先计划再执行。
-- 默认小步修改。
-- 默认生成 handoff。
-- 默认 review 只看高风险问题。
+- 重新生成 Handoff。
+- 复制 Handoff。
+- 下载 Handoff。
 
 ## 9. 首页布局草图
 
@@ -194,30 +205,33 @@ MVP 默认：
 │ AI Dev Hub                                 │
 ├──────────────┬─────────────────────────────┤
 │ 项目列表      │ 当前项目：project-a          │
-│              │ 当前任务：实现 CLI 原型       │
-│ - project-a  │ 状态：running                │
-│ - project-b  │                             │
+│ Agent         │ 当前任务：实现 CLI 原型       │
+│ Workflow      │ 状态：running                │
+│ Task          │                             │
 ├──────────────┼─────────────────────────────┤
-│ 任务列表      │ [生成上下文] [运行 Cursor]    │
-│ - task-001   │ [生成 Handoff] [Review]      │
-│ - task-002   │                             │
+│ 快捷操作      │ [运行 Agent] [运行 Workflow]  │
+│ - Review      │ [生成 Handoff]               │
+│ - Pre-work    │                             │
 ├──────────────┴─────────────────────────────┤
-│ 日志 / Diff / Handoff Tabs                 │
+│ Run / Workflow Run / Handoff Tabs          │
 └────────────────────────────────────────────┘
 ```
 
-## 10. UI 上线顺序
+## 10. V0 UI 上线顺序
 
 先做：
 
-1. 任务列表。
-2. 任务详情。
-3. 执行日志。
-4. Handoff 查看。
+1. 项目选择/初始化。
+2. Agent 管理。
+3. Workflow 管理。
+4. 任务详情。
+5. Run 详情。
+6. Handoff 查看。
 
-后做：
+不做：
 
-1. Diff viewer。
-2. 设置页。
-3. 记忆管理。
-4. 多工具 dashboard。
+1. 在线代码编辑器。
+2. Diff viewer 高级交互。
+3. 多用户权限。
+4. Agent 市场。
+5. 复杂 Workflow DAG 编辑器。
