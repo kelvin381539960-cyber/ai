@@ -34,17 +34,21 @@ export class SnapshotStore {
     await mkdir(this.rootDir, { recursive: true });
     await copyFile(sourcePath, snapshotPath);
 
-    const record: SnapshotRecord = {
-      id,
-      sourcePath,
-      snapshotPath,
-      sha256,
-      bytes: data.byteLength,
-      createdAt,
-      reason
-    };
-
+    const record: SnapshotRecord = { id, sourcePath, snapshotPath, sha256, bytes: data.byteLength, createdAt, reason };
     await writeFile(metaPath, JSON.stringify(record, null, 2), 'utf8');
     return record;
+  }
+
+  async read(id: string): Promise<SnapshotRecord> {
+    const metaPath = path.join(this.rootDir, `${id}.json`);
+    const text = await readFile(metaPath, 'utf8');
+    return JSON.parse(text) as SnapshotRecord;
+  }
+
+  async restore(id: string, targetPath?: string): Promise<{ ok: true; snapshot: SnapshotRecord; restoredTo: string }> {
+    const snapshot = await this.read(id);
+    const restoredTo = targetPath ?? snapshot.sourcePath;
+    await copyFile(snapshot.snapshotPath, restoredTo);
+    return { ok: true, snapshot, restoredTo };
   }
 }

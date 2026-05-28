@@ -1,51 +1,32 @@
 # Initial MCP Tools
 
-## policy.check
+## Read/search/context tools
 
-Checks whether a tool would be auto-allowed or require confirmation.
+- `policy.check`
+- `audit.list`
+- `file.read`
+- `file.read_many`
+- `file.search`
+- `file.outline`
+- `file.hash`
+- `local.context_pack`
 
-## audit.list
+## Snapshot and patch tools
 
-Lists audit events from memory or disk.
-
-## file.read
-
-Reads a text file by line window with byte budget.
-
-## file.read_many
-
-Reads multiple files in one call with a total byte budget.
-
-## file.search
-
-Searches filenames and contents under allowed roots. Uses ripgrep when available and supports cursor pagination.
-
-## file.outline
-
-Extracts a lightweight structure summary from a source file.
-
-## file.hash
-
-Returns SHA-256 and byte length.
-
-## snapshot.create
+### snapshot.create
 
 Creates a snapshot copy of a file before editing.
-
-Example:
 
 ```json
 {
   "path": "/opt/AIX代码/src/index.ts",
-  "reason": "before payment webhook patch"
+  "reason": "before patch"
 }
 ```
 
-## patch.dry_run
+### patch.dry_run
 
 Previews a text replacement patch. It checks `expected_hash` and does not write files.
-
-Example:
 
 ```json
 {
@@ -57,23 +38,49 @@ Example:
 }
 ```
 
-## local.embed
+### patch.apply
 
-Uses Ollama `/api/embed`.
+Applies a text replacement patch with expected_hash protection, auto snapshot, and verify.
 
-## local.rerank
+```json
+{
+  "path": "/opt/AIX代码/src/index.ts",
+  "expected_hash": "sha256...",
+  "old_text": "old block",
+  "new_text": "new block",
+  "auto_snapshot": true
+}
+```
 
-Uses local instruct model to score candidate snippets.
+### patch.verify
 
-## local.summarize
+Verifies expected text exists and optional old text is gone.
 
-Uses local instruct model to summarize large text.
+```json
+{
+  "path": "/opt/AIX代码/src/index.ts",
+  "expected_text": "new block",
+  "old_text": "old block"
+}
+```
 
-## local.context_pack
+### snapshot.restore
 
-Builds a compact context package from search hits and file windows.
+Restores a file from a snapshot id. This is destructive and should require confirmation.
 
-## Intentional exclusions in this phase
+```json
+{
+  "snapshot_id": "snap_...",
+  "target_path": "/opt/AIX代码/src/index.ts"
+}
+```
 
-`patch.dry_run` is available, but real write/apply is not exposed as an MCP tool yet.
+## Local model tools
+
+- `local.embed`
+- `local.rerank`
+- `local.summarize`
+
+## Still excluded
+
 No sudo/systemctl/git push/deploy tools are registered yet.

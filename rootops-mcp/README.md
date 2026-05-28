@@ -49,7 +49,7 @@ brew install ripgrep
 
 ## Current status
 
-Runnable MCP server with read/search/context and safe patch preview tools.
+Runnable MCP server with read/search/context and transactional patch tools.
 
 Registered tools:
 
@@ -61,18 +61,21 @@ Registered tools:
 - `file.outline`
 - `file.hash`
 - `snapshot.create`
+- `snapshot.restore`
 - `patch.dry_run`
+- `patch.apply`
+- `patch.verify`
 - `local.embed`
 - `local.rerank`
 - `local.summarize`
 - `local.context_pack`
 
-Real file write/apply is intentionally not exposed yet.
+No sudo/systemctl/git push/deploy tools are registered yet.
 
 ## Next build order
 
-1. Add patch apply tool behind risk policy.
-2. Add verify and rollback tools.
+1. Add unified diff preview.
+2. Add batch patch plan.
 3. Add tree-sitter outline.
 4. Add SQLite FTS5 index.
 5. Add embedding index.

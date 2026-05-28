@@ -21,29 +21,19 @@ export async function startMcpServer(): Promise<void> {
   const policy = new PolicyEngine(DEFAULT_TASK_SCOPE);
   const audit = new AuditLog();
   await audit.init();
-
   const fileEngine = new FileEngine(DEFAULT_TASK_SCOPE.allowedRoots);
   const patchEngine = new PatchEngine(fileEngine);
-  const ollama = new OllamaClient({
-    baseUrl: process.env.OLLAMA_BASE_URL ?? 'http://127.0.0.1:11434',
-    embeddingModel: process.env.OLLAMA_EMBEDDING_MODEL ?? 'nomic-embed-text',
-    instructModel: process.env.OLLAMA_INSTRUCT_MODEL ?? 'qwen2.5-coder:7b'
-  });
+  const ollama = new OllamaClient({ baseUrl: process.env.OLLAMA_BASE_URL ?? 'http://127.0.0.1:11434', embeddingModel: process.env.OLLAMA_EMBEDDING_MODEL ?? 'nomic-embed-text', instructModel: process.env.OLLAMA_INSTRUCT_MODEL ?? 'qwen2.5-coder:7b' });
   const local = new LocalIntelligence(ollama);
-
   const server = new Server({ name: 'aix-rootops-mcp', version: '0.1.0' }, { capabilities: { tools: {} } });
-
   server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: toolDefinitions }));
-
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const name = request.params.name;
     const args = request.params.arguments ?? {};
     const ctx: ToolCallContext = { taskId: DEFAULT_TASK_SCOPE.taskId, actor, toolName: name, profile: defaultProfile, args, risk: classifyToolRisk(name) };
     const decision = policy.authorize(ctx);
     await audit.record({ ...ctx, decision });
-
     if (!decision.allowed) return jsonToolResult({ ok: false, error: 'authorization_required', decision });
-
     try {
       switch (name) {
         case 'policy.check': {
@@ -80,12 +70,25 @@ export async function startMcpServer(): Promise<void> {
           const parsed = SnapshotCreateArgs.parse(args);
           return jsonToolResult({ ok: true, snapshot: await patchEngine.createSnapshot(parsed.path, parsed.reason) });
         }
+        case 'snapshot.restore': {
+          const parsed = SnapshotRestoreArgs.parse(args);
+          return jsonToolResult({ ok: true, restore: await patchEngine.restoreSnapshot(parsed.snapshot_id, parsed.target_path) });
+        }
         case 'patch.dry_run': {
           const parsed = PatchDryRunArgs.parse(args);
-          const patch: PatchOperation = { path: parsed.path, expectedHash: parsed.expected_hash, oldText: parsed.old_text, newText: parsed.new_text, risk: parsed.risk, dryRunRequired: parsed.dry_run_required, autoSnapshot: parsed.auto_snapshot };
+          const patch = toPatchOperation(parsed);
           const preview = await patchEngine.dryRun(patch);
           const localRisk = parsed.with_local_risk ? await local.classifyPatchRisk(patch).catch((error) => ({ error: String(error) })) : undefined;
           return jsonToolResult({ ok: true, preview, localRisk });
+        }
+        case 'patch.apply': {
+          const parsed = PatchApplyArgs.parse(args);
+          const patch = toPatchOperation(parsed);
+          return jsonToolResult({ ok: true, result: await patchEngine.apply(patch) });
+        }
+        case 'patch.verify': {
+          const parsed = PatchVerifyArgs.parse(args);
+          return jsonToolResult({ ok: true, verify: await patchEngine.verify(parsed.path, parsed.expected_text, parsed.old_text) });
         }
         case 'local.embed': {
           const parsed = LocalEmbedArgs.parse(args);
@@ -103,20 +106,17 @@ export async function startMcpServer(): Promise<void> {
           const parsed = LocalContextPackArgs.parse(args);
           return jsonToolResult({ ok: true, ...(await buildContextPack(fileEngine, { root: parsed.root, query: parsed.query, maxFiles: parsed.max_files, maxTotalBytes: parsed.max_total_bytes, linesPerFile: parsed.lines_per_file, fileGlob: parsed.file_glob })) });
         }
-        default:
-          return jsonToolResult({ ok: false, error: `unknown tool: ${name}` });
+        default: return jsonToolResult({ ok: false, error: `unknown tool: ${name}` });
       }
     } catch (error) {
       return jsonToolResult({ ok: false, error: error instanceof Error ? error.message : String(error) });
     }
   });
-
   await server.connect(new StdioServerTransport());
 }
 
-function jsonToolResult(value: unknown) {
-  return { content: [{ type: 'text' as const, text: JSON.stringify(value, null, 2) }] };
-}
+function jsonToolResult(value: unknown) { return { content: [{ type: 'text' as const, text: JSON.stringify(value, null, 2) }] }; }
+function toPatchOperation(parsed: z.infer<typeof PatchDryRunArgs>): PatchOperation { return { path: parsed.path, expectedHash: parsed.expected_hash, oldText: parsed.old_text, newText: parsed.new_text, risk: parsed.risk, dryRunRequired: parsed.dry_run_required, autoSnapshot: parsed.auto_snapshot }; }
 
 const PolicyCheckArgs = z.object({ tool_name: z.string(), profile: z.string().optional() as z.ZodOptional<z.ZodType<ToolProfile>>, args: z.unknown().optional() });
 const AuditListArgs = z.object({ source: z.enum(['memory', 'disk']).default('memory'), date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional() });
@@ -126,7 +126,10 @@ const FileSearchArgs = z.object({ path: z.string().optional(), query: z.string()
 const FileOutlineArgs = z.object({ path: z.string(), max_bytes: z.number().int().min(1).max(2 * 1024 * 1024).default(512 * 1024), max_items: z.number().int().min(1).max(2000).default(300) });
 const FileHashArgs = z.object({ path: z.string() });
 const SnapshotCreateArgs = z.object({ path: z.string(), reason: z.string().default('manual') });
+const SnapshotRestoreArgs = z.object({ snapshot_id: z.string(), target_path: z.string().optional() });
 const PatchDryRunArgs = z.object({ path: z.string(), expected_hash: z.string(), old_text: z.string(), new_text: z.string(), risk: z.enum(['R0', 'R1', 'R2', 'R3', 'R4']).default('R1'), dry_run_required: z.boolean().default(true), auto_snapshot: z.boolean().default(true), with_local_risk: z.boolean().default(false) });
+const PatchApplyArgs = PatchDryRunArgs.omit({ with_local_risk: true });
+const PatchVerifyArgs = z.object({ path: z.string(), expected_text: z.string(), old_text: z.string().optional() });
 const LocalEmbedArgs = z.object({ texts: z.array(z.string()).min(1).max(128) });
 const LocalRerankArgs = z.object({ query: z.string(), candidates: z.array(z.object({ id: z.string(), text: z.string(), metadata: z.record(z.unknown()).optional() })).min(1).max(200) });
 const LocalSummarizeArgs = z.object({ text: z.string().min(1) });
