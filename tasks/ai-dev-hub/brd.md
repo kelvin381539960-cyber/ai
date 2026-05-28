@@ -43,7 +43,7 @@ AI 开发任务中台
 - 不是多 Agent 自动编排平台。
 - 不是公网 SaaS。
 
-Agent 和 Workflow 是产品能力组件，不是产品定位本身。
+Agent、Workflow、External AI Control Layer 都是能力组件，不是产品定位本身。
 
 ## 4. 业务目标
 
@@ -130,6 +130,14 @@ V0 Workflow 只支持线性步骤。
 任务交接文档。
 
 用于让下一个工具、下一个 Agent、下一个 Workflow 或用户自己继续任务。
+
+### 6.7 External AI Control Layer
+
+外部 AI 控制层。
+
+用于后续让 ChatGPT、Claude、Cursor、Codex 等工具通过 Action、MCP 或 API 受控访问 AI Dev Hub。
+
+该能力不进入 V0，实现阶段建议放到 V1/V2。
 
 ## 7. V0 核心闭环
 
@@ -310,6 +318,8 @@ V0 明确不做：
 - 多用户权限。
 - 公网 SaaS。
 - 绑定具体 AI 工具。
+- ChatGPT Action。
+- MCP Server。
 
 V0 可以保留扩展接口，但不实现上述能力。
 
@@ -328,6 +338,8 @@ V0 虽然做轻量版本，但数据结构和产品模型必须支持扩展。
 - 一个 Workflow 可被多个 Task 复用。
 - Workflow 后续可扩展条件分支和 DAG，但 V0 不实现。
 - Agent 后续可扩展 HTTP Adapter，但 V0 不实现。
+- 后续可暴露 REST API 给 ChatGPT Action 使用。
+- 后续可暴露 MCP Server 给外部 AI 工具使用。
 
 ## 12. 核心原则
 
@@ -353,9 +365,9 @@ Agent 和 Workflow 由用户创建、启用、禁用和调用。
 
 V0 不做复杂功能，但模型不能写死成单任务、单 Agent、单 Workflow。
 
-### 12.4 先记录，后自动化
+### 12.4 外部 AI 受控接入
 
-V0 的重点是沉淀任务现场，不追求自动完成所有工作。
+后续允许 ChatGPT、Claude、Cursor 等外部 AI 通过 API / Action / MCP 管理任务和 Workflow，但不能绕过 AI Dev Hub 的安全策略直接操作代码、shell、密钥或部署。
 
 ## 13. V0 典型场景
 
@@ -395,7 +407,40 @@ V0 的重点是沉淀任务现场，不追求自动完成所有工作。
 
 系统不依赖某个工具的聊天记录。
 
-## 14. V0 成功标准
+## 14. V1/V2 扩展方向
+
+### V1：REST API + ChatGPT Action
+
+目标：让 ChatGPT 可以通过受控 API 管理 AI Dev Hub。
+
+能力：
+
+- 创建任务。
+- 查询任务。
+- 创建 Agent。
+- 创建 Workflow。
+- 回填 Run。
+- 获取 Handoff。
+
+### V2：MCP Server
+
+目标：让支持 MCP 的 AI 工具通过 tools 调用 AI Dev Hub。
+
+能力：
+
+- task tools。
+- agent tools。
+- workflow tools。
+- run tools。
+- handoff tools。
+
+限制：
+
+- 不开放直接 shell。
+- 不开放自动 push / merge / deploy。
+- 高风险操作必须用户确认。
+
+## 15. V0 成功标准
 
 V0 完成后必须能演示：
 
@@ -412,7 +457,7 @@ V0 完成后必须能演示：
 11. 系统生成 Handoff。
 12. 后续 Agent 或 Workflow 能基于 Handoff 接力。
 
-## 15. 业务指标
+## 16. 业务指标
 
 V0 关注：
 
@@ -424,7 +469,7 @@ V0 关注：
 - Handoff 生成数量。
 - 用户重复解释任务背景次数下降。
 
-## 16. 关键风险
+## 17. 关键风险
 
 ### 风险 1：范围膨胀
 
@@ -461,7 +506,16 @@ V0 加入 UI 和 Workflow 后容易膨胀。
 - 敏感文件变更需要提示。
 - Web UI 不直接公网裸露。
 
-## 17. 下一步
+### 风险 5：外部 AI 越权
+
+控制：
+
+- V0 不开放 Action / MCP。
+- V1/V2 只开放受控 API。
+- 外部 AI 不能直接执行 shell。
+- 高风险操作必须确认。
+
+## 18. 下一步
 
 BRD 确认后进入 PRD。
 
@@ -477,4 +531,5 @@ PRD 需要明确：
 - Workflow Run 流程。
 - Manual Agent 回填流程。
 - Handoff 生成规则。
+- V1/V2 外部 AI 接入预留点。
 - V0 验收标准。
