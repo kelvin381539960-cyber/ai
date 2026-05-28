@@ -2,16 +2,25 @@
 
 ## 当前状态
 
-已进入技术方案设计阶段，并新增：
+技术方案和实现级文档已完成，当前已经具备交给开发工具实现 MVP 的输入。
+
+新增：
 
 ```text
-tasks/ai-dev-hub/technical-design.md
+tasks/ai-dev-hub/database-schema.md
+tasks/ai-dev-hub/api-spec.md
+tasks/ai-dev-hub/implementation-plan.md
 ```
 
-当前技术方案已给出 MVP 推荐架构：
+已有核心文档：
 
 ```text
-Next.js + TypeScript + SQLite + 文件系统 + 模块化单体
+tasks/ai-dev-hub/brd.md
+tasks/ai-dev-hub/prd.md
+tasks/ai-dev-hub/prd-detail.md
+tasks/ai-dev-hub/ux-optimized-plan.md
+tasks/ai-dev-hub/usability-readiness-assessment.md
+tasks/ai-dev-hub/technical-design.md
 ```
 
 ## 当前产品定位
@@ -32,6 +41,14 @@ Next.js + TypeScript + SQLite + 文件系统 + 模块化单体
 选择任务类型 → 填写目标 → 添加资料 → 系统推荐助手和流程 → 开始执行 → 查看输出 → 继续优化 / 评审 → 生成最终结论
 ```
 
+## 当前技术结论
+
+```text
+Next.js + TypeScript + SQLite + 文件系统 + 模块化单体
+```
+
+不要一开始做微服务。
+
 ## 当前核心对象
 
 ```text
@@ -47,110 +64,109 @@ Output
 Handoff
 ```
 
-## 技术方案核心结论
+其中：
 
-### 架构
+- Material 是输入核心。
+- Output 是产出核心。
+- Assistant 是用户看到的“助手”。
+- Workflow 是用户看到的“任务流程”。
+- Run 是底层执行记录。
+- Handoff 是 Output 的一种。
 
-```text
-模块化单体
-```
+## 已完成实现级文档
 
-不要一开始做微服务。
+### database-schema.md
 
-### 技术栈
-
-```text
-Next.js
-React
-TypeScript
-SQLite
-Prisma 或 Drizzle
-本地/服务器文件系统
-```
-
-### 存储原则
+定义：
 
 ```text
-SQLite 存结构化状态
-文件系统存资料、输出、prompt、run 结果
-数据库保存路径和摘要
+workspaces
+projects
+tasks
+materials
+assistants
+workflows
+workflow_runs
+runs
+outputs
+template_installations
+settings
 ```
 
-### 数据目录
+### api-spec.md
+
+定义 API：
 
 ```text
-.ai-work-hub/
-  db.sqlite
-  materials/
-  outputs/
-  runs/
-  workflow-runs/
-  exports/
-  templates/
+Onboarding
+Workspace
+Project
+Task
+Material
+Assistant
+Run
+Workflow
+Workflow Run
+Output
+Search
+Settings
 ```
 
-### MVP 优先实现
+### implementation-plan.md
+
+拆分实现阶段：
 
 ```text
-任务类型入口
-资料管理
-Manual Assistant
-Prompt 复制/回填
-Output 管理
-Workflow 暂停/继续/恢复
+Phase 0：项目初始化
+Phase 1：Onboarding + Seed Templates
+Phase 2：Task + Material
+Phase 3：Assistant + Manual Run
+Phase 4：Output 管理
+Phase 5：Workflow Runtime
+Phase 6：可用性补齐
 ```
 
-### MVP 不优先实现
+## MVP 首个 Demo 验收
+
+必须能演示：
+
+```text
+初始化系统
+创建需求调研任务
+添加资料
+运行调研助手
+复制 prompt
+粘贴 AI 输出
+生成调研结论 Output
+编辑 Output
+标记最终版
+```
+
+如果这个 Demo 不顺，说明产品还不能交付使用。
+
+## 当前禁止偏离
+
+实现时不要先做：
 
 ```text
 复杂 DAG
-代码执行
-MCP
-ChatGPT Action
+条件分支
 多用户权限
 成本统计
+ChatGPT Action
+MCP Server
+自动代码执行
+自动 push / merge / deploy
 ```
 
-## 当前技术模块
+## 推荐执行提示
 
 ```text
-Onboarding Service
-Template Service
-Task Service
-Material Service
-Assistant Service
-Assistant Runtime
-Manual Adapter
-Workflow Service
-Workflow Runtime
-Context Builder
-Output Service
-```
+请按 tasks/ai-dev-hub/technical-design.md、database-schema.md、api-spec.md、implementation-plan.md 实现 AI Work Hub MVP。
 
-## 下一步建议
+优先实现用户真实闭环，不要先做高级能力。
 
-技术方案主干已完成。
+用户主路径：选择任务类型 → 添加资料 → 推荐助手和流程 → Manual Assistant 生成 prompt → 用户回填外部 AI 输出 → 保存 Output。
 
-下一步建议补实现级细节：
-
-```text
-database-schema.md       数据库 schema
-api-spec.md              API 详细规格
-implementation-plan.md   MVP 实现任务拆解
-```
-
-然后可以交给开发工具开始实现。
-
-## 给下一个 AI 工具的接力提示
-
-```text
-请先阅读 tasks/ai-dev-hub/technical-design.md、brd.md、prd.md、prd-detail.md、onboarding.md、seed-templates.md、manual-run-flow.md、output-rules.md、material-rules.md、workflow-run-rules.md、handoff.md。
-
-当前技术方案主干已完成。下一步应补 database-schema.md、api-spec.md、implementation-plan.md。
-
-技术实现必须保持产品/运营用户主路径，不要回退到开发者工具视角。
-
-优先实现：任务类型入口、资料管理、Manual Assistant、Output、Workflow 恢复。
-
-不要优先实现：代码执行、复杂 DAG、MCP、ChatGPT Action、多用户权限。
+Material 和 Output 是核心对象。Assistant 和 Workflow 是支撑对象。Run 是底层记录。Handoff 是 Output 的一种。
 ```
