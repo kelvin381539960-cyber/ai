@@ -30,6 +30,16 @@ Pseudo PTY:
 - `remote.pty.close`
 - `remote.pty.list`
 
+Tunnels:
+
+- `remote.tunnel.open`
+- `remote.tunnel.list`
+- `remote.tunnel.close`
+
+Remote agent:
+
+- `remote.agent.bootstrap`
+
 ## Target shape
 
 ```json
@@ -41,78 +51,46 @@ Pseudo PTY:
 }
 ```
 
-## Streaming command
+## SSH tunnel
 
 ```json
 {
   "target": { "host": "example.com", "user": "root" },
-  "command": "tail -f /var/log/syslog"
+  "local_host": "127.0.0.1",
+  "local_port": 15432,
+  "remote_host": "127.0.0.1",
+  "remote_port": 5432
 }
 ```
 
-Read:
+Close:
 
 ```json
 {
-  "stream_id": "stream_...",
-  "clear": true
+  "tunnel_id": "tun_..."
 }
 ```
 
-Kill:
-
-```json
-{
-  "stream_id": "stream_...",
-  "signal": "SIGTERM"
-}
-```
-
-## Pseudo PTY
-
-Open:
+## Remote agent bootstrap
 
 ```json
 {
   "target": { "host": "example.com", "user": "root" },
-  "cwd": "/opt/app"
+  "install_path": "/tmp/aix-rootops-agent.sh"
 }
 ```
 
-Write:
+The first agent version supports:
 
-```json
-{
-  "pty_id": "pty_...",
-  "input": "git status\n"
-}
+```bash
+/tmp/aix-rootops-agent.sh health
+/tmp/aix-rootops-agent.sh hash /path/file
+/tmp/aix-rootops-agent.sh stat /path/file
+/tmp/aix-rootops-agent.sh which rg git node python3
 ```
-
-Read:
-
-```json
-{
-  "pty_id": "pty_...",
-  "clear": true
-}
-```
-
-## Safety
-
-`remote.exec` and `remote.exec_stream.start` screen commands with a blocklist and high-risk detector.
-
-Blocked examples:
-
-- `rm -rf /`
-- `mkfs`
-- `shutdown`
-- `reboot`
-- `chmod -R 777`
 
 ## Current limitations
 
 - Pseudo PTY uses ssh stdin/stdout pipes, not `node-pty`.
-- Sessions are in-memory.
-- Server groups are in-memory.
-- Tunnels are not implemented yet.
-- Remote agent bootstrap is not implemented yet.
+- Sessions, tunnels, and server groups are in-memory.
+- Remote agent is a lightweight shell helper, not a full daemon yet.

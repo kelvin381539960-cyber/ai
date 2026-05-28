@@ -12,11 +12,13 @@ import { LocalIntelligence } from '../local/local-intelligence.js';
 import { OllamaClient } from '../local/ollama-client.js';
 import { PatchEngine } from '../patch/patch-engine.js';
 import { buildPatchPlan } from '../patch/patch-plan.js';
+import { AgentBootstrap } from '../remote/agent-bootstrap.js';
 import { PtyManager } from '../remote/pty-manager.js';
 import { RemoteOps } from '../remote/remote-ops.js';
 import { ServerGroupRegistry } from '../remote/server-groups.js';
 import { RemoteSessionPool } from '../remote/session-pool.js';
 import { StreamManager } from '../remote/stream-manager.js';
+import { TunnelManager } from '../remote/tunnel-manager.js';
 import type { PatchOperation, ToolCallContext, ToolProfile } from '../types.js';
 import { toolDefinitions } from './tools.js';
 
@@ -34,6 +36,8 @@ export async function startMcpServer(): Promise<void> {
   const groups = new ServerGroupRegistry();
   const streams = new StreamManager();
   const ptys = new PtyManager();
+  const tunnels = new TunnelManager();
+  const agent = new AgentBootstrap(remote);
   const ollama = new OllamaClient({ baseUrl: process.env.OLLAMA_BASE_URL ?? 'http://127.0.0.1:11434', embeddingModel: process.env.OLLAMA_EMBEDDING_MODEL ?? 'nomic-embed-text', instructModel: process.env.OLLAMA_INSTRUCT_MODEL ?? 'qwen2.5-coder:7b' });
   const local = new LocalIntelligence(ollama);
   const server = new Server({ name: 'aix-rootops-mcp', version: '0.1.0' }, { capabilities: { tools: {} } });
@@ -73,6 +77,10 @@ export async function startMcpServer(): Promise<void> {
         case 'remote.pty.read': { const parsed = RemotePtyReadArgs.parse(args); return jsonToolResult({ ok: true, pty: ptys.read(parsed.pty_id, parsed.clear) }); }
         case 'remote.pty.close': { const parsed = RemotePtyCloseArgs.parse(args); return jsonToolResult(ptys.close(parsed.pty_id)); }
         case 'remote.pty.list': return jsonToolResult({ ok: true, ptys: ptys.list() });
+        case 'remote.tunnel.open': { const parsed = RemoteTunnelOpenArgs.parse(args); return jsonToolResult({ ok: true, tunnel: tunnels.open({ target: parsed.target, localHost: parsed.local_host, localPort: parsed.local_port, remoteHost: parsed.remote_host, remotePort: parsed.remote_port }) }); }
+        case 'remote.tunnel.list': return jsonToolResult({ ok: true, tunnels: tunnels.list() });
+        case 'remote.tunnel.close': { const parsed = RemoteTunnelCloseArgs.parse(args); return jsonToolResult(tunnels.close(parsed.tunnel_id)); }
+        case 'remote.agent.bootstrap': { const parsed = RemoteAgentBootstrapArgs.parse(args); return jsonToolResult({ ok: true, result: await agent.install(parsed.target, parsed.install_path) }); }
         case 'remote.rsync_push': { const parsed = RemoteRsyncPushArgs.parse(args); return jsonToolResult({ ok: true, result: await remote.rsyncPush(parsed.source, parsed.target, parsed.destination) }); }
         case 'remote.rsync_pull': { const parsed = RemoteRsyncPullArgs.parse(args); return jsonToolResult({ ok: true, result: await remote.rsyncPull(parsed.target, parsed.source, parsed.destination) }); }
         case 'remote.group.register': { const parsed = RemoteGroupRegisterArgs.parse(args); return jsonToolResult({ ok: true, group: groups.register(parsed.name, parsed.targets) }); }
@@ -115,6 +123,9 @@ const RemotePtyOpenArgs = z.object({ target: SshTargetSchema, cwd: z.string().op
 const RemotePtyWriteArgs = z.object({ pty_id: z.string(), input: z.string() });
 const RemotePtyReadArgs = z.object({ pty_id: z.string(), clear: z.boolean().default(false) });
 const RemotePtyCloseArgs = z.object({ pty_id: z.string() });
+const RemoteTunnelOpenArgs = z.object({ target: SshTargetSchema, local_host: z.string().default('127.0.0.1'), local_port: z.number().int().min(1).max(65535), remote_host: z.string().default('127.0.0.1'), remote_port: z.number().int().min(1).max(65535) });
+const RemoteTunnelCloseArgs = z.object({ tunnel_id: z.string() });
+const RemoteAgentBootstrapArgs = z.object({ target: SshTargetSchema, install_path: z.string().default('/tmp/aix-rootops-agent.sh') });
 const RemoteRsyncPushArgs = z.object({ source: z.string(), target: SshTargetSchema, destination: z.string() });
 const RemoteRsyncPullArgs = z.object({ target: SshTargetSchema, source: z.string(), destination: z.string() });
 const RemoteGroupRegisterArgs = z.object({ name: z.string(), targets: z.array(SshTargetSchema).min(1).max(100) });

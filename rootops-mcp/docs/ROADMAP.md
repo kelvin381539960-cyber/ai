@@ -55,8 +55,8 @@
 - [x] command risk screening
 - [x] streaming exec
 - [x] pseudo PTY sessions
-- [ ] tunnel management
-- [ ] remote agent bootstrap
+- [x] tunnel management
+- [x] remote agent bootstrap
 
 ## Phase 5: Low-friction authorization
 

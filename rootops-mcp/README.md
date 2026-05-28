@@ -35,7 +35,7 @@ Registered tool groups:
 - file read/search/outline/hash
 - snapshot/patch transaction
 - local model sidecar
-- remote SSH / streaming / pseudo PTY / rsync / server groups
+- remote SSH / streaming / pseudo PTY / tunnels / rsync / server groups / remote agent bootstrap
 
 No sudo/systemctl/git push/deploy tools are registered as first-class tools yet.
 
@@ -47,9 +47,10 @@ No sudo/systemctl/git push/deploy tools are registered as first-class tools yet.
 
 ## Next build order
 
-1. Add tunnel management.
-2. Add remote agent bootstrap.
-3. Add task scope creation.
-4. Add merged confirmation payload.
-5. Add tree-sitter outline.
-6. Add SQLite FTS5 index.
+1. Add task scope creation.
+2. Add merged confirmation payload.
+3. Add risk threshold limits.
+4. Add audit export.
+5. Add emergency freeze.
+6. Add tree-sitter outline.
+7. Add SQLite FTS5 index.
