@@ -1,103 +1,108 @@
-# AI Dev Hub Handoff
+# AI Work Hub Handoff
 
 ## 当前状态
 
-BRD 已确认，项目进入 PRD 阶段。
+用户明确希望产品更适合产品经理、运营使用。
+
+因此产品定位已从：
+
+```text
+AI 开发任务中台
+```
+
+调整为：
+
+```text
+AI 工作流任务中台
+```
+
+原 `AI Dev Hub` 作为代号保留，产品名建议改为：
+
+```text
+AI Work Hub
+```
 
 已新增：
 
 ```text
-tasks/ai-dev-hub/prd.md
+tasks/ai-dev-hub/positioning-pm-ops.md
 ```
 
-当前 PRD 已覆盖：
+已更新：
 
-- 页面范围。
-- 页面字段。
-- 核心流程。
-- Primary Agent / Supporting Agent。
-- Agent 创建。
-- Workflow 创建。
-- Workflow Run。
-- Manual Agent 回填。
-- Context Mode。
-- Handoff 生成。
-- 安全规则。
-- MVP 验收标准。
+```text
+tasks/ai-dev-hub/brd.md
+```
 
 ## 已完成
 
-- 明确产品定位：AI 开发任务中台。
-- 明确 Agent 和 Workflow 是能力组件。
-- 明确 MVP 必须有 UI。
-- 明确支持多任务、多 Agent、多 Workflow。
-- 明确任务级 Primary Agent 策略。
-- 明确用户可以随时临时运行其他 Agent。
-- 明确用户可以随时切换 Primary Agent。
-- 明确 Workflow 默认使用任务 Primary Agent。
-- 明确 Supporting Agent 只在必要场景调用。
-- 明确 Context Mode，控制 token 成本。
-- 新增 PRD：`prd.md`。
+- 明确产品不应只服务开发者。
+- 明确优先用户是产品经理、运营、技术型 PM、个人开发者。
+- 明确产品定位为 AI 工作流任务中台。
+- 明确开发任务只是重要扩展场景，不是唯一主线。
+- 明确 UI 不应默认围绕 Git、Diff、CLI。
+- 明确 Agent 模板要增加 Research、PRD、Ops、Data、Meeting 等产品/运营向模板。
+- 明确 Workflow 模板要增加需求调研、PRD 生成、竞品分析、运营活动、会议纪要等模板。
 
 ## 当前关键结论
 
-1. 产品定位是 AI 开发任务中台。
-2. MVP 是轻量 UI + 多任务 + 多 Agent + 多 Workflow + Run + Handoff。
-3. 每个 Task 可以指定 Primary Agent。
-4. 同一任务默认由 Primary Agent 持续执行。
-5. 用户可以随时临时运行其他 Agent。
-6. 用户可以随时正式切换 Primary Agent。
-7. Supporting Agent 用于评审、安全检查、架构检查、异常、额度不足、第二意见等场景。
-8. Workflow 只做线性步骤，不做复杂 DAG。
-9. 系统不绑定任何具体 AI 工具。
-10. External AI Control Layer 作为后续扩展预留，不进入 MVP。
+1. 产品定位：AI 工作流任务中台。
+2. 首要用户：产品经理 / 运营 / 技术型 PM。
+3. 开发者是重要用户，但不再是唯一主线。
+4. Primary Agent 策略仍然成立。
+5. Workflow 仍然只做线性步骤。
+6. Agent / Workflow 仍然只是能力组件。
+7. External AI Control Layer 仍然作为扩展预留。
+8. MVP 仍然是轻量 UI + 多任务 + 多 Agent + 多 Workflow + Run + Handoff。
 
-## 当前 PRD 核心闭环
+## 新默认 Agent 模板
 
 ```text
-初始化项目 → 创建 Agent → 创建 Workflow → 创建任务 → 选择 Primary Agent → 运行 Primary Agent / Workflow → 必要时运行 Supporting Agent → 保存 Run → 生成 Handoff
+Research Agent
+PRD Agent
+Review Agent
+Ops Planning Agent
+Data Analysis Agent
+Meeting Summary Agent
+Handoff Agent
+Tech Review Agent
+Code Agent
 ```
 
-## 当前需要用户确认
+## 新默认 Workflow 模板
 
-请用户确认 `prd.md`。
+```text
+需求调研 Workflow
+PRD 生成 Workflow
+竞品分析 Workflow
+运营活动 Workflow
+评审 Workflow
+会议纪要 Workflow
+交接总结 Workflow
+开发 Pre-work Workflow
+```
 
-重点确认：
+## 当前需要调整
 
-1. 页面范围是否正确。
-2. 任务详情页是否满足实际操作。
-3. Primary Agent / Supporting Agent 流程是否合理。
-4. Workflow 线性步骤是否足够作为 MVP。
-5. Context Mode 是否满足 token 控制诉求。
-6. 是否可以进入技术方案设计。
+PRD 需要同步从开发者视角调整到产品/运营视角。
 
-## 下一步建议
+重点调整：
 
-用户确认 PRD 后，进入技术方案设计。
-
-技术方案应输出：
-
-1. 系统架构。
-2. 前后端模块划分。
-3. 数据模型。
-4. 文件系统 `.ai/` 存储方案。
-5. Agent Adapter Runtime。
-6. Workflow Runtime。
-7. Context Builder。
-8. Handoff Generator。
-9. 安全策略。
-10. MVP 开发计划。
+1. 页面命名从 Project/Git 导向改为 Workspace/Project/Task 导向。
+2. Task 类型增加 research、prd、ops_plan、data_analysis、meeting_summary。
+3. Agent 模板改成产品/运营优先。
+4. Workflow 模板改成产品/运营优先。
+5. Git、CLI、Diff 降级为开发者模式或高级能力。
+6. Handoff 可以叫 Handoff / 任务结论。
 
 ## 给下一个 AI 工具的接力提示
 
 ```text
-请先阅读 tasks/ai-dev-hub/brd.md、prd.md、task-agent-strategy.md、handoff.md。
+请先阅读 tasks/ai-dev-hub/positioning-pm-ops.md、brd.md、handoff.md。
 
-当前阶段是 PRD 确认。不要进入技术方案，除非用户确认 PRD。
+当前用户已明确：产品要更适合产品经理、运营使用，不应只围绕开发者和 CLI。请把产品定位从 AI 开发任务中台调整为 AI 工作流任务中台。
 
-必须保持产品定位：AI 开发任务中台。
+PRD 需要同步更新为产品/运营优先：调研、PRD、竞品分析、运营活动、会议纪要、评审、交接总结是默认场景。代码、CLI、Git、Diff 应作为高级/扩展场景。
 
-必须保持核心策略：同一任务默认由 Primary Agent 持续执行，但用户可以随时临时运行其他 Agent，也可以正式切换 Primary Agent。
-
-请不要实现完整 IDE、复杂 DAG、多 Agent 自动智能编排、自动 push / merge / deploy，也不要把任何具体 AI 工具写死为唯一执行器。
+不要把产品做成 IDE、代码编辑器、Agent 市场、复杂 Workflow 平台或多 Agent 自动编排平台。
 ```
