@@ -1,9 +1,10 @@
 import { notFound, redirect } from 'next/navigation';
+import { CopyButton } from '@/components/CopyButton';
 import { getTaskDetail } from '@/services/query-service';
 import { addMaterial } from '@/services/material-service';
 import { runDefaultAssistant } from '@/services/run-service';
 import { completeRun } from '@/services/run-service';
-import { updateOutput, markOutputFinal } from '@/services/output-service';
+import { updateOutput, markOutputFinal, createOutputVersion } from '@/services/output-service';
 
 async function addMaterialAction(formData: FormData) {
   'use server';
@@ -45,6 +46,16 @@ async function updateOutputAction(formData: FormData) {
   redirect(`/tasks/${taskId}`);
 }
 
+async function newVersionAction(formData: FormData) {
+  'use server';
+  const taskId = String(formData.get('taskId'));
+  createOutputVersion(String(formData.get('outputId')), {
+    title: String(formData.get('title') || ''),
+    content: String(formData.get('content') || '')
+  });
+  redirect(`/tasks/${taskId}`);
+}
+
 async function markFinalAction(formData: FormData) {
   'use server';
   const taskId = String(formData.get('taskId'));
@@ -56,6 +67,7 @@ export default function TaskDetailPage({ params, searchParams }: { params: { id:
   const detail = getTaskDetail(params.id);
   if (!detail) notFound();
   const activeRun = searchParams.run ? detail.runs.find((run) => run.id === searchParams.run) : detail.runs.find((run) => run.status === 'waiting_user');
+  const activePrompt = activeRun ? detail.promptByRunId[activeRun.id] || '' : '';
 
   return (
     <main className="container">
@@ -76,8 +88,11 @@ export default function TaskDetailPage({ params, searchParams }: { params: { id:
       {activeRun ? (
         <section className="card" style={{ marginBottom: 16 }}>
           <h2>等待回填的助手运行</h2>
-          <p className="muted">请复制 Prompt 到外部 AI，再把结果粘贴回来。</p>
-          <pre>{detail.promptByRunId[activeRun.id] || 'Prompt 文件不存在'}</pre>
+          <p className="muted">请确认 Prompt 中不包含不应发送给外部 AI 的敏感信息。复制后到外部 AI 执行，再把结果粘贴回来。</p>
+          <div className="row" style={{ marginBottom: 12 }}>
+            <CopyButton text={activePrompt} label="复制 Prompt" />
+          </div>
+          <pre>{activePrompt || 'Prompt 文件不存在'}</pre>
           <form action={completeRunAction}>
             <input type="hidden" name="taskId" value={detail.task.id} />
             <input type="hidden" name="runId" value={activeRun.id} />
@@ -132,30 +147,35 @@ export default function TaskDetailPage({ params, searchParams }: { params: { id:
         <h2>输出结果</h2>
         {detail.outputs.length === 0 ? <p className="muted">还没有输出。</p> : null}
         <div style={{ display: 'grid', gap: 16 }}>
-          {detail.outputs.map((output) => (
-            <div key={output.id} className="card">
-              <form action={updateOutputAction}>
-                <input type="hidden" name="taskId" value={detail.task.id} />
-                <input type="hidden" name="outputId" value={output.id} />
-                <div className="row">
-                  <span className="badge">v{output.version}</span>
-                  {output.is_final ? <span className="badge">最终版</span> : null}
-                </div>
-                <label>标题</label>
-                <input className="input" name="title" defaultValue={output.title} />
-                <label>内容</label>
-                <textarea name="content" defaultValue={detail.outputContentById[output.id] || ''} />
-                <div className="row" style={{ marginTop: 12 }}>
-                  <button className="btn secondary" type="submit">保存编辑</button>
-                </div>
-              </form>
-              <form action={markFinalAction} style={{ marginTop: 8 }}>
-                <input type="hidden" name="taskId" value={detail.task.id} />
-                <input type="hidden" name="outputId" value={output.id} />
-                <button className="btn" type="submit">标记最终版</button>
-              </form>
-            </div>
-          ))}
+          {detail.outputs.map((output) => {
+            const content = detail.outputContentById[output.id] || '';
+            return (
+              <div key={output.id} className="card">
+                <form action={updateOutputAction}>
+                  <input type="hidden" name="taskId" value={detail.task.id} />
+                  <input type="hidden" name="outputId" value={output.id} />
+                  <div className="row">
+                    <span className="badge">v{output.version}</span>
+                    {output.is_final ? <span className="badge">最终版</span> : null}
+                    <CopyButton text={content} label="复制 Markdown" />
+                  </div>
+                  <label>标题</label>
+                  <input className="input" name="title" defaultValue={output.title} />
+                  <label>内容</label>
+                  <textarea name="content" defaultValue={content} />
+                  <div className="row" style={{ marginTop: 12 }}>
+                    <button className="btn secondary" type="submit">保存编辑</button>
+                    <button className="btn secondary" formAction={newVersionAction}>另存为新版本</button>
+                  </div>
+                </form>
+                <form action={markFinalAction} style={{ marginTop: 8 }}>
+                  <input type="hidden" name="taskId" value={detail.task.id} />
+                  <input type="hidden" name="outputId" value={output.id} />
+                  <button className="btn" type="submit">标记最终版</button>
+                </form>
+              </div>
+            );
+          })}
         </div>
       </section>
     </main>
