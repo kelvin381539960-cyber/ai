@@ -4,7 +4,7 @@ import { getTaskDetail } from '@/services/query-service';
 import { addMaterial } from '@/services/material-service';
 import { runDefaultAssistant } from '@/services/run-service';
 import { completeRun } from '@/services/run-service';
-import { updateOutput, markOutputFinal, createOutputVersion } from '@/services/output-service';
+import { updateOutput, markOutputFinal, createOutputVersion, convertOutputToMaterial } from '@/services/output-service';
 
 async function addMaterialAction(formData: FormData) {
   'use server';
@@ -63,10 +63,19 @@ async function markFinalAction(formData: FormData) {
   redirect(`/tasks/${taskId}`);
 }
 
-export default function TaskDetailPage({ params, searchParams }: { params: { id: string }, searchParams: { run?: string } }) {
-  const detail = getTaskDetail(params.id);
+async function convertOutputAction(formData: FormData) {
+  'use server';
+  const taskId = String(formData.get('taskId'));
+  convertOutputToMaterial(String(formData.get('outputId')), taskId);
+  redirect(`/tasks/${taskId}`);
+}
+
+export default async function TaskDetailPage({ params, searchParams }: { params: Promise<{ id: string }>, searchParams: Promise<{ run?: string }> }) {
+  const { id } = await params;
+  const { run } = await searchParams;
+  const detail = getTaskDetail(id);
   if (!detail) notFound();
-  const activeRun = searchParams.run ? detail.runs.find((run) => run.id === searchParams.run) : detail.runs.find((run) => run.status === 'waiting_user');
+  const activeRun = run ? detail.runs.find((item) => item.id === run) : detail.runs.find((item) => item.status === 'waiting_user');
   const activePrompt = activeRun ? detail.promptByRunId[activeRun.id] || '' : '';
 
   return (
@@ -111,6 +120,7 @@ export default function TaskDetailPage({ params, searchParams }: { params: { id:
       <section className="grid" style={{ marginBottom: 16 }}>
         <div className="card">
           <h2>任务资料</h2>
+          {detail.materials.length === 0 ? <p className="muted">暂无资料。可先添加资料，也可以直接生成初稿。</p> : null}
           {detail.materials.map((m) => (
             <div key={m.id} style={{ borderTop: '1px solid var(--border)', paddingTop: 10, marginTop: 10 }}>
               <strong>{m.title}</strong> <span className="badge">{m.usage_status}</span>
@@ -134,10 +144,10 @@ export default function TaskDetailPage({ params, searchParams }: { params: { id:
         <div className="card">
           <h2>执行记录</h2>
           {detail.runs.length === 0 ? <p className="muted">暂无执行记录。</p> : null}
-          {detail.runs.map((run) => (
-            <div key={run.id} style={{ borderTop: '1px solid var(--border)', paddingTop: 10, marginTop: 10 }}>
-              <strong>{run.status}</strong>
-              <p className="muted">{run.id}</p>
+          {detail.runs.map((item) => (
+            <div key={item.id} style={{ borderTop: '1px solid var(--border)', paddingTop: 10, marginTop: 10 }}>
+              <strong>{item.status}</strong>
+              <p className="muted">{item.id}</p>
             </div>
           ))}
         </div>
@@ -145,7 +155,7 @@ export default function TaskDetailPage({ params, searchParams }: { params: { id:
 
       <section className="card">
         <h2>输出结果</h2>
-        {detail.outputs.length === 0 ? <p className="muted">还没有输出。</p> : null}
+        {detail.outputs.length === 0 ? <p className="muted">还没有输出。运行默认助手后，回填外部 AI 结果即可生成输出。</p> : null}
         <div style={{ display: 'grid', gap: 16 }}>
           {detail.outputs.map((output) => {
             const content = detail.outputContentById[output.id] || '';
@@ -168,11 +178,18 @@ export default function TaskDetailPage({ params, searchParams }: { params: { id:
                     <button className="btn secondary" formAction={newVersionAction}>另存为新版本</button>
                   </div>
                 </form>
-                <form action={markFinalAction} style={{ marginTop: 8 }}>
-                  <input type="hidden" name="taskId" value={detail.task.id} />
-                  <input type="hidden" name="outputId" value={output.id} />
-                  <button className="btn" type="submit">标记最终版</button>
-                </form>
+                <div className="row" style={{ marginTop: 8 }}>
+                  <form action={markFinalAction}>
+                    <input type="hidden" name="taskId" value={detail.task.id} />
+                    <input type="hidden" name="outputId" value={output.id} />
+                    <button className="btn" type="submit">标记最终版</button>
+                  </form>
+                  <form action={convertOutputAction}>
+                    <input type="hidden" name="taskId" value={detail.task.id} />
+                    <input type="hidden" name="outputId" value={output.id} />
+                    <button className="btn secondary" type="submit">转为任务资料</button>
+                  </form>
+                </div>
               </div>
             );
           })}

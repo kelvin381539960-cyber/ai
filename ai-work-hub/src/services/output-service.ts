@@ -52,3 +52,24 @@ export function markOutputFinal(outputId: string) {
   db.prepare('UPDATE tasks SET status = ?, updated_at = ? WHERE id = ?').run('done', now, output.task_id);
   return { ...output, content: readTextFile(output.content_path), is_final: 1 };
 }
+
+export function convertOutputToMaterial(outputId: string, targetTaskId?: string) {
+  const db = getDb();
+  const output = db.prepare('SELECT * FROM outputs WHERE id = ?').get(outputId) as OutputRow | undefined;
+  if (!output) throw new Error('Output 不存在');
+  const taskId = targetTaskId || output.task_id;
+  const now = nowIso();
+  const content = readTextFile(output.content_path);
+  const materialId = createId('material');
+  db.prepare(`INSERT INTO materials (id, task_id, type, title, content, usage_status, created_at, updated_at)
+    VALUES (?, ?, 'ai_output', ?, ?, 'key', ?, ?)`).run(
+    materialId,
+    taskId,
+    `输出资料：${output.title}`,
+    content,
+    now,
+    now
+  );
+  db.prepare('UPDATE tasks SET updated_at = ? WHERE id = ?').run(now, taskId);
+  return db.prepare('SELECT * FROM materials WHERE id = ?').get(materialId);
+}

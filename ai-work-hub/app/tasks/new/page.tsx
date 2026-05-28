@@ -25,8 +25,8 @@ async function createTaskAction(formData: FormData) {
   redirect(`/tasks/${task.id}`);
 }
 
-export default function NewTaskPage({ searchParams }: { searchParams: { type?: string } }) {
-  const type = searchParams.type || 'research';
+export default async function NewTaskPage({ searchParams }: { searchParams: Promise<{ type?: string }> }) {
+  const { type = 'research' } = await searchParams;
   return (
     <main className="container">
       <div className="card">

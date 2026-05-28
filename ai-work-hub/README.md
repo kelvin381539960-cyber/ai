@@ -17,6 +17,8 @@
 ```bash
 cd ai-work-hub
 npm install
+npm run typecheck
+npm run build
 npm run dev
 ```
 
@@ -30,6 +32,12 @@ npm run dev
 
 ```bash
 AI_WORK_HUB_DATA_DIR=/srv/ai-work-hub npm run dev
+```
+
+## 健康检查
+
+```text
+GET /api/health
 ```
 
 ## 主要入口
@@ -51,7 +59,16 @@ AI_WORK_HUB_DATA_DIR=/srv/ai-work-hub npm run dev
 7. 编辑输出内容。
 8. 另存为新版本或保存编辑。
 9. 标记最终版。
-10. 在 `/outputs` 查看输出并复制 Markdown。
+10. 转为任务资料。
+11. 在 `/outputs` 查看输出并复制 Markdown。
+
+## QA
+
+详见：
+
+```text
+QA.md
+```
 
 ## 注意
 
