@@ -59,6 +59,47 @@ export interface AssistantRow {
   updated_at: string;
 }
 
+export interface WorkflowRow {
+  id: string;
+  workspace_id: string;
+  name: string;
+  description: string | null;
+  applicable_task_types_json: string;
+  steps_json: string;
+  enabled: number;
+  is_seed: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WorkflowStep {
+  id: string;
+  title: string;
+  type: 'manual_input' | 'add_material' | 'context_build' | 'assistant_run' | 'review_prompt' | 'output_build';
+  useDefaultAssistant?: boolean;
+  assistantId?: string;
+  required?: boolean;
+}
+
+export interface WorkflowRunRow {
+  id: string;
+  task_id: string;
+  workflow_id: string;
+  status: 'pending' | 'running' | 'waiting_user' | 'success' | 'failed' | 'cancelled';
+  current_step_id: string | null;
+  step_states_json: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StepState {
+  status: 'pending' | 'running' | 'waiting_user' | 'success' | 'failed' | 'skipped';
+  title: string;
+  type: string;
+  runId?: string;
+  note?: string;
+}
+
 export interface RunRow {
   id: string;
   task_id: string;

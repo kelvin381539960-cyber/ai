@@ -2,9 +2,9 @@ import { notFound, redirect } from 'next/navigation';
 import { CopyButton } from '@/components/CopyButton';
 import { getTaskDetail } from '@/services/query-service';
 import { addMaterial } from '@/services/material-service';
-import { runDefaultAssistant } from '@/services/run-service';
-import { completeRun } from '@/services/run-service';
+import { runDefaultAssistant, completeRun } from '@/services/run-service';
 import { updateOutput, markOutputFinal, createOutputVersion, convertOutputToMaterial } from '@/services/output-service';
+import { startTaskWorkflow, continueWorkflowRun, cancelWorkflowRun } from '@/services/workflow-service';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,14 +27,38 @@ async function runAction(formData: FormData) {
   redirect(`/tasks/${taskId}?run=${run.id}`);
 }
 
+async function startWorkflowAction(formData: FormData) {
+  'use server';
+  const taskId = String(formData.get('taskId'));
+  startTaskWorkflow(taskId);
+  redirect(`/tasks/${taskId}`);
+}
+
+async function continueWorkflowAction(formData: FormData) {
+  'use server';
+  const taskId = String(formData.get('taskId'));
+  continueWorkflowRun(String(formData.get('workflowRunId')));
+  redirect(`/tasks/${taskId}`);
+}
+
+async function cancelWorkflowAction(formData: FormData) {
+  'use server';
+  const taskId = String(formData.get('taskId'));
+  cancelWorkflowRun(String(formData.get('workflowRunId')));
+  redirect(`/tasks/${taskId}`);
+}
+
 async function completeRunAction(formData: FormData) {
   'use server';
   const taskId = String(formData.get('taskId'));
-  completeRun(String(formData.get('runId')), {
+  const run = completeRun(String(formData.get('runId')), {
     result: String(formData.get('result') || ''),
     outputTitle: String(formData.get('outputTitle') || '输出结果'),
     outputType: String(formData.get('outputType') || 'research_report')
   });
+  if (run.workflow_run_id) {
+    continueWorkflowRun(run.workflow_run_id);
+  }
   redirect(`/tasks/${taskId}`);
 }
 
@@ -90,10 +114,16 @@ export default async function TaskDetailPage({ params, searchParams }: { params:
         </div>
         <p>{detail.task.goal}</p>
         <p className="muted">默认助手：{detail.defaultAssistant?.name || '未设置'} · 资料范围：{detail.task.context_scope}</p>
-        <form action={runAction}>
-          <input type="hidden" name="taskId" value={detail.task.id} />
-          <button className="btn" type="submit">继续生成</button>
-        </form>
+        <div className="row">
+          <form action={runAction}>
+            <input type="hidden" name="taskId" value={detail.task.id} />
+            <button className="btn" type="submit">继续生成</button>
+          </form>
+          <form action={startWorkflowAction}>
+            <input type="hidden" name="taskId" value={detail.task.id} />
+            <button className="btn secondary" type="submit">运行推荐流程</button>
+          </form>
+        </div>
       </section>
 
       {activeRun ? (
@@ -141,6 +171,45 @@ export default async function TaskDetailPage({ params, searchParams }: { params:
             </select>
             <div style={{ marginTop: 12 }}><button className="btn secondary" type="submit">添加资料</button></div>
           </form>
+        </div>
+
+        <div className="card">
+          <h2>任务流程</h2>
+          {detail.workflowRuns.length === 0 ? <p className="muted">还没有运行流程。</p> : null}
+          {detail.workflowRuns.map((workflowRun) => (
+            <div key={workflowRun.id} style={{ borderTop: '1px solid var(--border)', paddingTop: 10, marginTop: 10 }}>
+              <div className="row">
+                <strong>{workflowRun.workflow_name}</strong>
+                <span className="badge">{workflowRun.status}</span>
+              </div>
+              <p className="muted">当前步骤：{workflowRun.current_step_id || '无'}</p>
+              <div style={{ display: 'grid', gap: 6 }}>
+                {Object.entries(workflowRun.stepStates).map(([stepId, state]) => (
+                  <div key={stepId} className="row">
+                    <span className="badge">{state.status}</span>
+                    <span>{state.title}</span>
+                    {state.runId ? <span className="muted">Run: {state.runId}</span> : null}
+                  </div>
+                ))}
+              </div>
+              <div className="row" style={{ marginTop: 10 }}>
+                {workflowRun.status === 'waiting_user' ? (
+                  <form action={continueWorkflowAction}>
+                    <input type="hidden" name="taskId" value={detail.task.id} />
+                    <input type="hidden" name="workflowRunId" value={workflowRun.id} />
+                    <button className="btn secondary" type="submit">确认并继续流程</button>
+                  </form>
+                ) : null}
+                {workflowRun.status !== 'success' && workflowRun.status !== 'cancelled' ? (
+                  <form action={cancelWorkflowAction}>
+                    <input type="hidden" name="taskId" value={detail.task.id} />
+                    <input type="hidden" name="workflowRunId" value={workflowRun.id} />
+                    <button className="btn secondary" type="submit">取消流程</button>
+                  </form>
+                ) : null}
+              </div>
+            </div>
+          ))}
         </div>
 
         <div className="card">

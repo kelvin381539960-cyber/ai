@@ -1,6 +1,7 @@
 import { getDb } from '@/lib/db';
 import { readTextFile } from '@/lib/fs-store';
-import type { AssistantRow, MaterialRow, OutputRow, RunRow, TaskRow } from '@/types/db';
+import { listTaskWorkflowRuns, getStepStates } from './workflow-service';
+import type { AssistantRow, MaterialRow, OutputRow, RunRow, TaskRow, WorkflowRunRow, StepState } from '@/types/db';
 
 export function getInitializationStatus(): { initialized: boolean; workspaceId?: string } {
   const db = getDb();
@@ -24,6 +25,7 @@ export function getTaskDetail(taskId: string): null | {
   materials: MaterialRow[];
   outputs: OutputRow[];
   runs: RunRow[];
+  workflowRuns: Array<WorkflowRunRow & { workflow_name: string; stepStates: Record<string, StepState> }>;
   defaultAssistant: AssistantRow | null;
   outputContentById: Record<string, string>;
   promptByRunId: Record<string, string>;
@@ -34,10 +36,11 @@ export function getTaskDetail(taskId: string): null | {
   const materials = db.prepare('SELECT * FROM materials WHERE task_id = ? ORDER BY created_at DESC').all(taskId) as MaterialRow[];
   const outputs = db.prepare('SELECT * FROM outputs WHERE task_id = ? ORDER BY created_at DESC').all(taskId) as OutputRow[];
   const runs = db.prepare('SELECT * FROM runs WHERE task_id = ? ORDER BY created_at DESC').all(taskId) as RunRow[];
+  const workflowRuns = listTaskWorkflowRuns(taskId).map((workflowRun) => ({ ...workflowRun, stepStates: getStepStates(workflowRun) }));
   const defaultAssistant = task.default_assistant_id ? db.prepare('SELECT * FROM assistants WHERE id = ?').get(task.default_assistant_id) as AssistantRow : null;
   const outputContentById: Record<string, string> = {};
   for (const output of outputs) outputContentById[output.id] = readTextFile(output.content_path);
   const promptByRunId: Record<string, string> = {};
   for (const run of runs) promptByRunId[run.id] = readTextFile(run.prompt_path);
-  return { task, materials, outputs, runs, defaultAssistant, outputContentById, promptByRunId };
+  return { task, materials, outputs, runs, workflowRuns, defaultAssistant, outputContentById, promptByRunId };
 }

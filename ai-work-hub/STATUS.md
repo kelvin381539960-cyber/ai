@@ -2,12 +2,12 @@
 
 ## 1. 当前阶段
 
-当前已进入第一批 MVP 实现阶段。
+当前已进入第一批 MVP 实现阶段，并已补入最小 Workflow Runtime。
 
-目标是跑通：
+目标闭环：
 
 ```text
-初始化系统 → 创建需求调研任务 → 添加资料 → Manual Assistant 生成 Prompt → 回填外部 AI 输出 → 生成 Output → 编辑 Output → 标记最终版
+初始化系统 → 创建需求调研任务 → 添加资料 → Manual Assistant 生成 Prompt → 回填外部 AI 输出 → 生成 Output → 编辑 Output → 标记最终版 → 可启动推荐流程
 ```
 
 ## 2. 已实现
@@ -84,6 +84,28 @@ Output 编辑
 基于 Output 创建新任务
 ```
 
+### Workflow Runtime 基础版
+
+```text
+启动推荐流程
+Workflow Run 状态展示
+Step 状态展示
+manual_input / add_material 等待用户确认
+assistant_run 生成 Manual Run
+回填 Run 后自动继续流程
+继续流程
+取消流程
+```
+
+限制：
+
+```text
+只支持线性流程
+不支持条件分支
+不支持并行
+不支持复杂重试策略
+```
+
 ### 搜索
 
 ```text
@@ -100,8 +122,6 @@ not-found.tsx
 ## 3. 暂未实现
 
 ```text
-Workflow Runtime 完整执行
-Workflow Run 暂停/继续/恢复
 CLI Assistant
 HTTP Assistant
 MCP Server
@@ -134,6 +154,10 @@ ChatGPT Action
 12. 在 /outputs 查看输出
 13. 基于输出创建新任务
 14. 在 /search 搜索历史内容
+15. 在任务详情运行推荐流程
+16. 流程进入 waiting_user
+17. 确认并继续流程
+18. 流程助手步骤生成 Manual Run
 ```
 
 ## 5. 当前风险
@@ -183,6 +207,6 @@ Cloudflare Zero Trust
 P0：真实运行 npm install/typecheck/build/dev
 P0：按 QA.md 跑首个 Demo
 P1：修复真实运行报错
-P1：补 Workflow Runtime 基础版
+P1：完善 Workflow Runtime 的失败重试
 P2：补 CLI Assistant / MCP / Action
 ```
