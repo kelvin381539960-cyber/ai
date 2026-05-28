@@ -62,6 +62,9 @@ Installed tools:
 - Claude Code CLI
 
 Account login is still required for each tool before real use.
+Cursor Agent was connected by syncing the root user's minimal Cursor CLI state
+files into the `cloudcli` service user's home. Do not copy full Cursor project
+history or MCP auth directories.
 
 ## Login Notes
 
@@ -78,10 +81,25 @@ claude
 
 Follow each tool's interactive login flow. Do not store tokens or API keys in this repository.
 
+If Cursor is already logged in as `root` and CloudCLI loses access, refresh only
+the minimal Cursor CLI state:
+
+```bash
+ssh root@43.133.44.67
+install -d -o cloudcli -g cloudcli -m 0700 /var/lib/cloudcli/.cursor
+for f in agent-cli-state.json cli-config.json statsig-cache.json; do
+  if [ -f "/root/.cursor/$f" ]; then
+    cp "/root/.cursor/$f" "/var/lib/cloudcli/.cursor/$f"
+    chown cloudcli:cloudcli "/var/lib/cloudcli/.cursor/$f"
+    chmod 0600 "/var/lib/cloudcli/.cursor/$f"
+  fi
+done
+systemctl restart cloudcli.service
+```
+
 ## Paths
 
 - CloudCLI data: `/var/lib/cloudcli/.cloudcli/auth.db`
 - CloudCLI workspaces: `/srv/cloudcli/workspaces`
 - User-local CLI bin: `/var/lib/cloudcli/.local/bin`
 - CloudCLI package: `/usr/lib/node_modules/@cloudcli-ai/cloudcli`
-
