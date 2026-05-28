@@ -21,13 +21,23 @@ sudo apt-get update
 sudo apt-get install -y build-essential python3
 ```
 
-## 3. 本地启动
+## 3. 本地检查
 
 ```bash
 cd ai-work-hub
 npm install
-npm run typecheck
-npm run build
+npm run check
+```
+
+或：
+
+```bash
+bash scripts/verify-local.sh
+```
+
+## 4. 本地启动
+
+```bash
 npm run dev
 ```
 
@@ -37,7 +47,22 @@ npm run dev
 http://localhost:3000
 ```
 
-## 4. 指定数据目录启动
+## 5. API Smoke Test
+
+应用启动后，新开终端：
+
+```bash
+cd ai-work-hub
+npm run smoke
+```
+
+如果服务不是本地 3000 端口：
+
+```bash
+AI_WORK_HUB_BASE_URL=http://your-host:3000 npm run smoke
+```
+
+## 6. 指定数据目录启动
 
 ```bash
 AI_WORK_HUB_DATA_DIR=/srv/ai-work-hub npm run dev
@@ -50,7 +75,7 @@ AI_WORK_HUB_DATA_DIR=/srv/ai-work-hub npm run build
 AI_WORK_HUB_DATA_DIR=/srv/ai-work-hub npm run start
 ```
 
-## 5. 健康检查
+## 7. 健康检查
 
 访问：
 
@@ -76,7 +101,7 @@ http://localhost:3000/api/health
 }
 ```
 
-## 6. 初始化
+## 8. 初始化
 
 访问：
 
@@ -99,7 +124,7 @@ Workspace 名称：我的工作台
 
 成功后返回首页。
 
-## 7. 跑通第一个 Demo
+## 9. 跑通第一个 Demo
 
 ### Step 1：创建任务
 
@@ -199,7 +224,7 @@ AI 工作流
 
 确认可以搜到任务、资料或输出。
 
-## 8. 验收标准
+## 10. 验收标准
 
 必须满足：
 
@@ -217,13 +242,13 @@ AI 工作流
 可以搜索历史内容
 ```
 
-## 9. 常见问题
+## 11. 常见问题
 
-### 9.1 npm install 失败
+### 11.1 npm install 失败
 
 优先检查 Node.js 版本和编译依赖。
 
-### 9.2 /api/health 返回 500
+### 11.2 /api/health 返回 500
 
 检查：
 
@@ -233,7 +258,7 @@ better-sqlite3 是否安装成功
 AI_WORK_HUB_DATA_DIR 是否可写
 ```
 
-### 9.3 build 时读取 SQLite 报错
+### 11.3 build 时读取 SQLite 报错
 
 页面已设置：
 
@@ -243,7 +268,7 @@ force-dynamic
 
 如果仍报错，检查是否新增了静态页面直接读取数据库。
 
-### 9.4 公司电脑和个人电脑看不到同一数据
+### 11.4 公司电脑和个人电脑看不到同一数据
 
 确认两台电脑访问的是同一个服务器实例，并且服务使用同一个：
 
@@ -251,7 +276,7 @@ force-dynamic
 AI_WORK_HUB_DATA_DIR
 ```
 
-## 10. 生产使用提醒
+## 12. 生产使用提醒
 
 当前版本没有登录系统。
 

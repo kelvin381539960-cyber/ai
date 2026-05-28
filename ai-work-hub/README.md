@@ -10,15 +10,16 @@
 初始化系统 → 首页任务类型入口 → 创建需求调研任务 → 添加资料 → Manual Assistant 生成 Prompt → 回填外部 AI 输出 → 创建 Output → 编辑 Output → 标记最终版
 ```
 
-暂不实现：Workflow Runtime、CLI Assistant、MCP、ChatGPT Action、多用户权限、复杂 DAG。
+已补入基础 Workflow Runtime，但只支持线性流程。
+
+暂不实现：CLI Assistant、MCP、ChatGPT Action、多用户权限、复杂 DAG。
 
 ## 启动
 
 ```bash
 cd ai-work-hub
 npm install
-npm run typecheck
-npm run build
+npm run check
 npm run dev
 ```
 
@@ -32,6 +33,19 @@ npm run dev
 
 ```bash
 AI_WORK_HUB_DATA_DIR=/srv/ai-work-hub npm run dev
+```
+
+## 验证
+
+```bash
+npm run check
+npm run smoke
+```
+
+详见：
+
+```text
+VERIFY.md
 ```
 
 ## 健康检查
@@ -73,6 +87,7 @@ GET /api/search?q=AI
 11. 在 `/outputs` 查看输出并复制 Markdown。
 12. 基于输出创建新任务。
 13. 在 `/search` 搜索历史任务、资料、输出。
+14. 在任务详情运行推荐流程。
 
 ## 运行手册
 
