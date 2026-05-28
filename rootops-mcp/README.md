@@ -27,7 +27,7 @@ brew install ripgrep
 
 ## Current status
 
-Runnable MCP server with read/search/context, transactional patch tools, and first remote ops tools.
+Runnable MCP server with read/search/context, transactional patch tools, and remote ops tools.
 
 Registered tool groups:
 
@@ -35,7 +35,7 @@ Registered tool groups:
 - file read/search/outline/hash
 - snapshot/patch transaction
 - local model sidecar
-- remote SSH / rsync / server groups
+- remote SSH / streaming / pseudo PTY / rsync / server groups
 
 No sudo/systemctl/git push/deploy tools are registered as first-class tools yet.
 
@@ -47,9 +47,9 @@ No sudo/systemctl/git push/deploy tools are registered as first-class tools yet.
 
 ## Next build order
 
-1. Add streaming exec.
-2. Add persistent PTY sessions.
-3. Add tunnel management.
-4. Add remote agent bootstrap.
+1. Add tunnel management.
+2. Add remote agent bootstrap.
+3. Add task scope creation.
+4. Add merged confirmation payload.
 5. Add tree-sitter outline.
 6. Add SQLite FTS5 index.

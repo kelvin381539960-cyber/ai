@@ -7,7 +7,9 @@ export const DEFAULT_TASK_SCOPE: TaskScope = {
   autoAllow: [
     'file.read', 'file.read_many', 'file.list', 'file.search', 'file.hash', 'file.outline', 'file.related',
     'patch.dry_run', 'patch.plan', 'patch.verify', 'patch.apply', 'snapshot.create',
-    'remote.session.open', 'remote.session.list', 'remote.session.close', 'remote.exec', 'remote.rsync_push', 'remote.rsync_pull', 'remote.group.register', 'remote.group.exec',
+    'remote.session.open', 'remote.session.list', 'remote.session.close', 'remote.exec', 'remote.exec_stream.start', 'remote.exec_stream.read', 'remote.exec_stream.kill', 'remote.exec_stream.list',
+    'remote.pty.open', 'remote.pty.write', 'remote.pty.read', 'remote.pty.close', 'remote.pty.list',
+    'remote.rsync_push', 'remote.rsync_pull', 'remote.group.register', 'remote.group.exec',
     'git.status', 'git.diff', 'git.log', 'build.run',
     'local.embed', 'local.rerank', 'local.summarize', 'local.patch_risk', 'local.context_pack'
   ],

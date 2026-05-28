@@ -12,9 +12,11 @@ import { LocalIntelligence } from '../local/local-intelligence.js';
 import { OllamaClient } from '../local/ollama-client.js';
 import { PatchEngine } from '../patch/patch-engine.js';
 import { buildPatchPlan } from '../patch/patch-plan.js';
+import { PtyManager } from '../remote/pty-manager.js';
 import { RemoteOps } from '../remote/remote-ops.js';
 import { ServerGroupRegistry } from '../remote/server-groups.js';
 import { RemoteSessionPool } from '../remote/session-pool.js';
+import { StreamManager } from '../remote/stream-manager.js';
 import type { PatchOperation, ToolCallContext, ToolProfile } from '../types.js';
 import { toolDefinitions } from './tools.js';
 
@@ -30,6 +32,8 @@ export async function startMcpServer(): Promise<void> {
   const remote = new RemoteOps();
   const sessions = new RemoteSessionPool();
   const groups = new ServerGroupRegistry();
+  const streams = new StreamManager();
+  const ptys = new PtyManager();
   const ollama = new OllamaClient({ baseUrl: process.env.OLLAMA_BASE_URL ?? 'http://127.0.0.1:11434', embeddingModel: process.env.OLLAMA_EMBEDDING_MODEL ?? 'nomic-embed-text', instructModel: process.env.OLLAMA_INSTRUCT_MODEL ?? 'qwen2.5-coder:7b' });
   const local = new LocalIntelligence(ollama);
   const server = new Server({ name: 'aix-rootops-mcp', version: '0.1.0' }, { capabilities: { tools: {} } });
@@ -60,6 +64,15 @@ export async function startMcpServer(): Promise<void> {
         case 'remote.session.list': return jsonToolResult({ ok: true, sessions: sessions.list() });
         case 'remote.session.close': { const parsed = RemoteSessionCloseArgs.parse(args); return jsonToolResult(sessions.close(parsed.session_id)); }
         case 'remote.exec': { const parsed = RemoteExecArgs.parse(args); const session = parsed.session_id ? sessions.get(parsed.session_id) : undefined; const target = parsed.target ?? session?.target; if (!target) throw new Error('target or session_id required'); return jsonToolResult({ ok: true, result: await remote.sshExec(target, parsed.command, { cwd: parsed.cwd ?? session?.cwd, timeoutMs: parsed.timeout_ms }) }); }
+        case 'remote.exec_stream.start': { const parsed = RemoteStreamStartArgs.parse(args); return jsonToolResult({ ok: true, stream: streams.start(parsed.target, parsed.command, { cwd: parsed.cwd }) }); }
+        case 'remote.exec_stream.read': { const parsed = RemoteStreamReadArgs.parse(args); return jsonToolResult({ ok: true, stream: streams.read(parsed.stream_id, parsed.clear) }); }
+        case 'remote.exec_stream.kill': { const parsed = RemoteStreamKillArgs.parse(args); return jsonToolResult(streams.kill(parsed.stream_id, parsed.signal as NodeJS.Signals)); }
+        case 'remote.exec_stream.list': return jsonToolResult({ ok: true, streams: streams.list() });
+        case 'remote.pty.open': { const parsed = RemotePtyOpenArgs.parse(args); return jsonToolResult({ ok: true, pty: ptys.open(parsed.target, parsed.cwd) }); }
+        case 'remote.pty.write': { const parsed = RemotePtyWriteArgs.parse(args); return jsonToolResult(ptys.write(parsed.pty_id, parsed.input)); }
+        case 'remote.pty.read': { const parsed = RemotePtyReadArgs.parse(args); return jsonToolResult({ ok: true, pty: ptys.read(parsed.pty_id, parsed.clear) }); }
+        case 'remote.pty.close': { const parsed = RemotePtyCloseArgs.parse(args); return jsonToolResult(ptys.close(parsed.pty_id)); }
+        case 'remote.pty.list': return jsonToolResult({ ok: true, ptys: ptys.list() });
         case 'remote.rsync_push': { const parsed = RemoteRsyncPushArgs.parse(args); return jsonToolResult({ ok: true, result: await remote.rsyncPush(parsed.source, parsed.target, parsed.destination) }); }
         case 'remote.rsync_pull': { const parsed = RemoteRsyncPullArgs.parse(args); return jsonToolResult({ ok: true, result: await remote.rsyncPull(parsed.target, parsed.source, parsed.destination) }); }
         case 'remote.group.register': { const parsed = RemoteGroupRegisterArgs.parse(args); return jsonToolResult({ ok: true, group: groups.register(parsed.name, parsed.targets) }); }
@@ -95,6 +108,13 @@ const PatchVerifyArgs = z.object({ path: z.string(), expected_text: z.string(), 
 const RemoteSessionOpenArgs = z.object({ target: SshTargetSchema, cwd: z.string().optional() });
 const RemoteSessionCloseArgs = z.object({ session_id: z.string() });
 const RemoteExecArgs = z.object({ target: SshTargetSchema.optional(), session_id: z.string().optional(), command: z.string(), cwd: z.string().optional(), timeout_ms: z.number().int().min(1000).max(3600000).default(300000) });
+const RemoteStreamStartArgs = z.object({ target: SshTargetSchema, command: z.string(), cwd: z.string().optional() });
+const RemoteStreamReadArgs = z.object({ stream_id: z.string(), clear: z.boolean().default(false) });
+const RemoteStreamKillArgs = z.object({ stream_id: z.string(), signal: z.string().default('SIGTERM') });
+const RemotePtyOpenArgs = z.object({ target: SshTargetSchema, cwd: z.string().optional() });
+const RemotePtyWriteArgs = z.object({ pty_id: z.string(), input: z.string() });
+const RemotePtyReadArgs = z.object({ pty_id: z.string(), clear: z.boolean().default(false) });
+const RemotePtyCloseArgs = z.object({ pty_id: z.string() });
 const RemoteRsyncPushArgs = z.object({ source: z.string(), target: SshTargetSchema, destination: z.string() });
 const RemoteRsyncPullArgs = z.object({ target: SshTargetSchema, source: z.string(), destination: z.string() });
 const RemoteGroupRegisterArgs = z.object({ name: z.string(), targets: z.array(SshTargetSchema).min(1).max(100) });

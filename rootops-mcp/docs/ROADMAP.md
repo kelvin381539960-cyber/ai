@@ -53,8 +53,8 @@
 - [x] rsync push
 - [x] server groups
 - [x] command risk screening
-- [ ] streaming exec
-- [ ] persistent PTY sessions
+- [x] streaming exec
+- [x] pseudo PTY sessions
 - [ ] tunnel management
 - [ ] remote agent bootstrap
 

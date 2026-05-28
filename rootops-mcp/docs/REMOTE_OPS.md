@@ -1,8 +1,10 @@
 # Remote Ops
 
-Phase 4 introduces the first remote operations layer.
+Phase 4 remote operations layer.
 
 ## Tools
+
+Basic:
 
 - `remote.session.open`
 - `remote.session.list`
@@ -12,6 +14,21 @@ Phase 4 introduces the first remote operations layer.
 - `remote.rsync_pull`
 - `remote.group.register`
 - `remote.group.exec`
+
+Streaming:
+
+- `remote.exec_stream.start`
+- `remote.exec_stream.read`
+- `remote.exec_stream.kill`
+- `remote.exec_stream.list`
+
+Pseudo PTY:
+
+- `remote.pty.open`
+- `remote.pty.write`
+- `remote.pty.read`
+- `remote.pty.close`
+- `remote.pty.list`
 
 ## Target shape
 
@@ -24,42 +41,65 @@ Phase 4 introduces the first remote operations layer.
 }
 ```
 
-## Execute command
+## Streaming command
 
 ```json
 {
-  "target": {
-    "host": "example.com",
-    "user": "root"
-  },
-  "command": "uptime"
+  "target": { "host": "example.com", "user": "root" },
+  "command": "tail -f /var/log/syslog"
 }
 ```
 
-## Session flow
+Read:
 
 ```json
 {
-  "target": {
-    "host": "example.com",
-    "user": "root"
-  },
+  "stream_id": "stream_...",
+  "clear": true
+}
+```
+
+Kill:
+
+```json
+{
+  "stream_id": "stream_...",
+  "signal": "SIGTERM"
+}
+```
+
+## Pseudo PTY
+
+Open:
+
+```json
+{
+  "target": { "host": "example.com", "user": "root" },
   "cwd": "/opt/app"
 }
 ```
 
-Then:
+Write:
 
 ```json
 {
-  "session_id": "ssh_...",
-  "command": "git status"
+  "pty_id": "pty_...",
+  "input": "git status\n"
+}
+```
+
+Read:
+
+```json
+{
+  "pty_id": "pty_...",
+  "clear": true
 }
 ```
 
 ## Safety
 
-`remote.exec` screens commands with a blocklist and high-risk detector.
+`remote.exec` and `remote.exec_stream.start` screen commands with a blocklist and high-risk detector.
 
 Blocked examples:
 
@@ -69,16 +109,10 @@ Blocked examples:
 - `reboot`
 - `chmod -R 777`
 
-High-risk examples are allowed at the command-risk layer but should be controlled by policy/profile in production:
-
-- `sudo`
-- `systemctl restart`
-- `git push`
-- database destructive SQL
-
 ## Current limitations
 
-- Sessions are in-memory records, not persistent PTY shells.
-- Streaming exec is not implemented yet.
+- Pseudo PTY uses ssh stdin/stdout pipes, not `node-pty`.
+- Sessions are in-memory.
 - Server groups are in-memory.
 - Tunnels are not implemented yet.
+- Remote agent bootstrap is not implemented yet.
