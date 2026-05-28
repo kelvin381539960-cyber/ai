@@ -87,6 +87,12 @@ export async function startMcpServer(): Promise<void> {
           return jsonToolResult({ ok: true, ...result });
         }
 
+        case 'file.read_many': {
+          const parsed = FileReadManyArgs.parse(args);
+          const result = await fileEngine.readMany(parsed.items, parsed.max_total_bytes);
+          return jsonToolResult({ ok: true, ...result });
+        }
+
         case 'file.search': {
           const parsed = FileSearchArgs.parse(args);
           const result = await fileEngine.search(parsed);
@@ -159,6 +165,17 @@ const FileReadArgs = z.object({
   with_line_numbers: z.boolean().default(true)
 });
 
+const FileReadManyArgs = z.object({
+  items: z.array(z.object({
+    path: z.string(),
+    offset_line: z.number().int().min(1).optional(),
+    limit_lines: z.number().int().min(1).max(2000).optional(),
+    max_bytes: z.number().int().min(1).max(1024 * 1024).optional(),
+    with_line_numbers: z.boolean().optional()
+  })).min(1).max(100),
+  max_total_bytes: z.number().int().min(1).max(4 * 1024 * 1024).default(512 * 1024)
+});
+
 const FileSearchArgs = z.object({
   path: z.string().optional(),
   query: z.string().min(1),
@@ -170,7 +187,9 @@ const FileSearchArgs = z.object({
   include_contents: z.boolean().default(true),
   max_file_bytes: z.number().int().min(1).max(10 * 1024 * 1024).default(256 * 1024),
   context_before: z.number().int().min(0).max(20).default(0),
-  context_after: z.number().int().min(0).max(20).default(0)
+  context_after: z.number().int().min(0).max(20).default(0),
+  cursor: z.string().optional(),
+  backend: z.enum(['auto', 'rg', 'native']).default('auto')
 });
 
 const FileHashArgs = z.object({ path: z.string() });

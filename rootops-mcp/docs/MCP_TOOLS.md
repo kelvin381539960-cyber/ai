@@ -29,11 +29,53 @@ or:
 
 Reads a text file by line window with byte budget.
 
+## file.read_many
+
+Reads multiple files in one call with a total byte budget.
+
+Example:
+
+```json
+{
+  "items": [
+    { "path": "/opt/AIX代码/README.md", "limit_lines": 100 },
+    { "path": "/opt/AIX代码/docs/ROADMAP.md", "limit_lines": 100 }
+  ],
+  "max_total_bytes": 524288
+}
+```
+
 ## file.search
 
 Searches filenames and contents under allowed roots.
 
-Current implementation is native TypeScript scanning. Replace or augment with ripgrep in Phase 2.
+Backends:
+
+- `auto`: use ripgrep when available, fallback to native TypeScript scanning.
+- `rg`: require ripgrep.
+- `native`: use TypeScript scanning only.
+
+Supports cursor pagination through `nextCursor`.
+
+Example:
+
+```json
+{
+  "path": "/opt/AIX代码",
+  "query": "RootOps",
+  "max_results": 20,
+  "backend": "auto"
+}
+```
+
+Then continue:
+
+```json
+{
+  "query": "RootOps",
+  "cursor": "..."
+}
+```
 
 ## file.hash
 

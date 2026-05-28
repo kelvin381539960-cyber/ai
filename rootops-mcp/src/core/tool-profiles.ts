@@ -3,6 +3,7 @@ import type { ToolProfile } from '../types.js';
 export const TOOL_PROFILES: Record<ToolProfile, string[]> = {
   read_only: [
     'file.read',
+    'file.read_many',
     'file.list',
     'file.search',
     'file.hash',
@@ -15,7 +16,9 @@ export const TOOL_PROFILES: Record<ToolProfile, string[]> = {
   ],
   code_edit: [
     'file.read',
+    'file.read_many',
     'file.search',
+    'file.hash',
     'file.patch',
     'file.write',
     'snapshot.create',

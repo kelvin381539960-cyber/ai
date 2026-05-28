@@ -25,9 +25,9 @@
 
 - [x] Basic file.read with line window and byte budget
 - [x] Basic file.search with glob, regex, context, byte cap
-- [ ] ripgrep backend
-- [ ] cursor pagination
-- [ ] read_many with byte budget
+- [x] ripgrep backend
+- [x] cursor pagination
+- [x] read_many with byte budget
 - [ ] tree-sitter outline
 - [ ] SQLite FTS5 index
 - [ ] embedding index

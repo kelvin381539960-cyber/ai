@@ -2,10 +2,20 @@ import { createHash } from 'node:crypto';
 import { stat, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import fg from 'fast-glob';
+import { decodeCursor, encodeCursor, stableOptionsHash } from './cursor.js';
+import { searchWithRipgrep } from './rg-search.js';
 
 export interface ReadLineOptions {
   maxBytes: number;
   withLineNumbers: boolean;
+}
+
+export interface ReadManyItem {
+  path: string;
+  offset_line?: number;
+  limit_lines?: number;
+  max_bytes?: number;
+  with_line_numbers?: boolean;
 }
 
 export interface SearchOptions {
@@ -20,6 +30,8 @@ export interface SearchOptions {
   max_file_bytes: number;
   context_before: number;
   context_after: number;
+  cursor?: string;
+  backend?: 'auto' | 'rg' | 'native';
 }
 
 export interface SearchHit {
@@ -51,6 +63,32 @@ export class FileEngine {
     };
   }
 
+  async readMany(items: ReadManyItem[], maxTotalBytes: number): Promise<{ results: unknown[]; bytesUsed: number; truncated: boolean }> {
+    const results: unknown[] = [];
+    let bytesUsed = 0;
+    let truncated = false;
+
+    for (const item of items) {
+      if (bytesUsed >= maxTotalBytes) {
+        truncated = true;
+        break;
+      }
+
+      const budget = Math.min(item.max_bytes ?? 128 * 1024, maxTotalBytes - bytesUsed);
+      const before = bytesUsed;
+      const result = await this.readLines(item.path, item.offset_line ?? 1, item.limit_lines ?? 200, {
+        maxBytes: budget,
+        withLineNumbers: item.with_line_numbers ?? true
+      });
+      bytesUsed += result.lines.join('\n').length;
+      results.push(result);
+
+      if (bytesUsed === before || result.truncatedByBytes) truncated = true;
+    }
+
+    return { results, bytesUsed, truncated };
+  }
+
   async readBytes(filePath: string, offset = 0, length = 64 * 1024): Promise<Buffer> {
     const safePath = this.resolveAllowedPath(filePath);
     const data = await readFile(safePath);
@@ -67,28 +105,64 @@ export class FileEngine {
     };
   }
 
-  async search(options: SearchOptions): Promise<{ root: string; hits: SearchHit[]; limitReached: boolean }> {
+  async search(options: SearchOptions): Promise<{ root: string; hits: SearchHit[]; limitReached: boolean; nextCursor?: string; backend: string }> {
     const root = this.resolveAllowedPath(options.path ?? this.allowedRoots[0] ?? process.cwd());
-    const pattern = options.file_glob ?? '**/*';
-    const entries = await fg(pattern, {
-      cwd: root,
-      onlyFiles: true,
-      dot: false,
-      unique: true,
-      absolute: true,
-      followSymbolicLinks: false,
-      ignore: ['**/node_modules/**', '**/.git/**', '**/dist/**', '**/build/**', '**/.next/**']
+    const pageOffset = options.cursor ? decodeCursor(options.cursor).nextOffset : 0;
+    const optionsHash = stableOptionsHash({
+      root,
+      query: options.query,
+      file_glob: options.file_glob,
+      regex: options.regex,
+      case_sensitive: options.case_sensitive,
+      include_filenames: options.include_filenames,
+      include_contents: options.include_contents,
+      max_file_bytes: options.max_file_bytes,
+      context_before: options.context_before,
+      context_after: options.context_after,
+      backend: options.backend ?? 'auto'
     });
 
+    let allHits: SearchHit[];
+    let backend = 'native';
+
+    if ((options.backend ?? 'auto') !== 'native') {
+      const rg = await searchWithRipgrep(root, options);
+      if (rg.available && !rg.error) {
+        backend = 'rg';
+        const filenameHits = options.include_filenames ? await this.searchFilenames(root, options) : [];
+        allHits = [...filenameHits, ...rg.hits];
+      } else if (options.backend === 'rg') {
+        throw new Error(rg.error ?? 'ripgrep backend unavailable');
+      } else {
+        allHits = await this.searchNativeAll(root, options);
+      }
+    } else {
+      allHits = await this.searchNativeAll(root, options);
+    }
+
+    const page = allHits.slice(pageOffset, pageOffset + options.max_results);
+    const nextOffset = pageOffset + page.length;
+    const limitReached = nextOffset < allHits.length;
+
+    return {
+      root,
+      hits: page,
+      limitReached,
+      nextCursor: limitReached
+        ? encodeCursor({ root, query: options.query, nextOffset, createdAt: new Date().toISOString(), optionsHash })
+        : undefined,
+      backend
+    };
+  }
+
+  private async searchNativeAll(root: string, options: SearchOptions): Promise<SearchHit[]> {
+    const entries = await this.listSearchEntries(root, options.file_glob);
     const hits: SearchHit[] = [];
     const matcher = makeMatcher(options.query, options.regex, options.case_sensitive);
 
     for (const entry of entries) {
-      if (hits.length >= options.max_results) break;
-
       if (options.include_filenames && matcher(path.basename(entry))) {
         hits.push({ path: entry, matchType: 'filename', snippet: path.relative(root, entry) });
-        if (hits.length >= options.max_results) break;
       }
 
       if (!options.include_contents) continue;
@@ -111,11 +185,30 @@ export class FileEngine {
           snippet: lines[i],
           context: lines.slice(before, after).map((line, idx) => `${before + idx + 1}: ${line}`)
         });
-        if (hits.length >= options.max_results) break;
       }
     }
 
-    return { root, hits, limitReached: hits.length >= options.max_results };
+    return hits;
+  }
+
+  private async searchFilenames(root: string, options: SearchOptions): Promise<SearchHit[]> {
+    const entries = await this.listSearchEntries(root, options.file_glob);
+    const matcher = makeMatcher(options.query, options.regex, options.case_sensitive);
+    return entries
+      .filter((entry) => matcher(path.basename(entry)))
+      .map((entry) => ({ path: entry, matchType: 'filename' as const, snippet: path.relative(root, entry) }));
+  }
+
+  private async listSearchEntries(root: string, fileGlob?: string): Promise<string[]> {
+    return fg(fileGlob ?? '**/*', {
+      cwd: root,
+      onlyFiles: true,
+      dot: false,
+      unique: true,
+      absolute: true,
+      followSymbolicLinks: false,
+      ignore: ['**/node_modules/**', '**/.git/**', '**/dist/**', '**/build/**', '**/.next/**']
+    });
   }
 
   private resolveAllowedPath(inputPath: string): string {

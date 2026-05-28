@@ -7,7 +7,7 @@ export function compareRisk(a: RiskLevel, b: RiskLevel): number {
 }
 
 export function classifyToolRisk(toolName: string): RiskLevel {
-  if (/^(file\.read|file\.list|file\.search|git\.status|git\.diff|git\.log|local\.)/.test(toolName)) {
+  if (/^(file\.read|file\.read_many|file\.list|file\.search|file\.hash|git\.status|git\.diff|git\.log|local\.)/.test(toolName)) {
     return 'R0';
   }
 

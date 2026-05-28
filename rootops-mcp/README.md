@@ -62,6 +62,16 @@ npm run smoke
 npm run dev
 ```
 
+Install ripgrep for faster search:
+
+```bash
+# Ubuntu/Debian
+sudo apt-get install ripgrep
+
+# macOS
+brew install ripgrep
+```
+
 ## MCP client examples
 
 See:
@@ -85,13 +95,14 @@ The local model is used for embedding, rerank, summarize, and patch risk hints. 
 
 ## Current status
 
-Initial runnable MCP server with read-only and local intelligence tools.
+Runnable MCP server with read-only and local intelligence tools.
 
 Registered tools:
 
 - `policy.check`
 - `audit.list`
 - `file.read`
+- `file.read_many`
 - `file.search`
 - `file.hash`
 - `local.embed`
@@ -100,9 +111,9 @@ Registered tools:
 
 ## Next build order
 
-1. Add persistent task scope creation.
-2. Add ripgrep backend and cursor pagination.
-3. Add `read_many` with byte budget.
+1. Add tree-sitter outline.
+2. Add SQLite FTS5 index.
+3. Add embedding index and `context_pack`.
 4. Add patch dry-run/snapshot/apply/verify flow.
 5. Add SSH session pool and rsync pull.
 6. Add merged confirmation payload.

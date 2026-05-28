@@ -6,6 +6,7 @@ export const DEFAULT_TASK_SCOPE: TaskScope = {
   expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
   autoAllow: [
     'file.read',
+    'file.read_many',
     'file.list',
     'file.search',
     'file.hash',

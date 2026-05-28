@@ -39,8 +39,33 @@ export const toolDefinitions = [
     }
   },
   {
+    name: 'file.read_many',
+    description: 'Read multiple files with per-file windows and a total byte budget.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        items: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              path: { type: 'string' },
+              offset_line: { type: 'number', default: 1 },
+              limit_lines: { type: 'number', default: 200 },
+              max_bytes: { type: 'number', default: 131072 },
+              with_line_numbers: { type: 'boolean', default: true }
+            },
+            required: ['path']
+          }
+        },
+        max_total_bytes: { type: 'number', default: 524288 }
+      },
+      required: ['items']
+    }
+  },
+  {
     name: 'file.search',
-    description: 'Search filenames and/or file contents under an allowed root. Supports glob, regex, context windows, and max file byte limits.',
+    description: 'Search filenames and/or file contents under an allowed root. Uses ripgrep when available and supports cursor pagination.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -54,7 +79,9 @@ export const toolDefinitions = [
         include_contents: { type: 'boolean', default: true },
         max_file_bytes: { type: 'number', default: 262144 },
         context_before: { type: 'number', default: 0 },
-        context_after: { type: 'number', default: 0 }
+        context_after: { type: 'number', default: 0 },
+        cursor: { type: 'string' },
+        backend: { type: 'string', enum: ['auto', 'rg', 'native'], default: 'auto' }
       },
       required: ['query']
     }

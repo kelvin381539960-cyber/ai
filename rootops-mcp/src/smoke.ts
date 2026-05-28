@@ -25,18 +25,39 @@ export async function runSmoke(): Promise<void> {
   const fileEngine = new FileEngine([process.cwd()]);
   const readmePath = `${process.cwd()}/README.md`;
   const readme = await fileEngine.readLines(readmePath, 1, 20, { maxBytes: 64 * 1024, withLineNumbers: true }).catch((error) => ({ error: String(error) }));
+  const readMany = await fileEngine.readMany([
+    { path: readmePath, limit_lines: 10 },
+    { path: `${process.cwd()}/docs/ROADMAP.md`, limit_lines: 20 }
+  ], 128 * 1024).catch((error) => ({ error: String(error) }));
   const search = await fileEngine.search({
     path: process.cwd(),
     query: 'RootOps',
-    max_results: 10,
+    max_results: 5,
     regex: false,
     case_sensitive: false,
     include_filenames: true,
     include_contents: true,
     max_file_bytes: 256 * 1024,
     context_before: 1,
-    context_after: 1
+    context_after: 1,
+    backend: 'auto'
   });
+  const searchNext = search.nextCursor
+    ? await fileEngine.search({
+        path: process.cwd(),
+        query: 'RootOps',
+        max_results: 5,
+        regex: false,
+        case_sensitive: false,
+        include_filenames: true,
+        include_contents: true,
+        max_file_bytes: 256 * 1024,
+        context_before: 1,
+        context_after: 1,
+        cursor: search.nextCursor,
+        backend: 'auto'
+      })
+    : null;
 
-  console.log(JSON.stringify({ ok: true, decision, event, readme, search }, null, 2));
+  console.log(JSON.stringify({ ok: true, decision, event, readme, readMany, search, searchNext }, null, 2));
 }
