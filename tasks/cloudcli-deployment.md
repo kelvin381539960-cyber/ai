@@ -9,6 +9,7 @@
 - Service user: `cloudcli`
 - systemd service: `cloudcli.service`
 - Remote bind: `127.0.0.1:3101`
+- Workspace root: `/srv/cloudcli/workspaces`
 - Local access: SSH tunnel to `localhost:3001`
 
 ## Local Access
