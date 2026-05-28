@@ -2,107 +2,180 @@
 
 ## 当前状态
 
-用户明确希望产品更适合产品经理、运营使用。
+已根据两条核心反馈完成方案优化：
 
-因此产品定位已从：
+1. 产品要更适合产品经理、运营使用。
+2. 用户体验要从“管理 Agent / Workflow”改为“完成任务”。
 
-```text
-AI 开发任务中台
-```
-
-调整为：
+新增：
 
 ```text
-AI 工作流任务中台
+tasks/ai-dev-hub/ux-optimized-plan.md
 ```
 
-原 `AI Dev Hub` 作为代号保留，产品名建议改为：
-
-```text
-AI Work Hub
-```
-
-已新增：
-
-```text
-tasks/ai-dev-hub/positioning-pm-ops.md
-```
-
-已更新：
+更新：
 
 ```text
 tasks/ai-dev-hub/brd.md
+tasks/ai-dev-hub/prd.md
 ```
 
-## 已完成
+## 当前定位
 
-- 明确产品不应只服务开发者。
-- 明确优先用户是产品经理、运营、技术型 PM、个人开发者。
-- 明确产品定位为 AI 工作流任务中台。
-- 明确开发任务只是重要扩展场景，不是唯一主线。
-- 明确 UI 不应默认围绕 Git、Diff、CLI。
-- 明确 Agent 模板要增加 Research、PRD、Ops、Data、Meeting 等产品/运营向模板。
-- 明确 Workflow 模板要增加需求调研、PRD 生成、竞品分析、运营活动、会议纪要等模板。
-
-## 当前关键结论
-
-1. 产品定位：AI 工作流任务中台。
-2. 首要用户：产品经理 / 运营 / 技术型 PM。
-3. 开发者是重要用户，但不再是唯一主线。
-4. Primary Agent 策略仍然成立。
-5. Workflow 仍然只做线性步骤。
-6. Agent / Workflow 仍然只是能力组件。
-7. External AI Control Layer 仍然作为扩展预留。
-8. MVP 仍然是轻量 UI + 多任务 + 多 Agent + 多 Workflow + Run + Handoff。
-
-## 新默认 Agent 模板
+产品定位已调整为：
 
 ```text
-Research Agent
-PRD Agent
-Review Agent
-Ops Planning Agent
-Data Analysis Agent
-Meeting Summary Agent
-Handoff Agent
-Tech Review Agent
-Code Agent
+产品经理 / 运营的 AI 工作台
 ```
 
-## 新默认 Workflow 模板
+正式定义：
 
 ```text
-需求调研 Workflow
-PRD 生成 Workflow
-竞品分析 Workflow
-运营活动 Workflow
-评审 Workflow
-会议纪要 Workflow
-交接总结 Workflow
-开发 Pre-work Workflow
+面向产品、运营、技术型 PM 和个人开发者的 AI 工作流任务中台。
 ```
 
-## 当前需要调整
+## 核心变化
 
-PRD 需要同步从开发者视角调整到产品/运营视角。
+### 1. 用户主路径调整
 
-重点调整：
+旧路径：
 
-1. 页面命名从 Project/Git 导向改为 Workspace/Project/Task 导向。
-2. Task 类型增加 research、prd、ops_plan、data_analysis、meeting_summary。
-3. Agent 模板改成产品/运营优先。
-4. Workflow 模板改成产品/运营优先。
-5. Git、CLI、Diff 降级为开发者模式或高级能力。
-6. Handoff 可以叫 Handoff / 任务结论。
+```text
+创建 Agent → 创建 Workflow → 创建 Task → Run → Handoff
+```
+
+新路径：
+
+```text
+选择任务类型 → 填写目标 → 添加资料 → 系统推荐助手和流程 → 开始执行 → 查看输出 → 继续优化 / 评审 → 生成最终结论
+```
+
+### 2. 用户表达调整
+
+| 底层对象 | UI 名称 |
+|---|---|
+| Agent | 助手 |
+| Primary Agent | 默认助手 |
+| Supporting Agent | 其他助手 |
+| Workflow | 任务流程 |
+| Run | 执行记录 |
+| Handoff | 任务结论 / 交接说明 |
+| Context Mode | 资料范围 |
+| Source / Material | 任务资料 |
+| Output | 输出结果 |
+
+### 3. 新增核心对象
+
+新增：
+
+```text
+Material / Source
+Output
+```
+
+Material 是产品/运营任务的核心输入。
+
+Output 是产品/运营用户真正关心的产出。
+
+Handoff 是 Output 的一种。
+
+### 4. 导航调整
+
+推荐主导航：
+
+```text
+首页
+任务
+资料
+助手
+流程
+输出
+设置
+```
+
+Run 和 Handoff 不作为一级导航。
+
+### 5. 开发能力降级
+
+Git / Diff / CLI / Code Agent 保留，但降级为高级能力，不作为默认主流程。
+
+## 当前推荐 MVP 闭环
+
+```text
+选任务类型
+→ 填目标
+→ 加资料
+→ 系统推荐默认助手和任务流程
+→ 点击开始
+→ 查看输出
+→ 添加资料或找其他助手评审
+→ 生成最终结论 / 交接说明
+```
+
+## 当前默认任务类型
+
+```text
+需求调研
+PRD 生成
+竞品分析
+运营方案
+会议纪要
+评审
+数据复盘
+技术追问
+自定义任务
+```
+
+## 当前默认助手模板
+
+```text
+调研助手
+PRD 助手
+竞品分析助手
+运营方案助手
+数据分析助手
+会议纪要助手
+评审助手
+技术追问助手
+代码助手（高级）
+```
+
+## 当前默认流程模板
+
+```text
+需求调研流程
+PRD 生成流程
+竞品分析流程
+运营活动流程
+评审流程
+会议纪要流程
+交接总结流程
+开发前准备流程（高级）
+```
+
+## 下一步建议
+
+当前 PRD 已按优化方案更新。
+
+建议下一步进入技术方案设计，但技术方案必须遵守：
+
+1. 用户主路径从任务类型开始。
+2. Material 和 Output 是核心对象。
+3. Agent / Workflow 是底层能力组件。
+4. Run / Handoff 不作为用户主导航。
+5. 开发者能力作为高级能力。
+6. 默认服务产品/运营场景。
 
 ## 给下一个 AI 工具的接力提示
 
 ```text
-请先阅读 tasks/ai-dev-hub/positioning-pm-ops.md、brd.md、handoff.md。
+请先阅读 tasks/ai-dev-hub/ux-optimized-plan.md、brd.md、prd.md、handoff.md。
 
-当前用户已明确：产品要更适合产品经理、运营使用，不应只围绕开发者和 CLI。请把产品定位从 AI 开发任务中台调整为 AI 工作流任务中台。
+当前方案已经从“AI 开发任务中台”调整为“产品经理 / 运营的 AI 工作台”。
 
-PRD 需要同步更新为产品/运营优先：调研、PRD、竞品分析、运营活动、会议纪要、评审、交接总结是默认场景。代码、CLI、Git、Diff 应作为高级/扩展场景。
+不要再把用户主路径设计成创建 Agent / 创建 Workflow。用户主路径必须是：选择任务类型 → 添加资料 → 推荐助手和流程 → 生成输出。
 
-不要把产品做成 IDE、代码编辑器、Agent 市场、复杂 Workflow 平台或多 Agent 自动编排平台。
+Material / Source 和 Output 是核心对象。Agent / Workflow / Run / Handoff 是支撑对象。
+
+Git、Diff、CLI、Code Agent 是高级能力，不是默认主流程。
 ```

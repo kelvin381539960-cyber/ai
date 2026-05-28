@@ -1,99 +1,127 @@
-# AI Dev Hub MVP PRD
+# AI Work Hub MVP PRD
 
 ## 1. 文档状态
 
 - 阶段：PRD
-- 依据：`brd.md`
-- 产品定位：AI 开发任务中台
-- MVP 范围：轻量 UI + 多任务 + Agent + Workflow + Run + Handoff
+- 依据：`brd.md`、`ux-optimized-plan.md`
+- 产品定位：产品经理 / 运营的 AI 工作台
+- MVP 范围：轻量 UI + 多任务 + 资料 + 助手 + 流程 + 输出 + 执行记录
 
 ## 2. 产品目标
 
-MVP 要实现一个可用的 AI 开发任务中台，让用户可以：
+MVP 要实现一个可用的 AI 工作任务台，让用户可以：
 
-1. 在 UI 中管理多个任务。
-2. 为任务选择 Primary Agent。
-3. 创建和复用多个 Agent。
-4. 创建和复用多个线性 Workflow。
-5. 运行 Agent 或 Workflow。
-6. 保存每次执行结果。
-7. 生成 Handoff，支持后续接力。
-8. 在需要时随时切换任务 Primary Agent。
+1. 从任务类型直接开始。
+2. 添加任务资料。
+3. 使用系统推荐的默认助手和任务流程。
+4. 运行流程或助手。
+5. 查看和沉淀输出结果。
+6. 找其他助手评审或补充。
+7. 更换默认助手。
+8. 生成最终结论或交接说明。
 
 ## 3. 信息架构
 
-MVP 页面：
+主导航：
 
 ```text
-项目页
-任务列表页
-任务详情页
-Agent 管理页
-Workflow 管理页
-Run 记录页
-Handoff 页
-设置页
+首页
+任务
+资料
+助手
+流程
+输出
+设置
 ```
 
-全局导航：
+Run 和 Handoff 不作为一级导航。
 
-```text
-Projects
-Tasks
-Agents
-Workflows
-Runs
-Handoff
-Settings
-```
+- Run 显示为任务详情中的执行记录。
+- Handoff 显示为输出的一种。
 
 ## 4. 核心对象关系
 
 ```text
+Workspace 1 ── N Project / Space
 Project 1 ── N Task
-Project 1 ── N Agent
-Project 1 ── N Workflow
-Task 1 ── 1 Primary Agent
-Task 1 ── N Run
+Task 1 ── N Material
+Task 1 ── 1 Default Assistant
+Task 1 ── N Assistant Run
 Task 1 ── N Workflow Run
-Agent 1 ── N Run
+Task 1 ── N Output
+Assistant 1 ── N Run
 Workflow 1 ── N Workflow Run
-Task 1 ── N Handoff
 ```
 
 ## 5. 页面需求
 
-## 5.1 项目页
+## 5.1 首页
 
 ### 目标
 
-选择或初始化项目工作区。
+让用户从“我要完成什么”开始，而不是先配置工具。
 
-### 展示字段
+### 主入口
 
-- 项目名称
-- 项目路径
-- Git 分支
-- Git 状态
-- Task 数量
-- Agent 数量
-- Workflow 数量
-- 最近更新时间
+展示任务类型卡片：
 
-### 操作
+- 做需求调研。
+- 写 PRD。
+- 做竞品分析。
+- 做运营方案。
+- 整理会议纪要。
+- 做评审。
+- 做数据复盘。
+- 技术追问。
+- 自定义任务。
 
-- 添加项目
-- 初始化 `.ai/` 工作区
-- 进入项目
-- 刷新 Git 状态
+### 最近任务
+
+展示：
+
+- 任务名称。
+- 任务类型。
+- 状态。
+- 最近输出。
+- 默认助手。
 
 ### 验收
 
-- 用户可以添加一个本地/服务器项目路径。
-- 用户可以在该项目下初始化 `.ai/` 工作区。
-- UI 能展示项目基础状态。
+- 用户可以从首页任务类型直接创建任务。
+- 用户无需先创建 Agent 或 Workflow。
 
-## 5.2 任务列表页
+## 5.2 任务创建页
+
+### 目标
+
+用最少问题创建一个可执行任务。
+
+### 字段
+
+- 任务类型。
+- 任务标题。
+- 任务目标。
+- 任务资料。
+- 预期输出。
+- 默认助手，系统推荐，可修改。
+- 推荐流程，系统推荐，可修改。
+- 资料范围，默认标准。
+
+### 创建逻辑
+
+用户选择任务类型后，系统自动推荐：
+
+- 默认助手。
+- 推荐流程。
+- 输出类型。
+- 资料范围。
+
+### 验收
+
+- 用户 4 个核心输入内可创建任务：做什么、类型、资料、输出。
+- 系统能根据任务类型推荐助手和流程。
+
+## 5.3 任务列表页
 
 ### 目标
 
@@ -101,290 +129,284 @@ Task 1 ── N Handoff
 
 ### 展示字段
 
-- 任务标题
-- 状态
-- Primary Agent
-- 最近 Run 时间
-- 最近 Handoff 时间
-- 关联 Workflow Run 数量
+- 任务标题。
+- 任务类型。
+- 状态。
+- 默认助手。
+- 最近输出。
+- 最近更新时间。
 
 ### 筛选
 
-- 状态
-- Primary Agent
-- 是否有 Handoff
+- 任务类型。
+- 状态。
+- 默认助手。
+- 是否有输出。
 
 ### 操作
 
-- 创建任务
-- 打开任务详情
-- 切换任务状态
-- 归档任务
+- 创建任务。
+- 打开任务详情。
+- 归档任务。
 
-### 验收
-
-- 用户可以创建多个任务。
-- 用户可以按状态筛选任务。
-- 用户可以看到每个任务的 Primary Agent。
-
-## 5.3 任务详情页
+## 5.4 任务详情页
 
 ### 目标
 
-围绕单个任务执行 AI 工作。
+围绕单个任务持续推进到结果。
 
 ### 区块
 
-#### 任务信息
+#### 任务概览
 
-字段：
+展示：
 
-- 标题
-- 目标
-- 范围
-- 非目标
-- 验收标准
-- 所需能力
-- 状态
+- 标题。
+- 类型。
+- 目标。
+- 状态。
+- 默认助手。
+- 当前流程。
+- 资料范围。
 
-#### Primary Agent
+#### 任务资料
 
-字段：
+展示：
 
-- 当前 Primary Agent
-- Agent 类型
-- Agent 能力
-- 默认 Context Mode
+- 文本资料。
+- 链接。
+- 文件。
+- 截图。
+- 会议纪要。
+- 用户反馈。
+- 外部 AI 输出。
 
 操作：
 
-- Run Primary Agent
-- Run Another Agent
-- Switch Primary Agent
-- Generate Handoff
+- 添加资料。
+- 编辑资料。
+- 删除资料。
+- 将输出转为资料。
 
-#### Supporting Agent Runs
-
-展示：
-
-- Run ID
-- Agent
-- 触发原因
-- 状态
-- 时间
-
-#### Workflow Runs
+#### 当前输出
 
 展示：
 
-- Workflow 名称
-- 当前 Step
-- 状态
-- 时间
+- 最新输出。
+- 输出类型。
+- 版本。
+- 生成来源。
 
-#### Handoff 摘要
+操作：
+
+- 继续生成。
+- 找其他助手看看。
+- 生成最终结论。
+- 复制输出。
+
+#### 任务流程
 
 展示：
 
-- 当前状态
-- 剩余事项
-- 风险
-- 下一步建议
+- 当前流程。
+- 步骤列表。
+- 当前步骤状态。
+
+操作：
+
+- 运行流程。
+- 继续流程。
+- 更换流程。
+
+#### 执行记录
+
+展示：
+
+- 执行时间。
+- 使用助手。
+- 输入摘要。
+- 输出摘要。
+- 状态。
+
+#### 默认助手
+
+展示：
+
+- 默认助手名称。
+- 能力。
+- 资料范围。
+
+操作：
+
+- 继续使用默认助手。
+- 找其他助手看看。
+- 更换默认助手。
 
 ### 验收
 
-- 用户可以在任务详情页运行 Primary Agent。
-- 用户可以临时运行另一个 Agent。
-- 用户可以正式切换 Primary Agent。
-- 用户可以查看任务关联 Run 和 Handoff。
+- 用户可以在任务详情页添加资料。
+- 用户可以运行默认助手。
+- 用户可以运行流程。
+- 用户可以查看输出结果。
+- 用户可以找其他助手评审。
+- 用户可以更换默认助手。
 
-## 5.4 Agent 管理页
+## 5.5 资料页
 
 ### 目标
 
-创建和管理可复用 Agent。
-
-### Agent 类型
-
-- Manual Agent
-- Generic CLI Agent
+集中查看任务资料。
 
 ### 字段
 
-- Agent ID
-- 名称
-- 类型
-- 能力
-- Prompt 模板
-- 默认 Context Mode
-- CLI 命令，仅 CLI Agent
-- 是否启用
+- 资料标题。
+- 类型。
+- 所属任务。
+- 来源。
+- 创建时间。
 
 ### 操作
 
-- 创建 Agent
-- 从模板创建 Agent
-- 编辑 Agent
-- 启用 / 禁用 Agent
-- 测试 Agent
-- 删除 Agent
+- 添加资料。
+- 编辑资料。
+- 删除资料。
+- 关联到任务。
 
-### 内置模板
+### 资料类型
 
-- Code Agent
-- Review Agent
-- Security Review Agent
-- Architecture Review Agent
-- Research Agent
-- Handoff Agent
+- text。
+- url。
+- file。
+- image。
+- meeting_note。
+- user_feedback。
+- competitor_info。
+- ai_output。
 
-### 验收
-
-- 用户可以创建多个 Agent。
-- 一个 Agent 可以被多个任务复用。
-- Manual Agent 可以生成 prompt。
-- Generic CLI Agent 可以被测试。
-
-## 5.5 Workflow 管理页
+## 5.6 助手管理页
 
 ### 目标
 
-创建和管理可复用线性 Workflow。
+管理可复用 AI 助手。
 
-### Workflow 字段
+### 用户可见名称
 
-- Workflow ID
-- 名称
-- 描述
-- Step 列表
-- 是否启用
+使用“助手”，不使用 Agent 作为主表达。
+
+### 助手类型
+
+- Manual Assistant。
+- Generic CLI Assistant，高级。
+
+### 字段
+
+- 助手名称。
+- 适用任务类型。
+- 能力。
+- Prompt 模板。
+- 默认资料范围。
+- 执行方式。
+- 是否启用。
+
+### 内置助手模板
+
+- 调研助手。
+- PRD 助手。
+- 竞品分析助手。
+- 运营方案助手。
+- 数据分析助手。
+- 会议纪要助手。
+- 评审助手。
+- 技术追问助手。
+- 代码助手，高级。
+
+### 验收
+
+- 用户可以使用内置助手。
+- 用户可以创建自定义助手。
+- 一个助手可以被多个任务复用。
+
+## 5.7 流程管理页
+
+### 目标
+
+管理可复用任务流程。
+
+### 用户可见名称
+
+使用“任务流程”，不强调 Workflow Builder。
+
+### 字段
+
+- 流程名称。
+- 适用任务类型。
+- 步骤列表。
+- 默认助手规则。
+- 是否启用。
 
 ### Step 类型
 
-- manual_input
-- context_build
-- agent_run
-- review_prompt
-- handoff_build
+- manual_input。
+- add_material。
+- context_build。
+- assistant_run。
+- review_prompt。
+- output_build。
 
-### Step 字段
+### 内置流程模板
 
-- Step ID
-- 标题
-- 类型
-- Agent 选择方式
-- 指定 Agent，可选
-- Context Mode
-- 是否必填
-
-### Agent 选择规则
-
-- 默认使用任务 Primary Agent。
-- Step 可显式指定 Supporting Agent。
-- 用户运行 Workflow 时可手动覆盖。
-
-### 操作
-
-- 创建 Workflow
-- 从模板创建 Workflow
-- 添加 Step
-- 删除 Step
-- 调整 Step 顺序
-- 编辑 Step
-- 运行 Workflow
-
-### 内置模板
-
-- Pre-work Workflow
-- Research Workflow
-- Review Workflow
+- 需求调研流程。
+- PRD 生成流程。
+- 竞品分析流程。
+- 运营活动流程。
+- 评审流程。
+- 会议纪要流程。
+- 交接总结流程。
+- 开发前准备流程，高级。
 
 ### 验收
 
-- 用户可以创建多个 Workflow。
-- 一个 Workflow 可以被多个任务复用。
-- Workflow 支持线性步骤执行。
-- Manual Step 可以暂停等待用户输入。
+- 用户可以从模板创建流程。
+- 用户可以编辑线性步骤。
+- 流程可以被多个任务复用。
 
-## 5.6 Run 记录页
+## 5.8 输出页
 
 ### 目标
 
-查看和完成 Agent 执行记录。
+管理任务生成的结果。
 
-### 展示字段
+### 输出类型
 
-- Run ID
-- Task
-- Agent
-- 是否 Primary Agent
-- Context Mode
-- 状态
-- Prompt
-- 输出结果
-- stdout
-- stderr
-- 开始时间
-- 结束时间
-- Git status
+- research_report。
+- prd_draft。
+- competitive_analysis。
+- ops_plan。
+- meeting_summary。
+- review_result。
+- action_items。
+- handoff。
+- custom。
 
-### 状态
+### 字段
 
-- pending
-- running
-- waiting_user
-- success
-- failed
-- cancelled
-- timeout
+- 输出标题。
+- 输出类型。
+- 所属任务。
+- 来源助手。
+- 来源流程。
+- 版本。
+- 创建时间。
 
 ### 操作
 
-- 查看 prompt
-- 复制 prompt
-- 粘贴外部 AI 输出
-- 标记完成
-- 标记失败
-- 基于 Run 生成 Handoff
+- 查看输出。
+- 复制输出。
+- 标记为最终版本。
+- 转为任务资料。
+- 基于输出创建新任务。
 
-### 验收
-
-- Manual Agent Run 可以进入 waiting_user。
-- 用户可以粘贴外部 AI 输出完成 Run。
-- CLI Agent Run 可以保存 stdout/stderr。
-
-## 5.7 Handoff 页
-
-### 目标
-
-展示和生成任务交接文档。
-
-### 内容
-
-- 当前任务状态
-- Primary Agent
-- 最近 Run
-- Supporting Agent 调用记录
-- Workflow Run 记录
-- 已完成事项
-- 剩余事项
-- 风险
-- 是否建议切换 Agent
-- 下一步建议
-
-### 操作
-
-- 生成 Handoff
-- 复制 Handoff
-- 查看历史 Handoff
-
-### 验收
-
-- 用户可以为任务生成 Handoff。
-- Handoff 能说明当前任务状态。
-- Handoff 能支持另一个 Agent 接手。
-
-## 5.8 设置页
+## 5.9 设置页
 
 ### 目标
 
@@ -392,195 +414,97 @@ Task 1 ── N Handoff
 
 ### 设置项
 
-- 默认 Context Mode
-- 是否允许在 main/master 分支执行
-- 敏感文件规则
-- 默认项目路径
-- UI 访问提示
-
-### MVP 默认值
-
-- 默认 Context Mode：standard
-- 默认不允许自动 push
-- 默认不允许自动 merge
-- 默认不允许自动 deploy
-- 默认不提交 `.ai/RUNS/`
+- 默认资料范围。
+- 默认任务类型。
+- 高级模式开关。
+- CLI Assistant 配置，高级。
+- 安全规则。
 
 ## 6. 关键流程
 
-## 6.1 初始化项目流程
+## 6.1 从任务类型创建任务
 
 ```text
-进入项目页
-→ 添加项目路径
-→ 点击初始化 .ai
-→ 系统生成 .ai 工作区
-→ 显示项目状态
+首页
+→ 选择任务类型
+→ 填写目标
+→ 添加资料
+→ 系统推荐助手和流程
+→ 用户确认
+→ 创建任务
 ```
 
-生成文件：
-
-```text
-.ai/PROJECT.md
-.ai/RULES.md
-.ai/COMMANDS.md
-.ai/AGENTS.yaml
-.ai/WORKFLOWS.yaml
-.ai/TASKS/
-.ai/RUNS/
-.ai/WORKFLOW_RUNS/
-.ai/HANDOFF.md
-```
-
-## 6.2 创建 Agent 流程
-
-```text
-进入 Agent 管理页
-→ 点击创建 Agent
-→ 选择类型 Manual / Generic CLI
-→ 填写名称、能力、模板、Context Mode
-→ 保存
-→ Agent 出现在列表
-```
-
-Manual Agent 必填：
-
-- 名称
-- 能力
-- Prompt 模板
-
-Generic CLI Agent 必填：
-
-- 名称
-- 能力
-- 命令
-- 输入方式
-
-## 6.3 创建任务流程
-
-```text
-进入任务列表页
-→ 点击创建任务
-→ 填写标题、目标、范围、验收标准
-→ 选择 required capabilities
-→ 选择 Primary Agent
-→ 保存
-→ 进入任务详情页
-```
-
-如果不选择 Primary Agent：
-
-- 系统根据能力推荐候选 Agent。
-- 用户可跳过，但首次运行前必须选择。
-
-## 6.4 运行 Primary Agent 流程
+## 6.2 添加任务资料
 
 ```text
 任务详情页
-→ 点击 Run Primary Agent
-→ 系统生成 context
-→ 根据 Agent 类型执行
-→ 保存 Run
-→ 更新任务状态
+→ 添加资料
+→ 选择资料类型
+→ 填写或上传内容
+→ 保存
+→ 资料进入任务上下文
 ```
 
-Manual Agent：
-
-```text
-生成 prompt
-→ Run 状态 waiting_user
-→ 用户复制 prompt 到外部 AI
-→ 用户粘贴结果
-→ Run 状态 success
-```
-
-Generic CLI Agent：
-
-```text
-生成 prompt
-→ 执行 CLI
-→ 保存 stdout/stderr
-→ Run 状态 success / failed
-```
-
-## 6.5 临时运行其他 Agent 流程
+## 6.3 运行默认助手
 
 ```text
 任务详情页
-→ 点击 Run Another Agent
-→ 选择 Agent
+→ 点击继续生成
+→ 系统按资料范围构建上下文
+→ 调用默认助手
+→ 生成输出
+→ 保存执行记录
+```
+
+## 6.4 找其他助手看看
+
+```text
+任务详情页
+→ 点击找其他助手看看
+→ 选择助手
 → 选择原因
-→ 执行 Run
-→ 保存为 Supporting Agent Run
+→ 生成 prompt 或执行
+→ 保存输出
 ```
 
 原因选项：
 
-- review
-- security_review
-- architecture_review
-- primary_failed
-- quota_low
-- capability_missing
-- second_opinion
-- user_requested
+- 评审。
+- 数据分析。
+- 技术追问。
+- 第二意见。
+- 用户主动。
 
-## 6.6 切换 Primary Agent 流程
+## 6.5 更换默认助手
 
 ```text
 任务详情页
-→ 点击 Switch Primary Agent
-→ 选择新 Agent
-→ 填写切换原因
-→ 选择是否生成 Handoff
-→ 保存切换记录
-→ 新 Agent 成为 Primary Agent
-```
-
-切换后：
-
-- 旧 Primary Agent 保留在历史记录。
-- 后续默认使用新 Primary Agent。
-- 系统记录切换原因。
-- 建议生成 Handoff。
-
-## 6.7 创建 Workflow 流程
-
-```text
-进入 Workflow 管理页
-→ 点击创建 Workflow
-→ 选择从模板创建或空白创建
-→ 添加 Step
-→ 配置 Step 类型和 Agent 规则
+→ 点击更换默认助手
+→ 选择新助手
+→ 填写原因
+→ 系统建议生成交接说明
 → 保存
 ```
 
-## 6.8 运行 Workflow 流程
+## 6.6 运行任务流程
 
 ```text
 任务详情页
-→ 点击 Run Workflow
-→ 选择 Workflow
-→ 系统按 Step 顺序执行
-→ 遇到 waiting_user 暂停
-→ 用户补充结果后继续
-→ 结束后生成 Workflow Run
+→ 选择流程
+→ 按步骤执行
+→ 遇到用户输入步骤则暂停
+→ 用户补充后继续
+→ 生成输出
 ```
 
-Step 执行规则：
-
-- 未指定 Agent：使用任务 Primary Agent。
-- 指定 Agent：使用该 Supporting Agent。
-- Manual Step：等待用户输入。
-
-## 6.9 生成 Handoff 流程
+## 6.7 生成最终结论
 
 ```text
 任务详情页
-→ 点击 Generate Handoff
-→ 系统读取任务、Run、Workflow Run、Git 状态
-→ 生成 Handoff
-→ 展示并保存
+→ 点击生成最终结论
+→ 系统读取任务、资料、输出、执行记录
+→ 生成 Output
+→ 可标记为最终版本
 ```
 
 ## 7. 字段定义
@@ -591,128 +515,111 @@ Step 执行规则：
 |---|---|---:|---|
 | id | string | 是 | 任务 ID |
 | title | string | 是 | 标题 |
+| type | enum | 是 | 任务类型 |
 | goal | string | 是 | 目标 |
-| scope | string[] | 否 | 范围 |
-| nonGoals | string[] | 否 | 非目标 |
-| acceptanceCriteria | string[] | 否 | 验收标准 |
-| requiredCapabilities | string[] | 否 | 所需能力 |
-| primaryAgentId | string | 否 | 主 Agent |
+| expectedOutput | string | 否 | 预期输出 |
+| defaultAssistantId | string | 否 | 默认助手 |
+| workflowId | string | 否 | 推荐流程 |
+| contextScope | enum | 是 | 简洁 / 标准 / 完整 |
 | status | enum | 是 | 状态 |
 | createdAt | datetime | 是 | 创建时间 |
 | updatedAt | datetime | 是 | 更新时间 |
 
-## 7.2 Agent
+## 7.2 Material
 
 | 字段 | 类型 | 必填 | 说明 |
 |---|---|---:|---|
-| id | string | 是 | Agent ID |
+| id | string | 是 | 资料 ID |
+| taskId | string | 是 | 任务 ID |
+| type | enum | 是 | text / url / file / image / meeting_note / user_feedback / competitor_info / ai_output |
+| title | string | 是 | 标题 |
+| content | string | 否 | 内容 |
+| filePath | string | 否 | 文件路径 |
+| sourceUrl | string | 否 | 链接 |
+| createdAt | datetime | 是 | 创建时间 |
+
+## 7.3 Assistant
+
+| 字段 | 类型 | 必填 | 说明 |
+|---|---|---:|---|
+| id | string | 是 | 助手 ID |
 | name | string | 是 | 名称 |
 | type | enum | 是 | manual / cli |
+| applicableTaskTypes | string[] | 否 | 适用任务类型 |
 | capabilities | string[] | 是 | 能力 |
 | promptTemplate | string | 否 | Prompt 模板 |
-| contextMode | enum | 是 | light / standard / full |
-| command | string | CLI 必填 | CLI 命令 |
+| defaultContextScope | enum | 是 | 简洁 / 标准 / 完整 |
 | enabled | boolean | 是 | 是否启用 |
 
-## 7.3 Workflow
+## 7.4 Workflow
 
 | 字段 | 类型 | 必填 | 说明 |
 |---|---|---:|---|
-| id | string | 是 | Workflow ID |
+| id | string | 是 | 流程 ID |
 | name | string | 是 | 名称 |
+| applicableTaskTypes | string[] | 否 | 适用任务类型 |
 | description | string | 否 | 描述 |
 | steps | Step[] | 是 | 步骤 |
 | enabled | boolean | 是 | 是否启用 |
 
-## 7.4 Workflow Step
+## 7.5 Output
 
 | 字段 | 类型 | 必填 | 说明 |
 |---|---|---:|---|
-| id | string | 是 | Step ID |
-| title | string | 是 | 标题 |
-| type | enum | 是 | manual_input / context_build / agent_run / review_prompt / handoff_build |
-| agentId | string | 否 | 指定 Agent |
-| usePrimaryAgent | boolean | 否 | 是否默认使用 Primary Agent |
-| contextMode | enum | 否 | light / standard / full |
-| required | boolean | 是 | 是否必填 |
-
-## 7.5 Run
-
-| 字段 | 类型 | 必填 | 说明 |
-|---|---|---:|---|
-| id | string | 是 | Run ID |
+| id | string | 是 | 输出 ID |
 | taskId | string | 是 | 任务 ID |
-| agentId | string | 是 | Agent ID |
-| isPrimaryAgent | boolean | 是 | 是否主 Agent 执行 |
+| type | enum | 是 | 输出类型 |
+| title | string | 是 | 标题 |
+| content | string | 是 | 内容 |
+| sourceRunIds | string[] | 否 | 来源执行记录 |
+| version | number | 是 | 版本 |
+| isFinal | boolean | 是 | 是否最终版本 |
+| createdAt | datetime | 是 | 创建时间 |
+
+## 7.6 Run
+
+| 字段 | 类型 | 必填 | 说明 |
+|---|---|---:|---|
+| id | string | 是 | 执行记录 ID |
+| taskId | string | 是 | 任务 ID |
+| assistantId | string | 是 | 助手 ID |
 | reason | string | 否 | 调用原因 |
-| contextMode | enum | 是 | 上下文模式 |
+| contextScope | enum | 是 | 资料范围 |
 | prompt | string | 是 | 输入 prompt |
 | result | string | 否 | 输出结果 |
-| stdout | string | 否 | 标准输出 |
-| stderr | string | 否 | 标准错误 |
 | status | enum | 是 | 状态 |
 | createdAt | datetime | 是 | 创建时间 |
 | completedAt | datetime | 否 | 完成时间 |
 
-## 7.6 Handoff
+## 8. 资料范围规则
 
-| 字段 | 类型 | 必填 | 说明 |
-|---|---|---:|---|
-| id | string | 是 | Handoff ID |
-| taskId | string | 是 | 任务 ID |
-| content | string | 是 | 内容 |
-| sourceRunIds | string[] | 否 | 来源 Run |
-| createdAt | datetime | 是 | 创建时间 |
-
-## 8. Context Mode 规则
-
-### light
+### 简洁
 
 包含：
 
-- 任务标题
-- 任务目标
-- 当前 Handoff 摘要
-- 必要 Run 摘要
+- 任务目标。
+- 最新输出。
+- 用户本次输入。
 
-适合：
-
-- Handoff Agent
-- 简单 Review
-- 状态总结
-
-### standard
+### 标准
 
 包含：
 
-- 项目摘要
-- 任务详情
-- 规则
-- 当前 Handoff
-- Git status
-- 关键 Run 摘要
+- 任务目标。
+- 任务资料摘要。
+- 最近输出。
+- 当前流程步骤。
 
-适合：
-
-- Primary Agent 默认执行
-- Workflow 常规步骤
-
-### full
+### 完整
 
 包含：
 
-- 完整任务上下文
-- 完整 Handoff
-- 更完整 diff
-- 相关文件路径或内容
-- 关键历史记录
+- 全部任务资料。
+- 历史输出。
+- 关键执行记录。
+- 相关文件。
 
-适合：
-
-- 复杂架构分析
-- 用户主动要求
-
-默认不使用 full。
+默认：标准。
 
 ## 9. 状态定义
 
@@ -751,17 +658,6 @@ failed
 cancelled
 ```
 
-## 9.4 Step 状态
-
-```text
-pending
-running
-waiting_user
-success
-failed
-skipped
-```
-
 ## 10. 安全规则
 
 MVP 必须遵守：
@@ -770,31 +666,27 @@ MVP 必须遵守：
 - 不自动 merge。
 - 不自动 deploy。
 - 不直接修改密钥文件。
-- `.ai/RUNS/` 默认不进 Git。
+- CLI 助手属于高级能力。
 - Web UI 不建议直接公网暴露。
-- CLI Agent 执行前后记录 Git 状态。
-- 切换 Primary Agent 必须记录原因。
+- 用户资料和输出需要本地/私有保存。
 
 ## 11. 验收标准
 
 MVP 完成后必须通过以下验收：
 
-1. UI 可以初始化项目。
-2. UI 可以创建多个任务。
-3. UI 可以创建多个 Agent。
-4. UI 可以创建多个 Workflow。
-5. 任务可以选择 Primary Agent。
-6. 任务可以运行 Primary Agent。
-7. 任务可以临时运行 Supporting Agent。
-8. 任务可以切换 Primary Agent。
-9. Workflow 可以被多个任务复用。
-10. Workflow Step 默认可使用 Primary Agent。
-11. Manual Agent 可以生成 prompt 并等待用户回填。
-12. 用户回填后 Run 变为 success。
-13. Generic CLI Agent 可以执行命令并保存 stdout/stderr。
-14. 系统可以生成 Handoff。
-15. Handoff 能说明当前任务状态和下一步。
-16. 系统不绑定任何具体 AI 工具。
+1. 用户可以从首页选择任务类型开始。
+2. 用户可以创建任务并添加资料。
+3. 系统可以推荐默认助手和流程。
+4. 用户可以运行默认助手。
+5. 用户可以运行任务流程。
+6. 用户可以查看输出结果。
+7. 用户可以将输出转为资料。
+8. 用户可以找其他助手评审。
+9. 用户可以更换默认助手。
+10. 系统保存执行记录。
+11. 系统可以生成最终结论 / 交接说明。
+12. 用户无需先理解 Agent / Workflow 才能开始。
+13. Git / CLI / Code Agent 不出现在默认主流程中。
 
 ## 12. MVP 不做
 
@@ -822,8 +714,9 @@ MVP 数据模型和服务设计需预留：
 - REST API。
 - ChatGPT Action。
 - MCP Server。
-- HTTP Agent。
+- HTTP Assistant。
 - Workflow 条件分支。
 - Workflow DAG。
 - 成本统计。
 - 偏好记忆。
+- 开发者模式。

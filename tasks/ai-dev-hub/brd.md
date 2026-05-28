@@ -18,22 +18,28 @@
 - 不同 AI 工具输出无法统一管理。
 - 同一任务缺少持续上下文。
 - 多电脑工作现场不统一。
-- 少数开发/技术任务还需要接入 CLI 或代码 Agent。
+- AI 输出和任务资料缺少统一沉淀。
 
-需要一个私有部署的 AI 工作流任务中台，统一管理任务、Agent、Workflow、Run 和 Handoff。
+需要一个私有部署的 AI 工作流任务中台，帮助用户围绕“任务”持续推进工作，并沉淀资料、过程和输出。
 
 ## 3. 产品定位
 
 AI Work Hub 的定位是：
 
 ```text
-AI 工作流任务中台
+产品经理 / 运营的 AI 工作台
+```
+
+更正式定义：
+
+```text
+面向产品、运营、技术型 PM 和个人开发者的 AI 工作流任务中台。
 ```
 
 核心价值：
 
 ```text
-以任务为中心，沉淀 AI 工作现场，让产品、运营、技术任务可以持续推进和复用。
+以任务为中心，管理资料、助手、流程、输出和交接，让 AI 工作可以持续推进。
 ```
 
 它不是：
@@ -46,7 +52,7 @@ AI 工作流任务中台
 - 不是多 Agent 自动编排平台。
 - 不是公网 SaaS。
 
-Agent、Workflow、External AI Control Layer 都是能力组件，不是产品定位本身。
+Agent、Workflow、Run、Handoff、Adapter 都是底层能力组件，不是用户第一入口。
 
 ## 4. 目标用户
 
@@ -60,9 +66,10 @@ Agent、Workflow、External AI Control Layer 都是能力组件，不是产品�
 
 - 同时使用多个 AI 工具。
 - 经常做调研、PRD、评审、总结、运营方案。
-- 希望通过 UI 管理 AI 工作流。
-- 希望把重复流程沉淀为 Workflow。
-- 希望把常用角色沉淀为 Agent。
+- 希望从任务类型直接开始，而不是先配置工具。
+- 希望把任务资料和 AI 输出沉淀下来。
+- 希望把重复流程沉淀为任务流程。
+- 希望把常用角色沉淀为助手。
 - 希望同一任务持续积累上下文和结论。
 - 少数场景需要接入开发 CLI 或代码 Agent。
 
@@ -71,37 +78,64 @@ Agent、Workflow、External AI Control Layer 都是能力组件，不是产品�
 MVP 目标：
 
 ```text
-让用户可以在 UI 中管理多个任务、多个 Agent、多个 Workflow，并把每次 AI 输出沉淀为 Run 和 Handoff。
+让用户从任务类型开始，添加资料，使用推荐助手和流程，持续生成输出并沉淀任务结论。
 ```
 
 核心业务目标：
 
+- 用户无需先理解 Agent / Workflow 就能开始任务。
 - 多任务可管理。
-- 多 Workflow 可管理。
-- 多 Agent 可管理。
+- 任务资料可沉淀。
+- 多助手可复用。
+- 多任务流程可复用。
 - 每次 AI 输出可记录。
 - 每个任务可生成结论和交接。
 - 换工具、换电脑后任务现场不丢。
-- 产品/运营固定流程可以复用。
 
-## 6. 核心业务对象
+## 6. 用户主路径
 
-### 6.1 Workspace
+MVP 主路径：
+
+```text
+选择任务类型
+→ 填写目标
+→ 添加资料
+→ 系统推荐默认助手和任务流程
+→ 开始执行
+→ 查看输出
+→ 继续优化 / 找其他助手评审
+→ 生成最终结论 / 交接说明
+```
+
+首页第一问题：
+
+```text
+你想完成什么？
+```
+
+默认入口：
+
+- 做需求调研。
+- 写 PRD。
+- 做竞品分析。
+- 做运营方案。
+- 整理会议纪要。
+- 做评审。
+- 做数据复盘。
+- 技术追问。
+- 自定义任务。
+
+## 7. 核心业务对象
+
+### 7.1 Workspace
 
 用户工作空间。
 
-一个 Workspace 下可以有：
+一个 Workspace 下可以有多个 Project / Space。
 
-- 多个 Project。
-- 多个 Task。
-- 多个 Agent。
-- 多个 Workflow。
-- 多个 Run。
-- 多个 Handoff。
+### 7.2 Project / Space
 
-### 6.2 Project
-
-项目或业务主题。
+业务空间或项目。
 
 例如：
 
@@ -110,91 +144,80 @@ MVP 目标：
 - 某调研专题。
 - 某代码项目。
 
-### 6.3 Task
+### 7.3 Task
 
 AI 工作任务。
 
 一个 Task 可以：
 
-- 指定一个 Primary Agent。
-- 关联多个 Run。
-- 运行多个辅助 Agent。
-- 运行多个 Workflow。
-- 生成多个阶段性 Handoff。
+- 有任务类型。
+- 有任务资料。
+- 有默认助手。
+- 运行任务流程。
+- 生成多个输出。
+- 生成多个执行记录。
+- 生成最终结论或交接说明。
 
-### 6.4 Primary Agent
+### 7.4 Material / Source
 
-任务主 Agent。
+任务资料。
 
-定义：
+支持：
 
-```text
-一个任务默认由一个 Primary Agent 持续推进。
-```
+- 文本。
+- 链接。
+- 文件。
+- 截图。
+- 会议纪要。
+- 用户反馈。
+- 竞品资料。
+- 历史结论。
+- 外部 AI 输出。
 
-示例：
+### 7.5 Assistant / Agent
 
-- PRD 任务默认由 PRD Agent 负责。
-- 调研任务默认由 Research Agent 负责。
-- 运营活动任务默认由 Ops Planning Agent 负责。
-- 技术评审任务默认由 Tech Review Agent 负责。
+可复用 AI 助手。
 
-### 6.5 Supporting Agent
+UI 中称为“助手”。
 
-辅助 Agent。
+底层仍可叫 Agent。
 
-只在必要时使用，例如：
+默认助手对应底层 Primary Agent。
 
-- Review。
-- 数据分析。
-- 安全检查。
-- 技术追问。
-- Handoff 总结。
-- 第二意见。
+### 7.6 Workflow
 
-### 6.6 Agent
+任务流程。
 
-可复用 AI 角色。
+UI 中称为“流程”或“任务流程”。
 
-Agent 可以是：
+MVP 只支持线性步骤。
 
-- Manual Agent。
-- Generic CLI Agent。
-- 后续扩展的 HTTP Agent。
+### 7.7 Run
 
-### 6.7 Workflow
+执行记录。
 
-可复用流程模板。
+Run 是底层记录，不作为用户主入口。
 
-MVP 支持多个 Workflow。
+### 7.8 Output
 
-MVP Workflow 只支持线性步骤。
+输出结果。
 
-Workflow Step 默认优先使用任务 Primary Agent，除非步骤显式指定 Supporting Agent。
+类型包括：
 
-### 6.8 Run
+- 调研结论。
+- PRD 草稿。
+- 竞品分析报告。
+- 运营方案。
+- 会议纪要。
+- 评审意见。
+- 下一步行动项。
+- 交接说明。
 
-一次 Agent 或 Workflow Step 的执行记录。
+### 7.9 Handoff
 
-### 6.9 Handoff
+交接说明。
 
-任务结论 / 交接文档。
-
-用于让用户、下一个 Agent、下一个 Workflow 或外部 AI 工具继续任务。
-
-## 7. MVP 核心闭环
-
-```text
-创建 Workspace/Project
-→ 创建多个 Agent
-→ 创建多个 Workflow
-→ 创建多个 Task
-→ 为 Task 选择 Primary Agent
-→ 运行 Agent 或 Workflow
-→ 必要时调用 Supporting Agent
-→ 保存 Run 结果
-→ 生成 Handoff / 任务结论
-```
+Handoff 是 Output 的一种。
 
 ## 8. MVP 核心业务能力
 
@@ -202,185 +225,119 @@ Workflow Step 默认优先使用任务 Primary Agent，除非步骤显式指定 
 
 用户可以创建或选择 Workspace / Project。
 
-Project 可代表：
+### 8.2 任务类型入口
 
-- 产品项目。
-- 运营项目。
-- 调研专题。
-- 开发项目。
+用户从任务类型开始创建任务。
 
-### 8.2 多任务管理
-
-用户可以创建、查看、切换多个任务。
-
-Task 字段：
-
-- 标题。
-- 目标。
-- 类型。
-- 范围。
-- 非目标。
-- 预期输出。
-- 所需能力。
-- Primary Agent。
-- 当前状态。
-
-Task 类型：
+任务类型：
 
 - research。
 - prd。
-- review。
+- competitive_analysis。
 - ops_plan。
 - data_analysis。
 - meeting_summary。
+- review。
 - tech_review。
 - dev_task。
+- custom。
 
-### 8.3 Agent 管理
+### 8.3 任务资料管理
 
-用户可以手动创建多个常用 Agent。
+每个任务可以添加多条资料。
 
-MVP 支持 Agent 类型：
+资料可以被任务流程和助手引用。
 
-- Manual Agent。
-- Generic CLI Agent。
+### 8.4 默认助手
 
-MVP 推荐 Agent 模板：
+创建任务时系统推荐默认助手。
 
-- Research Agent。
-- PRD Agent。
-- Review Agent。
-- Ops Planning Agent。
-- Data Analysis Agent。
-- Meeting Summary Agent。
-- Handoff Agent。
-- Tech Review Agent。
-- Code Agent。
+用户可以：
 
-Agent 字段：
+- 使用推荐助手。
+- 更换默认助手。
+- 临时找其他助手看看。
 
-- 名称。
-- 类型。
-- 能力。
-- Prompt 模板。
-- 执行方式。
-- 是否启用。
-- 默认上下文模式。
+### 8.5 助手管理
 
-### 8.4 Workflow 管理
+用户可以管理多个助手。
 
-用户可以创建多个固定 Workflow。
+MVP 推荐助手模板：
 
-MVP 只支持线性 Workflow：
+- 调研助手。
+- PRD 助手。
+- 竞品分析助手。
+- 运营方案助手。
+- 数据分析助手。
+- 会议纪要助手。
+- 评审助手。
+- 技术追问助手。
+- 代码助手。
 
-```text
-Step 1 → Step 2 → Step 3
-```
+### 8.6 任务流程管理
 
-MVP 推荐 Workflow 模板：
+用户可以使用或创建任务流程。
 
-- 需求调研 Workflow。
-- PRD 生成 Workflow。
-- 竞品分析 Workflow。
-- 运营活动 Workflow。
-- 评审 Workflow。
-- 会议纪要 Workflow。
-- 交接总结 Workflow。
-- 开发 Pre-work Workflow。
+MVP 推荐流程模板：
 
-Workflow Step 类型：
+- 需求调研流程。
+- PRD 生成流程。
+- 竞品分析流程。
+- 运营活动流程。
+- 评审流程。
+- 会议纪要流程。
+- 交接总结流程。
+- 开发前准备流程。
 
-- manual_input。
-- context_build。
-- agent_run。
-- review_prompt。
-- handoff_build。
+### 8.7 输出结果管理
 
-### 8.5 Primary Agent 选择
+用户可以查看任务产生的输出。
 
-创建任务时，用户可以选择 Primary Agent。
+输出可以被继续优化，也可以作为资料进入下一轮任务。
 
-如果用户不选，系统根据任务类型和所需能力推荐候选 Agent。
+### 8.8 资料范围
 
-任务执行中默认继续使用 Primary Agent。
+底层 Context Mode 在 UI 中叫“资料范围”。
 
-用户可以随时：
+选项：
 
-- 临时运行其他 Agent。
-- 正式切换 Primary Agent。
+- 简洁：只使用任务目标和最新结论。
+- 标准：使用任务目标、任务资料和最近输出。
+- 完整：使用全部资料、历史记录和相关文件。
 
-### 8.6 Context Mode
-
-为控制 token 和提高效率，MVP 支持上下文模式。
-
-Context Mode：
-
-- light。
-- standard。
-- full。
-
-默认规则：
-
-- Primary Agent 默认 standard。
-- Review / Handoff 类 Supporting Agent 默认 light 或 standard。
-- 不默认传全量历史。
-- 优先传任务目标、当前结论、关键输入、文件路径或摘要。
-
-### 8.7 Run 记录
-
-每次 Agent 执行都生成 Run。
-
-Run 记录：
-
-- Agent。
-- Task。
-- 是否 Primary Agent。
-- Prompt。
-- Context Mode。
-- 用户回填结果。
-- stdout / stderr。
-- 执行状态。
-- 时间。
-- 关键输入。
-- 关键输出。
-
-### 8.8 Handoff / 结论生成
-
-系统基于任务、Run、Workflow Run 和用户备注生成 Handoff。
-
-Handoff 内容：
-
-- 当前任务状态。
-- Primary Agent。
-- 执行过的 Supporting Agent。
-- 执行过的 Workflow。
-- 关键结论。
-- 风险。
-- 剩余事项。
-- 下一步建议。
+默认：标准。
 
 ## 9. MVP UI 范围
 
-MVP 必须有轻量 UI。
+主导航建议：
+
+```text
+首页
+任务
+资料
+助手
+流程
+输出
+设置
+```
 
 页面范围：
 
-- Workspace / Project 页。
+- 首页。
 - 任务列表页。
+- 任务创建页。
 - 任务详情页。
-- Agent 管理页。
-- Workflow 管理页。
-- Run 记录页。
-- Handoff / 结论页。
+- 资料管理区。
+- 助手管理页。
+- 流程管理页。
+- 输出页。
 - 设置页。
 
-UI 不做：
+Run / Handoff 不作为一级主导航。
 
-- 不做代码编辑器。
-- 不做复杂 diff viewer。
-- 不做权限系统。
-- 不做多用户协作。
-- 不做 Agent 市场。
+Run 显示为任务详情页中的执行记录。
+
+Handoff 显示为输出的一种。
 
 ## 10. MVP 不做范围
 
@@ -405,66 +362,46 @@ MVP 明确不做：
 - ChatGPT Action。
 - MCP Server。
 
-MVP 可以保留扩展接口，但不实现上述能力。
+开发相关能力作为高级能力保留，不作为默认主流程。
 
 ## 11. 扩展性要求
 
-MVP 虽然做轻量版本，但数据结构和产品模型必须支持扩展。
+MVP 必须满足：
 
-必须满足：
-
-- 一个 Workspace 支持多个 Project。
-- 一个 Project 支持多个 Task。
-- 一个 Project 支持多个 Agent。
-- 一个 Project 支持多个 Workflow。
-- 一个 Task 支持一个 Primary Agent。
-- 一个 Task 支持多个 Supporting Agent Run。
-- 一个 Task 支持多个 Workflow Run。
-- 一个 Agent 可被多个 Task 复用。
+- 一个 Workspace 支持多个 Project / Space。
+- 一个 Project / Space 支持多个 Task。
+- 一个 Task 支持多个 Material。
+- 一个 Task 支持一个默认助手。
+- 一个 Task 支持多个其他助手调用。
+- 一个 Task 支持多个流程运行记录。
+- 一个 Task 支持多个 Output。
+- 一个 Assistant 可被多个 Task 复用。
 - 一个 Workflow 可被多个 Task 复用。
-- Workflow 后续可扩展条件分支和 DAG，但 MVP 不实现。
-- Agent 后续可扩展 HTTP Adapter，但 MVP 不实现。
-- 后续可暴露 REST API 给 ChatGPT Action 使用。
-- 后续可暴露 MCP Server 给外部 AI 工具使用。
+- 后续可扩展条件分支和 DAG，但 MVP 不实现。
+- 后续可扩展 HTTP Adapter，但 MVP 不实现。
+- 后续可暴露 REST API / ChatGPT Action / MCP。
 
 ## 12. 核心原则
 
-### 12.1 任务级主 Agent
+### 12.1 任务优先
 
-系统默认不是频繁换工具，而是任务级选择主 Agent。
+用户从任务开始，不从工具配置开始。
 
-```text
-一个任务，一个 Primary Agent，持续推进。
-```
+### 12.2 资料优先
 
-### 12.2 少数场景才切换
+产品/运营任务的输入是资料，资料必须成为核心对象。
 
-切换 Agent 是例外，不是默认路径。
+### 12.3 输出优先
 
-常见切换原因：
+用户关心输出结果，Run 和 Handoff 是底层记录。
 
-- review。
-- 数据分析。
-- 技术追问。
-- primary agent 失败。
-- 额度不足。
-- 用户要第二意见。
+### 12.4 默认助手持续推进
 
-### 12.3 不绑定工具
+一个任务默认由一个默认助手持续推进。
 
-系统不写死 ChatGPT、Cursor、Codex、Claude 或任何单一工具。
+用户可以随时找其他助手看看，也可以更换默认助手。
 
-正确抽象：
-
-```text
-Task 选择 Primary Agent
-Agent 提供能力
-Adapter 执行能力
-Run 记录结果
-Handoff 支持少数切换场景
-```
-
-### 12.4 产品/运营优先
+### 12.5 产品/运营优先
 
 默认场景优先服务产品、运营、技术型 PM 的日常 AI 工作流。
 
@@ -474,146 +411,96 @@ Handoff 支持少数切换场景
 
 ### 13.1 产品需求调研
 
-用户创建调研任务，选择 Research Agent，运行需求调研 Workflow，最终生成调研结论。
+用户选择“做需求调研”，填写问题，添加资料，系统推荐调研助手和需求调研流程，最终生成调研结论。
 
 ### 13.2 PRD 生成
 
-用户创建 PRD 任务，选择 PRD Agent，运行 PRD Workflow，最终生成 PRD 草稿和评审结论。
+用户选择“写 PRD”，添加需求背景、用户反馈、业务目标，系统生成 PRD 草稿，并可调用评审助手优化。
 
 ### 13.3 运营活动策划
 
-用户创建运营活动任务，选择 Ops Planning Agent，运行运营活动 Workflow，沉淀活动方案。
+用户选择“做运营方案”，添加活动目标和历史数据，系统生成活动方案和执行清单。
 
 ### 13.4 竞品分析
 
-用户创建竞品分析任务，运行竞品分析 Workflow，生成结论和后续建议。
+用户添加竞品链接、截图、资料，系统生成竞品分析报告和跟进建议。
 
-### 13.5 技术方案评审
+### 13.5 会议纪要
 
-用户创建技术评审任务，选择 Tech Review Agent 或 Review Agent，生成评审结论。
+用户粘贴会议记录，系统生成纪要、结论和行动项。
 
-### 13.6 开发前准备
+### 13.6 技术追问
 
-用户创建开发任务，选择 Code Agent 或 CLI Agent，运行 Pre-work Workflow，生成开发前上下文和 handoff。
+产品经理可以把技术方案作为资料，调用技术追问助手生成问题清单和评审意见。
 
-## 14. 外部 AI 扩展方向
-
-### REST API + ChatGPT Action
-
-目标：让 ChatGPT 可以通过受控 API 管理 AI Work Hub。
-
-能力：
-
-- 创建任务。
-- 查询任务。
-- 创建 Agent。
-- 创建 Workflow。
-- 回填 Run。
-- 获取 Handoff。
-
-### MCP Server
-
-目标：让支持 MCP 的 AI 工具通过 tools 调用 AI Work Hub。
-
-能力：
-
-- task tools。
-- agent tools。
-- workflow tools。
-- run tools。
-- handoff tools。
-
-限制：
-
-- 不开放直接 shell。
-- 不开放自动 push / merge / deploy。
-- 高风险操作必须用户确认。
-
-## 15. MVP 成功标准
+## 14. 成功标准
 
 MVP 完成后必须能演示：
 
-1. 通过 UI 创建 Workspace / Project。
-2. 通过 UI 创建多个任务。
-3. 通过 UI 创建多个 Agent。
-4. 通过 UI 创建多个 Workflow。
-5. 创建任务时选择 Primary Agent。
-6. 一个任务默认由 Primary Agent 推进。
-7. Supporting Agent 可被临时调用。
-8. 一个 Agent 可被多个任务复用。
-9. 一个 Workflow 可被多个任务复用。
-10. 通过 UI 运行 Workflow。
-11. Manual Agent Step 可以生成 prompt 并等待用户回填结果。
-12. 用户回填结果后 Workflow 可继续。
-13. 系统保存 Run 记录。
-14. 系统生成 Handoff / 任务结论。
-15. 后续 Agent 或 Workflow 能基于 Handoff 接力。
+1. 用户从首页选择任务类型开始。
+2. 用户可以创建任务并添加资料。
+3. 系统自动推荐默认助手和流程。
+4. 用户可以运行流程。
+5. 用户可以查看输出结果。
+6. 用户可以找其他助手评审。
+7. 用户可以更换默认助手。
+8. 系统保存执行记录。
+9. 系统生成最终结论或交接说明。
+10. 用户不需要先理解 Agent / Workflow 才能开始。
 
-## 16. 业务指标
+## 15. 业务指标
 
 MVP 关注：
 
 - Task 创建数量。
-- Task 配置 Primary Agent 比例。
-- Agent 创建数量。
-- Workflow 创建数量。
+- Material 添加数量。
+- Output 生成数量。
 - Workflow 运行次数。
-- Run 记录数量。
-- Handoff 生成数量。
-- 同一任务内 Agent 切换次数下降。
+- Assistant 使用次数。
+- 用户从创建任务到生成第一个输出的时间。
 - 用户重复解释任务背景次数下降。
 
-## 17. 关键风险
+## 16. 关键风险
 
-### 风险 1：范围膨胀
+### 风险 1：产品变成工具配置台
 
 控制：
 
-- UI 只做操作台。
-- Workflow 只做线性步骤。
-- 不做 DAG。
-- 不做自动多 Agent 编排。
+- 首页从任务类型开始。
+- Agent / Workflow 作为配置项，不作为用户第一入口。
 
 ### 风险 2：误做成开发者工具
 
 控制：
 
-- 默认信息架构不围绕 Git、Diff、CLI。
-- 产品/运营任务作为默认场景。
-- 开发能力放到高级场景。
+- 默认场景围绕调研、PRD、运营、会议、评审。
+- Git、Diff、CLI 降级为高级能力。
 
-### 风险 3：过早绑定工具
-
-控制：
-
-- 只定义 Agent / Adapter 协议。
-- 具体工具通过配置接入。
-
-### 风险 4：任务内频繁切换 Agent 造成效率下降
+### 风险 3：范围膨胀
 
 控制：
 
-- 引入 Primary Agent。
-- Supporting Agent 只在必要场景调用。
+- Workflow 只做线性步骤。
+- 不做 DAG。
+- 不做多 Agent 自动编排。
 
-### 风险 5：Token 成本增加
+### 风险 4：Token 成本增加
 
 控制：
 
-- 引入 Context Mode。
+- 引入资料范围。
 - 默认不传全量历史。
 - 优先传摘要、任务目标、关键结论。
 
-## 18. 下一步
+## 17. 下一步
 
-BRD 更新后，需要同步调整 PRD。
+PRD 需要按本 BRD 调整。
 
-PRD 应重点围绕产品/运营场景展开：
+重点调整：
 
-- Workspace / Project。
-- Task 类型。
-- Agent 模板。
-- Workflow 模板。
-- Run 和 Handoff。
-- 产品/运营默认 UI。
-- 开发者能力作为扩展。
+- 首页任务类型入口。
+- 任务创建表单。
+- 资料管理。
+- 输出结果。
+- 助手和流程的用户化表达。
+- Run / Handoff 降级为内部记录和输出类型。
