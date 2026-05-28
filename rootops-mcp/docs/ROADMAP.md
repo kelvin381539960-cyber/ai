@@ -36,10 +36,11 @@
 
 ## Phase 3: Patch transaction
 
-- [ ] snapshot provider
-- [ ] unified diff preview
-- [ ] expected_hash apply
-- [ ] local_patch_risk integration
+- [x] snapshot provider
+- [x] simple diff preview
+- [x] expected_hash dry-run
+- [x] local_patch_risk hook
+- [ ] apply patch tool
 - [ ] verify step
 - [ ] rollback step
 

@@ -7,25 +7,10 @@ export function compareRisk(a: RiskLevel, b: RiskLevel): number {
 }
 
 export function classifyToolRisk(toolName: string): RiskLevel {
-  if (/^(file\.read|file\.read_many|file\.list|file\.search|file\.hash|file\.outline|git\.status|git\.diff|git\.log|local\.)/.test(toolName)) {
-    return 'R0';
-  }
-
-  if (/^(snapshot\.create|file\.patch|file\.write|file\.related)$/.test(toolName)) {
-    return 'R1';
-  }
-
-  if (/^(build\.run|git\.branch|git\.worktree|ssh\.exec|rsync\.)/.test(toolName)) {
-    return 'R2';
-  }
-
-  if (/^(git\.commit|git\.push|deploy\.|systemctl|database\.write)$/.test(toolName)) {
-    return 'R3';
-  }
-
-  if (/^(sudo|policy\.manage|approval\.bypass|git\.rollback|file\.delete)/.test(toolName)) {
-    return 'R4';
-  }
-
+  if (/^(file\.read|file\.read_many|file\.list|file\.search|file\.hash|file\.outline|git\.status|git\.diff|git\.log|local\.)/.test(toolName)) return 'R0';
+  if (/^(snapshot\.create|patch\.dry_run|file\.patch|file\.write|file\.related)$/.test(toolName)) return 'R1';
+  if (/^(build\.run|git\.branch|git\.worktree|ssh\.exec|rsync\.)/.test(toolName)) return 'R2';
+  if (/^(git\.commit|git\.push|deploy\.|systemctl|database\.write)$/.test(toolName)) return 'R3';
+  if (/^(sudo|policy\.manage|approval\.bypass|git\.rollback|file\.delete)/.test(toolName)) return 'R4';
   return 'R2';
 }

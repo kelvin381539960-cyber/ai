@@ -5,51 +5,13 @@ export const DEFAULT_TASK_SCOPE: TaskScope = {
   allowedRoots: ['/opt/AIX代码', '/opt/feishu-bridge', '/opt/cursor-bridge', '/opt/crawlx', '/opt/prd'],
   expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
   autoAllow: [
-    'file.read',
-    'file.read_many',
-    'file.list',
-    'file.search',
-    'file.hash',
-    'file.outline',
-    'file.related',
-    'file.patch',
-    'file.write',
-    'snapshot.create',
-    'git.status',
-    'git.diff',
-    'git.log',
-    'build.run',
-    'local.embed',
-    'local.rerank',
-    'local.summarize',
-    'local.patch_risk'
+    'file.read', 'file.read_many', 'file.list', 'file.search', 'file.hash', 'file.outline', 'file.related',
+    'patch.dry_run', 'snapshot.create',
+    'git.status', 'git.diff', 'git.log', 'build.run',
+    'local.embed', 'local.rerank', 'local.summarize', 'local.patch_risk', 'local.context_pack'
   ],
-  requiresConfirm: [
-    'git.push',
-    'git.rollback',
-    'file.delete.large',
-    'sudo',
-    'systemctl',
-    'database.write',
-    'policy.manage',
-    'deploy.apply'
-  ],
-  limits: {
-    maxFilesChanged: 30,
-    maxLinesChanged: 8000,
-    maxCommandSeconds: 300,
-    maxLocalModelBatchTokens: 200000
-  }
+  requiresConfirm: ['git.push', 'git.rollback', 'file.delete.large', 'sudo', 'systemctl', 'database.write', 'policy.manage', 'deploy.apply', 'file.write', 'file.patch'],
+  limits: { maxFilesChanged: 30, maxLinesChanged: 8000, maxCommandSeconds: 300, maxLocalModelBatchTokens: 200000 }
 };
 
-export const DANGEROUS_TOOL_NAMES = new Set([
-  'approval.bypass',
-  'policy.manage',
-  'sudo',
-  'systemctl',
-  'database.write',
-  'git.push',
-  'git.rollback',
-  'file.delete.large',
-  'deploy.apply'
-]);
+export const DANGEROUS_TOOL_NAMES = new Set(['approval.bypass', 'policy.manage', 'sudo', 'systemctl', 'database.write', 'git.push', 'git.rollback', 'file.delete.large', 'deploy.apply']);
