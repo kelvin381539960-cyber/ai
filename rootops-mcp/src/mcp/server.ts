@@ -6,6 +6,7 @@ import { DEFAULT_TASK_SCOPE } from '../config/default-policy.js';
 import { AuditLog } from '../core/audit.js';
 import { PolicyEngine } from '../core/policy-engine.js';
 import { classifyToolRisk } from '../core/risk.js';
+import { buildContextPack } from '../file/context-pack.js';
 import { FileEngine } from '../file/file-engine.js';
 import { LocalIntelligence } from '../local/local-intelligence.js';
 import { OllamaClient } from '../local/ollama-client.js';
@@ -99,6 +100,12 @@ export async function startMcpServer(): Promise<void> {
           return jsonToolResult({ ok: true, ...result });
         }
 
+        case 'file.outline': {
+          const parsed = FileOutlineArgs.parse(args);
+          const result = await fileEngine.outline(parsed.path, parsed.max_bytes, parsed.max_items);
+          return jsonToolResult({ ok: true, ...result });
+        }
+
         case 'file.hash': {
           const parsed = FileHashArgs.parse(args);
           const result = await fileEngine.hash(parsed.path);
@@ -120,6 +127,19 @@ export async function startMcpServer(): Promise<void> {
         case 'local.summarize': {
           const parsed = LocalSummarizeArgs.parse(args);
           const result = await local.summarizeLargeText(parsed.text);
+          return jsonToolResult({ ok: true, ...result });
+        }
+
+        case 'local.context_pack': {
+          const parsed = LocalContextPackArgs.parse(args);
+          const result = await buildContextPack(fileEngine, {
+            root: parsed.root,
+            query: parsed.query,
+            maxFiles: parsed.max_files,
+            maxTotalBytes: parsed.max_total_bytes,
+            linesPerFile: parsed.lines_per_file,
+            fileGlob: parsed.file_glob
+          });
           return jsonToolResult({ ok: true, ...result });
         }
 
@@ -192,6 +212,12 @@ const FileSearchArgs = z.object({
   backend: z.enum(['auto', 'rg', 'native']).default('auto')
 });
 
+const FileOutlineArgs = z.object({
+  path: z.string(),
+  max_bytes: z.number().int().min(1).max(2 * 1024 * 1024).default(512 * 1024),
+  max_items: z.number().int().min(1).max(2000).default(300)
+});
+
 const FileHashArgs = z.object({ path: z.string() });
 
 const LocalEmbedArgs = z.object({ texts: z.array(z.string()).min(1).max(128) });
@@ -202,3 +228,12 @@ const LocalRerankArgs = z.object({
 });
 
 const LocalSummarizeArgs = z.object({ text: z.string().min(1) });
+
+const LocalContextPackArgs = z.object({
+  root: z.string().optional(),
+  query: z.string().min(1),
+  max_files: z.number().int().min(1).max(50).default(8),
+  max_total_bytes: z.number().int().min(1).max(4 * 1024 * 1024).default(512 * 1024),
+  lines_per_file: z.number().int().min(1).max(1000).default(120),
+  file_glob: z.string().optional()
+});

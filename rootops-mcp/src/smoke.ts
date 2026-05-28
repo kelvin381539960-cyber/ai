@@ -2,6 +2,7 @@ import { DEFAULT_TASK_SCOPE } from './config/default-policy.js';
 import { AuditLog } from './core/audit.js';
 import { PolicyEngine } from './core/policy-engine.js';
 import { classifyToolRisk } from './core/risk.js';
+import { buildContextPack } from './file/context-pack.js';
 import { FileEngine } from './file/file-engine.js';
 import type { ToolCallContext } from './types.js';
 
@@ -25,6 +26,7 @@ export async function runSmoke(): Promise<void> {
   const fileEngine = new FileEngine([process.cwd()]);
   const readmePath = `${process.cwd()}/README.md`;
   const readme = await fileEngine.readLines(readmePath, 1, 20, { maxBytes: 64 * 1024, withLineNumbers: true }).catch((error) => ({ error: String(error) }));
+  const outline = await fileEngine.outline(`${process.cwd()}/src/mcp/server.ts`).catch((error) => ({ error: String(error) }));
   const readMany = await fileEngine.readMany([
     { path: readmePath, limit_lines: 10 },
     { path: `${process.cwd()}/docs/ROADMAP.md`, limit_lines: 20 }
@@ -58,6 +60,13 @@ export async function runSmoke(): Promise<void> {
         backend: 'auto'
       })
     : null;
+  const contextPack = await buildContextPack(fileEngine, {
+    root: process.cwd(),
+    query: 'MCP Gateway',
+    maxFiles: 5,
+    maxTotalBytes: 128 * 1024,
+    linesPerFile: 80
+  });
 
-  console.log(JSON.stringify({ ok: true, decision, event, readme, readMany, search, searchNext }, null, 2));
+  console.log(JSON.stringify({ ok: true, decision, event, readme, outline, readMany, search, searchNext, contextPack }, null, 2));
 }

@@ -87,6 +87,19 @@ export const toolDefinitions = [
     }
   },
   {
+    name: 'file.outline',
+    description: 'Summarize a file structure: imports, exports, classes, functions, methods, constants, todos with line numbers.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        path: { type: 'string' },
+        max_bytes: { type: 'number', default: 524288 },
+        max_items: { type: 'number', default: 300 }
+      },
+      required: ['path']
+    }
+  },
+  {
     name: 'file.hash',
     description: 'Return SHA-256 hash and byte size for a file inside an allowed root.',
     inputSchema: {
@@ -134,6 +147,22 @@ export const toolDefinitions = [
       type: 'object',
       properties: { text: { type: 'string' } },
       required: ['text']
+    }
+  },
+  {
+    name: 'local.context_pack',
+    description: 'Build a compact context pack from search hits and file windows for a task query.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        root: { type: 'string' },
+        query: { type: 'string' },
+        max_files: { type: 'number', default: 8 },
+        max_total_bytes: { type: 'number', default: 524288 },
+        lines_per_file: { type: 'number', default: 120 },
+        file_glob: { type: 'string' }
+      },
+      required: ['query']
     }
   }
 ];

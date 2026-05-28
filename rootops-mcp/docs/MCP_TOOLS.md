@@ -57,23 +57,19 @@ Backends:
 
 Supports cursor pagination through `nextCursor`.
 
+## file.outline
+
+Extracts a lightweight structure summary from a source file.
+
+Current version uses regex-based outline extraction for speed and broad compatibility. Later versions should add tree-sitter for higher precision.
+
 Example:
 
 ```json
 {
-  "path": "/opt/AIX代码",
-  "query": "RootOps",
-  "max_results": 20,
-  "backend": "auto"
-}
-```
-
-Then continue:
-
-```json
-{
-  "query": "RootOps",
-  "cursor": "..."
+  "path": "/opt/AIX代码/src/index.ts",
+  "max_bytes": 524288,
+  "max_items": 300
 }
 ```
 
@@ -104,6 +100,23 @@ Environment:
 
 ```text
 OLLAMA_INSTRUCT_MODEL=qwen2.5-coder:7b
+```
+
+## local.context_pack
+
+Builds a compact context package from search hits and file windows. This is the preferred entry for broad tasks before asking GPT to inspect many files.
+
+Example:
+
+```json
+{
+  "root": "/opt/AIX代码",
+  "query": "payment webhook signature",
+  "max_files": 8,
+  "max_total_bytes": 524288,
+  "lines_per_file": 120,
+  "file_glob": "*.{ts,tsx,java,kt,md}"
+}
 ```
 
 ## Intentional exclusions in this phase

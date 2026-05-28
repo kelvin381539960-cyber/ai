@@ -3,6 +3,7 @@ import { stat, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import fg from 'fast-glob';
 import { decodeCursor, encodeCursor, stableOptionsHash } from './cursor.js';
+import { buildFileOutline } from './outline.js';
 import { searchWithRipgrep } from './rg-search.js';
 
 export interface ReadLineOptions {
@@ -80,13 +81,20 @@ export class FileEngine {
         maxBytes: budget,
         withLineNumbers: item.with_line_numbers ?? true
       });
-      bytesUsed += result.lines.join('\n').length;
+      bytesUsed += Buffer.byteLength(result.lines.join('\n'), 'utf8');
       results.push(result);
 
       if (bytesUsed === before || result.truncatedByBytes) truncated = true;
     }
 
     return { results, bytesUsed, truncated };
+  }
+
+  async outline(filePath: string, maxBytes = 512 * 1024, maxItems = 300): Promise<ReturnType<typeof buildFileOutline>> {
+    const safePath = this.resolveAllowedPath(filePath);
+    const data = await readFile(safePath);
+    const text = data.subarray(0, maxBytes).toString('utf8');
+    return buildFileOutline(safePath, text, maxItems);
   }
 
   async readBytes(filePath: string, offset = 0, length = 64 * 1024): Promise<Buffer> {

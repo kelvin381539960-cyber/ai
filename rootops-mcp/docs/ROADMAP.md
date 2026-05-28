@@ -28,10 +28,11 @@
 - [x] ripgrep backend
 - [x] cursor pagination
 - [x] read_many with byte budget
+- [x] lightweight file.outline
+- [x] context_pack
 - [ ] tree-sitter outline
 - [ ] SQLite FTS5 index
 - [ ] embedding index
-- [ ] context_pack
 
 ## Phase 3: Patch transaction
 

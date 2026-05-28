@@ -104,16 +104,18 @@ Registered tools:
 - `file.read`
 - `file.read_many`
 - `file.search`
+- `file.outline`
 - `file.hash`
 - `local.embed`
 - `local.rerank`
 - `local.summarize`
+- `local.context_pack`
 
 ## Next build order
 
 1. Add tree-sitter outline.
 2. Add SQLite FTS5 index.
-3. Add embedding index and `context_pack`.
+3. Add embedding index.
 4. Add patch dry-run/snapshot/apply/verify flow.
 5. Add SSH session pool and rsync pull.
 6. Add merged confirmation payload.
