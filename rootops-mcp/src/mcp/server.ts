@@ -18,6 +18,8 @@ const defaultProfile = (process.env.ROOTOPS_PROFILE ?? 'read_only') as ToolProfi
 export async function startMcpServer(): Promise<void> {
   const policy = new PolicyEngine(DEFAULT_TASK_SCOPE);
   const audit = new AuditLog();
+  await audit.init();
+
   const fileEngine = new FileEngine(DEFAULT_TASK_SCOPE.allowedRoots);
   const ollama = new OllamaClient({
     baseUrl: process.env.OLLAMA_BASE_URL ?? 'http://127.0.0.1:11434',
@@ -46,7 +48,7 @@ export async function startMcpServer(): Promise<void> {
     };
 
     const decision = policy.authorize(ctx);
-    audit.record({ ...ctx, decision });
+    await audit.record({ ...ctx, decision });
 
     if (!decision.allowed) {
       return jsonToolResult({ ok: false, error: 'authorization_required', decision });
@@ -69,6 +71,10 @@ export async function startMcpServer(): Promise<void> {
         }
 
         case 'audit.list': {
+          const parsed = AuditListArgs.parse(args);
+          if (parsed.source === 'disk') {
+            return jsonToolResult({ ok: true, events: await audit.listFromDisk(parsed.date) });
+          }
           return jsonToolResult({ ok: true, events: audit.list() });
         }
 
@@ -138,6 +144,11 @@ const PolicyCheckArgs = z.object({
   tool_name: z.string(),
   profile: z.string().optional() as z.ZodOptional<z.ZodType<ToolProfile>>,
   args: z.unknown().optional()
+});
+
+const AuditListArgs = z.object({
+  source: z.enum(['memory', 'disk']).default('memory'),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional()
 });
 
 const FileReadArgs = z.object({

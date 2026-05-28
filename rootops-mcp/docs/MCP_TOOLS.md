@@ -6,7 +6,24 @@ Checks whether a tool would be auto-allowed or require confirmation.
 
 ## audit.list
 
-Lists in-memory audit events for the current MCP process.
+Lists audit events.
+
+Arguments:
+
+```json
+{
+  "source": "memory"
+}
+```
+
+or:
+
+```json
+{
+  "source": "disk",
+  "date": "2026-05-28"
+}
+```
 
 ## file.read
 
@@ -51,4 +68,4 @@ OLLAMA_INSTRUCT_MODEL=qwen2.5-coder:7b
 
 No write tools are registered yet.
 No sudo/systemctl/git push/deploy tools are registered yet.
-The first server version is read/search/local-intelligence only.
+The current server version is read/search/local-intelligence only.

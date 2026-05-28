@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "aix-rootops-mcp": {
+      "command": "npm",
+      "args": ["run", "dev"],
+      "cwd": "/absolute/path/to/ai/rootops-mcp",
+      "env": {
+        "ROOTOPS_ACTOR": "claude",
+        "ROOTOPS_PROFILE": "read_only",
+        "ROOTOPS_AUDIT_DIR": ".var/audit",
+        "OLLAMA_BASE_URL": "http://127.0.0.1:11434",
+        "OLLAMA_EMBEDDING_MODEL": "nomic-embed-text",
+        "OLLAMA_INSTRUCT_MODEL": "qwen2.5-coder:7b"
+      }
+    }
+  }
+}

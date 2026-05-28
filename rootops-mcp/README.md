@@ -51,17 +51,58 @@ Snapshot / rollback is the insurance.
 Audit log is the black box.
 ```
 
+## Quick start
+
+```bash
+cd rootops-mcp
+cp .env.example .env
+npm install
+npm run check
+npm run smoke
+npm run dev
+```
+
+## MCP client examples
+
+See:
+
+- `examples/claude_desktop_config.json`
+- `examples/cursor_mcp_config.json`
+
+Update `cwd` to your absolute local path before use.
+
+## Local model sidecar
+
+Default Ollama settings:
+
+```text
+OLLAMA_BASE_URL=http://127.0.0.1:11434
+OLLAMA_EMBEDDING_MODEL=nomic-embed-text
+OLLAMA_INSTRUCT_MODEL=qwen2.5-coder:7b
+```
+
+The local model is used for embedding, rerank, summarize, and patch risk hints. It must not become the root controller.
+
 ## Current status
 
-Initial architecture scaffold.
+Initial runnable MCP server with read-only and local intelligence tools.
+
+Registered tools:
+
+- `policy.check`
+- `audit.list`
+- `file.read`
+- `file.search`
+- `file.hash`
+- `local.embed`
+- `local.rerank`
+- `local.summarize`
 
 ## Next build order
 
-1. Implement MCP Gateway transport.
-2. Wire tool registry and profiles.
-3. Implement risk policy engine.
-4. Implement local intelligence via Ollama.
-5. Implement file read/search/hash primitives.
-6. Implement patch dry-run/snapshot/apply/verify flow.
-7. Implement SSH/rsync remote adapter.
-8. Add tests and smoke runner.
+1. Add persistent task scope creation.
+2. Add ripgrep backend and cursor pagination.
+3. Add `read_many` with byte budget.
+4. Add patch dry-run/snapshot/apply/verify flow.
+5. Add SSH session pool and rsync pull.
+6. Add merged confirmation payload.

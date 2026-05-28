@@ -14,10 +14,13 @@ export const toolDefinitions = [
   },
   {
     name: 'audit.list',
-    description: 'List in-memory audit events for this MCP process.',
+    description: 'List audit events for this MCP process. Can read memory or persisted JSONL by date.',
     inputSchema: {
       type: 'object',
-      properties: {}
+      properties: {
+        source: { type: 'string', enum: ['memory', 'disk'], default: 'memory' },
+        date: { type: 'string', description: 'YYYY-MM-DD, only used for disk source.' }
+      }
     }
   },
   {

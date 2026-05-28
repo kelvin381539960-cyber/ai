@@ -17,8 +17,9 @@
 - [x] Register local intelligence tools
 - [x] Add JSON schema validation
 - [x] Add structured error format
-- [ ] Persist audit log to disk
-- [ ] Add MCP client config examples
+- [x] Persist audit log to disk
+- [x] Add MCP client config examples
+- [x] Add local smoke script
 
 ## Phase 2: File intelligence
 
