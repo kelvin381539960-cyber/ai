@@ -11,6 +11,7 @@ import { FileEngine } from '../file/file-engine.js';
 import { LocalIntelligence } from '../local/local-intelligence.js';
 import { OllamaClient } from '../local/ollama-client.js';
 import { PatchEngine } from '../patch/patch-engine.js';
+import { buildPatchPlan } from '../patch/patch-plan.js';
 import type { PatchOperation, ToolCallContext, ToolProfile } from '../types.js';
 import { toolDefinitions } from './tools.js';
 
@@ -36,81 +37,26 @@ export async function startMcpServer(): Promise<void> {
     if (!decision.allowed) return jsonToolResult({ ok: false, error: 'authorization_required', decision });
     try {
       switch (name) {
-        case 'policy.check': {
-          const parsed = PolicyCheckArgs.parse(args);
-          const risk = classifyToolRisk(parsed.tool_name);
-          const check = policy.authorize({ taskId: DEFAULT_TASK_SCOPE.taskId, actor, toolName: parsed.tool_name, profile: parsed.profile ?? defaultProfile, args: parsed.args ?? {}, risk });
-          return jsonToolResult({ ok: true, risk, decision: check });
-        }
-        case 'audit.list': {
-          const parsed = AuditListArgs.parse(args);
-          return jsonToolResult({ ok: true, events: parsed.source === 'disk' ? await audit.listFromDisk(parsed.date) : audit.list() });
-        }
-        case 'file.read': {
-          const parsed = FileReadArgs.parse(args);
-          return jsonToolResult({ ok: true, ...(await fileEngine.readLines(parsed.path, parsed.offset_line, parsed.limit_lines, { maxBytes: parsed.max_bytes, withLineNumbers: parsed.with_line_numbers })) });
-        }
-        case 'file.read_many': {
-          const parsed = FileReadManyArgs.parse(args);
-          return jsonToolResult({ ok: true, ...(await fileEngine.readMany(parsed.items, parsed.max_total_bytes)) });
-        }
-        case 'file.search': {
-          const parsed = FileSearchArgs.parse(args);
-          return jsonToolResult({ ok: true, ...(await fileEngine.search(parsed)) });
-        }
-        case 'file.outline': {
-          const parsed = FileOutlineArgs.parse(args);
-          return jsonToolResult({ ok: true, ...(await fileEngine.outline(parsed.path, parsed.max_bytes, parsed.max_items)) });
-        }
-        case 'file.hash': {
-          const parsed = FileHashArgs.parse(args);
-          return jsonToolResult({ ok: true, ...(await fileEngine.hash(parsed.path)) });
-        }
-        case 'snapshot.create': {
-          const parsed = SnapshotCreateArgs.parse(args);
-          return jsonToolResult({ ok: true, snapshot: await patchEngine.createSnapshot(parsed.path, parsed.reason) });
-        }
-        case 'snapshot.restore': {
-          const parsed = SnapshotRestoreArgs.parse(args);
-          return jsonToolResult({ ok: true, restore: await patchEngine.restoreSnapshot(parsed.snapshot_id, parsed.target_path) });
-        }
-        case 'patch.dry_run': {
-          const parsed = PatchDryRunArgs.parse(args);
-          const patch = toPatchOperation(parsed);
-          const preview = await patchEngine.dryRun(patch);
-          const localRisk = parsed.with_local_risk ? await local.classifyPatchRisk(patch).catch((error) => ({ error: String(error) })) : undefined;
-          return jsonToolResult({ ok: true, preview, localRisk });
-        }
-        case 'patch.apply': {
-          const parsed = PatchApplyArgs.parse(args);
-          const patch = toPatchOperation(parsed);
-          return jsonToolResult({ ok: true, result: await patchEngine.apply(patch) });
-        }
-        case 'patch.verify': {
-          const parsed = PatchVerifyArgs.parse(args);
-          return jsonToolResult({ ok: true, verify: await patchEngine.verify(parsed.path, parsed.expected_text, parsed.old_text) });
-        }
-        case 'local.embed': {
-          const parsed = LocalEmbedArgs.parse(args);
-          return jsonToolResult({ ok: true, embeddings: await local.embed(parsed.texts) });
-        }
-        case 'local.rerank': {
-          const parsed = LocalRerankArgs.parse(args);
-          return jsonToolResult({ ok: true, items: await local.rerank(parsed.query, parsed.candidates) });
-        }
-        case 'local.summarize': {
-          const parsed = LocalSummarizeArgs.parse(args);
-          return jsonToolResult({ ok: true, ...(await local.summarizeLargeText(parsed.text)) });
-        }
-        case 'local.context_pack': {
-          const parsed = LocalContextPackArgs.parse(args);
-          return jsonToolResult({ ok: true, ...(await buildContextPack(fileEngine, { root: parsed.root, query: parsed.query, maxFiles: parsed.max_files, maxTotalBytes: parsed.max_total_bytes, linesPerFile: parsed.lines_per_file, fileGlob: parsed.file_glob })) });
-        }
+        case 'policy.check': { const parsed = PolicyCheckArgs.parse(args); const risk = classifyToolRisk(parsed.tool_name); const check = policy.authorize({ taskId: DEFAULT_TASK_SCOPE.taskId, actor, toolName: parsed.tool_name, profile: parsed.profile ?? defaultProfile, args: parsed.args ?? {}, risk }); return jsonToolResult({ ok: true, risk, decision: check }); }
+        case 'audit.list': { const parsed = AuditListArgs.parse(args); return jsonToolResult({ ok: true, events: parsed.source === 'disk' ? await audit.listFromDisk(parsed.date) : audit.list() }); }
+        case 'file.read': { const parsed = FileReadArgs.parse(args); return jsonToolResult({ ok: true, ...(await fileEngine.readLines(parsed.path, parsed.offset_line, parsed.limit_lines, { maxBytes: parsed.max_bytes, withLineNumbers: parsed.with_line_numbers })) }); }
+        case 'file.read_many': { const parsed = FileReadManyArgs.parse(args); return jsonToolResult({ ok: true, ...(await fileEngine.readMany(parsed.items, parsed.max_total_bytes)) }); }
+        case 'file.search': { const parsed = FileSearchArgs.parse(args); return jsonToolResult({ ok: true, ...(await fileEngine.search(parsed)) }); }
+        case 'file.outline': { const parsed = FileOutlineArgs.parse(args); return jsonToolResult({ ok: true, ...(await fileEngine.outline(parsed.path, parsed.max_bytes, parsed.max_items)) }); }
+        case 'file.hash': { const parsed = FileHashArgs.parse(args); return jsonToolResult({ ok: true, ...(await fileEngine.hash(parsed.path)) }); }
+        case 'snapshot.create': { const parsed = SnapshotCreateArgs.parse(args); return jsonToolResult({ ok: true, snapshot: await patchEngine.createSnapshot(parsed.path, parsed.reason) }); }
+        case 'snapshot.restore': { const parsed = SnapshotRestoreArgs.parse(args); return jsonToolResult({ ok: true, restore: await patchEngine.restoreSnapshot(parsed.snapshot_id, parsed.target_path) }); }
+        case 'patch.dry_run': { const parsed = PatchDryRunArgs.parse(args); const patch = toPatchOperation(parsed); const preview = await patchEngine.dryRun(patch); const localRisk = parsed.with_local_risk ? await local.classifyPatchRisk(patch).catch((error) => ({ error: String(error) })) : undefined; return jsonToolResult({ ok: true, preview, localRisk }); }
+        case 'patch.plan': { const parsed = PatchPlanArgs.parse(args); const patches = parsed.patches.map(toPatchOperation); return jsonToolResult({ ok: true, plan: await buildPatchPlan(patchEngine, { patches, maxFilesChanged: parsed.max_files_changed, maxLinesChanged: parsed.max_lines_changed }) }); }
+        case 'patch.apply': { const parsed = PatchApplyArgs.parse(args); return jsonToolResult({ ok: true, result: await patchEngine.apply(toPatchOperation(parsed)) }); }
+        case 'patch.verify': { const parsed = PatchVerifyArgs.parse(args); return jsonToolResult({ ok: true, verify: await patchEngine.verify(parsed.path, parsed.expected_text, parsed.old_text) }); }
+        case 'local.embed': { const parsed = LocalEmbedArgs.parse(args); return jsonToolResult({ ok: true, embeddings: await local.embed(parsed.texts) }); }
+        case 'local.rerank': { const parsed = LocalRerankArgs.parse(args); return jsonToolResult({ ok: true, items: await local.rerank(parsed.query, parsed.candidates) }); }
+        case 'local.summarize': { const parsed = LocalSummarizeArgs.parse(args); return jsonToolResult({ ok: true, ...(await local.summarizeLargeText(parsed.text)) }); }
+        case 'local.context_pack': { const parsed = LocalContextPackArgs.parse(args); return jsonToolResult({ ok: true, ...(await buildContextPack(fileEngine, { root: parsed.root, query: parsed.query, maxFiles: parsed.max_files, maxTotalBytes: parsed.max_total_bytes, linesPerFile: parsed.lines_per_file, fileGlob: parsed.file_glob })) }); }
         default: return jsonToolResult({ ok: false, error: `unknown tool: ${name}` });
       }
-    } catch (error) {
-      return jsonToolResult({ ok: false, error: error instanceof Error ? error.message : String(error) });
-    }
+    } catch (error) { return jsonToolResult({ ok: false, error: error instanceof Error ? error.message : String(error) }); }
   });
   await server.connect(new StdioServerTransport());
 }
@@ -129,6 +75,7 @@ const SnapshotCreateArgs = z.object({ path: z.string(), reason: z.string().defau
 const SnapshotRestoreArgs = z.object({ snapshot_id: z.string(), target_path: z.string().optional() });
 const PatchDryRunArgs = z.object({ path: z.string(), expected_hash: z.string(), old_text: z.string(), new_text: z.string(), risk: z.enum(['R0', 'R1', 'R2', 'R3', 'R4']).default('R1'), dry_run_required: z.boolean().default(true), auto_snapshot: z.boolean().default(true), with_local_risk: z.boolean().default(false) });
 const PatchApplyArgs = PatchDryRunArgs.omit({ with_local_risk: true });
+const PatchPlanArgs = z.object({ patches: z.array(PatchApplyArgs).min(1).max(100), max_files_changed: z.number().int().min(1).max(100).default(30), max_lines_changed: z.number().int().min(1).max(20000).default(8000) });
 const PatchVerifyArgs = z.object({ path: z.string(), expected_text: z.string(), old_text: z.string().optional() });
 const LocalEmbedArgs = z.object({ texts: z.array(z.string()).min(1).max(128) });
 const LocalRerankArgs = z.object({ query: z.string(), candidates: z.array(z.object({ id: z.string(), text: z.string(), metadata: z.record(z.unknown()).optional() })).min(1).max(200) });

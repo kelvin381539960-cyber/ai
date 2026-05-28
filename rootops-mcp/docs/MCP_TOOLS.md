@@ -17,24 +17,26 @@
 
 Creates a snapshot copy of a file before editing.
 
-```json
-{
-  "path": "/opt/AIX代码/src/index.ts",
-  "reason": "before patch"
-}
-```
-
 ### patch.dry_run
 
-Previews a text replacement patch. It checks `expected_hash` and does not write files.
+Previews a text replacement patch. It checks `expected_hash`, returns a unified diff preview, and does not write files.
+
+### patch.plan
+
+Builds a batch patch plan. It dry-runs each patch, estimates files/lines changed, and reports blockers. It does not write files.
 
 ```json
 {
-  "path": "/opt/AIX代码/src/index.ts",
-  "expected_hash": "sha256...",
-  "old_text": "old block",
-  "new_text": "new block",
-  "with_local_risk": true
+  "patches": [
+    {
+      "path": "/opt/AIX代码/src/index.ts",
+      "expected_hash": "sha256...",
+      "old_text": "old block",
+      "new_text": "new block"
+    }
+  ],
+  "max_files_changed": 30,
+  "max_lines_changed": 8000
 }
 ```
 
@@ -42,38 +44,13 @@ Previews a text replacement patch. It checks `expected_hash` and does not write 
 
 Applies a text replacement patch with expected_hash protection, auto snapshot, and verify.
 
-```json
-{
-  "path": "/opt/AIX代码/src/index.ts",
-  "expected_hash": "sha256...",
-  "old_text": "old block",
-  "new_text": "new block",
-  "auto_snapshot": true
-}
-```
-
 ### patch.verify
 
 Verifies expected text exists and optional old text is gone.
 
-```json
-{
-  "path": "/opt/AIX代码/src/index.ts",
-  "expected_text": "new block",
-  "old_text": "old block"
-}
-```
-
 ### snapshot.restore
 
 Restores a file from a snapshot id. This is destructive and should require confirmation.
-
-```json
-{
-  "snapshot_id": "snap_...",
-  "target_path": "/opt/AIX代码/src/index.ts"
-}
-```
 
 ## Local model tools
 

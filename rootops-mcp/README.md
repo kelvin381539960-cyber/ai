@@ -63,6 +63,7 @@ Registered tools:
 - `snapshot.create`
 - `snapshot.restore`
 - `patch.dry_run`
+- `patch.plan`
 - `patch.apply`
 - `patch.verify`
 - `local.embed`
@@ -74,9 +75,9 @@ No sudo/systemctl/git push/deploy tools are registered yet.
 
 ## Next build order
 
-1. Add unified diff preview.
-2. Add batch patch plan.
-3. Add tree-sitter outline.
-4. Add SQLite FTS5 index.
-5. Add embedding index.
-6. Add SSH session pool and rsync pull.
+1. Add SSH session pool and streaming exec.
+2. Add rsync pull/push.
+3. Add server groups.
+4. Add tree-sitter outline.
+5. Add SQLite FTS5 index.
+6. Add embedding index.

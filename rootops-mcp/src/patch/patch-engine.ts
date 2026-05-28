@@ -1,4 +1,5 @@
 import { readFile, writeFile } from 'node:fs/promises';
+import path from 'node:path';
 import { FileEngine } from '../file/file-engine.js';
 import { SnapshotStore } from '../snapshot/snapshot-store.js';
 import type { PatchOperation } from '../types.js';
@@ -40,7 +41,12 @@ export class PatchEngine {
     }
 
     const next = text.replace(patch.oldText, patch.newText);
-    return { ok: true, reason: 'patch can be applied', currentHash: currentHash.sha256, preview: buildSimpleDiffPreview(text, next) };
+    return {
+      ok: true,
+      reason: 'patch can be applied',
+      currentHash: currentHash.sha256,
+      preview: buildSimpleDiffPreview(text, next, path.basename(patch.path))
+    };
   }
 
   async createSnapshot(path: string, reason: string): Promise<unknown> {

@@ -37,14 +37,13 @@
 ## Phase 3: Patch transaction
 
 - [x] snapshot provider
-- [x] simple diff preview
+- [x] unified diff preview
 - [x] expected_hash dry-run
 - [x] local_patch_risk hook
 - [x] apply patch tool
 - [x] verify step
 - [x] rollback/restore step
-- [ ] unified diff preview
-- [ ] batch patch plan
+- [x] batch patch plan
 
 ## Phase 4: Remote ops
 
