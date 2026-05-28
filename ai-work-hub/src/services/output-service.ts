@@ -2,6 +2,7 @@ import path from 'node:path';
 import { getDb } from '@/lib/db';
 import { getDataDir, readTextFile, writeTextFile } from '@/lib/fs-store';
 import { createId, nowIso } from '@/lib/ids';
+import { taskTypeDefaults } from '@/lib/templates';
 import type { OutputRow } from '@/types/db';
 
 export function updateOutput(outputId: string, input: { title: string; content: string }) {
@@ -72,4 +73,46 @@ export function convertOutputToMaterial(outputId: string, targetTaskId?: string)
   );
   db.prepare('UPDATE tasks SET updated_at = ? WHERE id = ?').run(now, taskId);
   return db.prepare('SELECT * FROM materials WHERE id = ?').get(materialId);
+}
+
+export function createTaskFromOutput(outputId: string, input: { type: string; title: string; goal: string }) {
+  const db = getDb();
+  const output = db.prepare('SELECT * FROM outputs WHERE id = ?').get(outputId) as OutputRow | undefined;
+  if (!output) throw new Error('Output 不存在');
+  const sourceTask = db.prepare('SELECT * FROM tasks WHERE id = ?').get(output.task_id) as { project_id: string } | undefined;
+  if (!sourceTask) throw new Error('来源任务不存在');
+  const project = db.prepare('SELECT * FROM projects WHERE id = ?').get(sourceTask.project_id) as { id: string; workspace_id: string };
+  const defaults = taskTypeDefaults[input.type] || taskTypeDefaults.research;
+  const assistant = db.prepare('SELECT * FROM assistants WHERE workspace_id = ? AND name = ? LIMIT 1').get(project.workspace_id, defaults.assistantName) as { id: string } | undefined;
+  const workflow = db.prepare('SELECT * FROM workflows WHERE workspace_id = ? AND name = ? LIMIT 1').get(project.workspace_id, defaults.workflowName) as { id: string } | undefined;
+  const now = nowIso();
+  const taskId = createId('task');
+  const content = readTextFile(output.content_path);
+
+  db.prepare(`INSERT INTO tasks (id, project_id, title, type, goal, expected_output, default_assistant_id, workflow_id, context_scope, status, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'ready', ?, ?)`).run(
+    taskId,
+    project.id,
+    input.title,
+    input.type,
+    input.goal,
+    '基于已有输出继续推进',
+    assistant?.id || null,
+    workflow?.id || null,
+    defaults.contextScope,
+    now,
+    now
+  );
+
+  db.prepare(`INSERT INTO materials (id, task_id, type, title, content, usage_status, created_at, updated_at)
+    VALUES (?, ?, 'ai_output', ?, ?, 'key', ?, ?)`).run(
+    createId('material'),
+    taskId,
+    `来源输出：${output.title}`,
+    content,
+    now,
+    now
+  );
+
+  return db.prepare('SELECT * FROM tasks WHERE id = ?').get(taskId);
 }

@@ -47,6 +47,7 @@ GET /api/health
 - `/tasks/new?type=research` 创建任务
 - `/tasks/[id]` 任务详情
 - `/outputs` 输出列表
+- `/search` 搜索
 
 ## 首个 Demo 验收
 
@@ -61,6 +62,16 @@ GET /api/health
 9. 标记最终版。
 10. 转为任务资料。
 11. 在 `/outputs` 查看输出并复制 Markdown。
+12. 基于输出创建新任务。
+13. 在 `/search` 搜索历史任务、资料、输出。
+
+## 部署
+
+详见：
+
+```text
+DEPLOY.md
+```
 
 ## QA
 

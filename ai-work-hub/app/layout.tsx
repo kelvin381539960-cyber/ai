@@ -16,6 +16,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <a href="/">首页</a>
             <a href="/tasks">任务</a>
             <a href="/outputs">输出</a>
+            <a href="/search">搜索</a>
             <a href="/onboarding">设置</a>
           </nav>
         </header>
