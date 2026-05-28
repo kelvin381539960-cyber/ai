@@ -67,6 +67,10 @@ Cursor Agent was connected by syncing the root user's minimal Cursor CLI state
 files into the `cloudcli` service user's home. Do not copy full Cursor project
 history or MCP auth directories.
 
+CloudCLI uses `/usr/local/bin/cursor-agent`, a wrapper around the Cursor Agent
+installed at `/opt/cloudcli-tools/cursor-agent`. This avoids service-level
+`spawn cursor-agent EACCES` errors from user-home symlink resolution.
+
 ## Login Notes
 
 Run login commands as the `cloudcli` user so CloudCLI can reuse the saved session:
@@ -103,4 +107,6 @@ systemctl restart cloudcli.service
 - CloudCLI data: `/var/lib/cloudcli/.cloudcli/auth.db`
 - CloudCLI workspaces: `/srv/cloudcli/workspaces`
 - User-local CLI bin: `/var/lib/cloudcli/.local/bin`
+- Cursor Agent wrapper: `/usr/local/bin/cursor-agent`
+- Cursor Agent package copy: `/opt/cloudcli-tools/cursor-agent`
 - CloudCLI package: `/usr/lib/node_modules/@cloudcli-ai/cloudcli`
