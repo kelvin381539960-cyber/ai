@@ -1,0 +1,25 @@
+{
+  "name": "aix-rootops-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "High-permission, low-friction personal AI RootOps MCP.",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx src/index.ts",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "smoke": "tsx src/index.ts --smoke"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "latest",
+    "execa": "latest",
+    "fast-glob": "latest",
+    "zod": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "tsx": "latest",
+    "typescript": "latest"
+  }
+}
