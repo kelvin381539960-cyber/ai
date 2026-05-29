@@ -90,7 +90,7 @@ export async function updateProjectSource(id: string, input: {
   includePatterns: string[];
   excludePatterns: string[];
 }) {
-  await getDefaultProject();
+  const project = await getDefaultProject();
   await db
     .update(projectSources)
     .set({
@@ -100,22 +100,25 @@ export async function updateProjectSource(id: string, input: {
       status: "pending",
       updatedAt: nowIso(),
     })
-    .where(eq(projectSources.id, id));
+    .where(and(eq(projectSources.id, id), eq(projectSources.projectId, project.id)));
 }
 
 export async function deleteProjectSource(id: string) {
-  await getDefaultProject();
+  const project = await getDefaultProject();
+  const [source] = await db.select().from(projectSources).where(and(eq(projectSources.id, id), eq(projectSources.projectId, project.id))).limit(1);
+  if (!source) throw new Error("Source not found");
   await db.delete(sourceFiles).where(eq(sourceFiles.sourceId, id));
   await db.delete(projectSources).where(eq(projectSources.id, id));
 }
 
 export async function listProjectSources() {
-  await getDefaultProject();
-  return db.select().from(projectSources).orderBy(desc(projectSources.updatedAt));
+  const project = await getDefaultProject();
+  return db.select().from(projectSources).where(eq(projectSources.projectId, project.id)).orderBy(desc(projectSources.updatedAt));
 }
 
 export async function getProjectSource(id: string, query?: string) {
-  const [source] = await db.select().from(projectSources).where(eq(projectSources.id, id)).limit(1);
+  const project = await getDefaultProject();
+  const [source] = await db.select().from(projectSources).where(and(eq(projectSources.id, id), eq(projectSources.projectId, project.id))).limit(1);
   if (!source) return null;
   const files = query
     ? await db
@@ -137,7 +140,8 @@ export async function getProjectSource(id: string, query?: string) {
 }
 
 export async function indexProjectSource(id: string) {
-  const [source] = await db.select().from(projectSources).where(eq(projectSources.id, id)).limit(1);
+  const project = await getDefaultProject();
+  const [source] = await db.select().from(projectSources).where(and(eq(projectSources.id, id), eq(projectSources.projectId, project.id))).limit(1);
   if (!source) throw new Error("Source not found");
   if (source.type !== "server_folder") throw new Error("Only server folder sources can be indexed in v1");
 
@@ -190,9 +194,10 @@ export async function indexProjectSource(id: string) {
 }
 
 export async function resolveFileReferences(refs: WorkflowFileReference[]) {
+  const project = await getDefaultProject();
   const resolved = [];
   for (const ref of refs) {
-    const [source] = await db.select().from(projectSources).where(eq(projectSources.id, ref.sourceId)).limit(1);
+    const [source] = await db.select().from(projectSources).where(and(eq(projectSources.id, ref.sourceId), eq(projectSources.projectId, project.id))).limit(1);
     if (!source) continue;
     const [file] = await db
       .select()

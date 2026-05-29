@@ -1,4 +1,5 @@
-import { desc, eq, like, or, inArray } from "drizzle-orm";
+import { cookies } from "next/headers";
+import { and, desc, eq, like, or, inArray } from "drizzle-orm";
 import { db, initDb } from "@/lib/db/client";
 import {
   agents,
@@ -14,6 +15,8 @@ import { newId, nowIso } from "@/lib/id";
 import { defaultRules } from "@/lib/templates/rules";
 import { buildLinearDefinition, workflowTemplates } from "@/lib/templates/workflows";
 import type { AgentType, KnowledgeType, RuleType, WorkflowDefinition } from "@/lib/types";
+
+const activeProjectCookie = "ai_work_hub_project_id";
 
 export function parseJson<T>(value: string, fallback: T): T {
   try {
@@ -129,23 +132,103 @@ export async function ensureAppReady() {
   }
 }
 
-export async function getDefaultProject() {
+async function seedProjectDefaults(projectId: string) {
+  const now = nowIso();
+  await db.insert(rules).values(
+    defaultRules.map((rule) => ({
+      ...rule,
+      id: newId("rule"),
+      projectId,
+      enabled: true,
+      createdAt: now,
+      updatedAt: now,
+    })),
+  );
+  await db.insert(workflows).values(
+    workflowTemplates.map((template) => ({
+      id: newId("workflow"),
+      projectId,
+      name: template.name,
+      scenario: template.scenario,
+      description: template.description,
+      definition: JSON.stringify(buildLinearDefinition(template)),
+      createdAt: now,
+      updatedAt: now,
+    })),
+  );
+}
+
+export async function listProjects() {
   await ensureAppReady();
-  const [project] = await db.select().from(projects).limit(1);
+  return db.select().from(projects).orderBy(desc(projects.updatedAt));
+}
+
+export async function getActiveProject() {
+  await ensureAppReady();
+  const cookieStore = await cookies();
+  const activeId = cookieStore.get(activeProjectCookie)?.value;
+  if (activeId) {
+    const [active] = await db.select().from(projects).where(eq(projects.id, activeId)).limit(1);
+    if (active) return active;
+  }
+  const [project] = await db.select().from(projects).orderBy(desc(projects.updatedAt)).limit(1);
   return project;
 }
 
+export async function getDefaultProject() {
+  return getActiveProject();
+}
+
+export async function createProject(input: { name: string; description: string }) {
+  await ensureAppReady();
+  const now = nowIso();
+  const id = newId("project");
+  await db.insert(projects).values({
+    id,
+    name: input.name,
+    description: input.description,
+    createdAt: now,
+    updatedAt: now,
+  });
+  await seedProjectDefaults(id);
+  return id;
+}
+
+export async function updateProject(id: string, input: { name: string; description: string }) {
+  await ensureAppReady();
+  await db.update(projects).set({ name: input.name, description: input.description, updatedAt: nowIso() }).where(eq(projects.id, id));
+}
+
+export async function deleteProject(id: string) {
+  await ensureAppReady();
+  const projectList = await db.select().from(projects);
+  if (projectList.length <= 1) throw new Error("At least one project is required.");
+  await db.delete(projects).where(eq(projects.id, id));
+}
+
+export async function setActiveProject(id: string) {
+  await ensureAppReady();
+  const [project] = await db.select().from(projects).where(eq(projects.id, id)).limit(1);
+  if (!project) throw new Error("Project not found");
+  const cookieStore = await cookies();
+  cookieStore.set(activeProjectCookie, id, {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+  });
+}
+
 export async function getDashboard() {
-  const project = await getDefaultProject();
+  const project = await getActiveProject();
   const [knowledge, workflowList, agentList, runList, outputList, ruleList, sourceList] =
     await Promise.all([
-      db.select().from(knowledgeItems).orderBy(desc(knowledgeItems.updatedAt)).limit(5),
-      db.select().from(workflows).orderBy(desc(workflows.updatedAt)),
+      db.select().from(knowledgeItems).where(eq(knowledgeItems.projectId, project.id)).orderBy(desc(knowledgeItems.updatedAt)).limit(5),
+      db.select().from(workflows).where(eq(workflows.projectId, project.id)).orderBy(desc(workflows.updatedAt)),
       db.select().from(agents).orderBy(desc(agents.updatedAt)),
-      db.select().from(runs).orderBy(desc(runs.createdAt)).limit(5),
-      db.select().from(outputs).orderBy(desc(outputs.updatedAt)).limit(5),
-      db.select().from(rules).where(eq(rules.enabled, true)),
-      db.select().from(projectSources).orderBy(desc(projectSources.updatedAt)).limit(5),
+      db.select().from(runs).where(eq(runs.projectId, project.id)).orderBy(desc(runs.createdAt)).limit(5),
+      db.select().from(outputs).where(eq(outputs.projectId, project.id)).orderBy(desc(outputs.updatedAt)).limit(5),
+      db.select().from(rules).where(and(eq(rules.projectId, project.id), eq(rules.enabled, true))),
+      db.select().from(projectSources).where(eq(projectSources.projectId, project.id)).orderBy(desc(projectSources.updatedAt)).limit(5),
     ]);
   return { project, knowledge, workflows: workflowList, agents: agentList, runs: runList, outputs: outputList, rules: ruleList, sources: sourceList };
 }
@@ -180,7 +263,7 @@ export async function updateKnowledge(id: string, input: {
   type: KnowledgeType;
   tags: string[];
 }) {
-  await ensureAppReady();
+  const project = await getActiveProject();
   await db
     .update(knowledgeItems)
     .set({
@@ -190,28 +273,31 @@ export async function updateKnowledge(id: string, input: {
       tags: JSON.stringify(input.tags),
       updatedAt: nowIso(),
     })
-    .where(eq(knowledgeItems.id, id));
+    .where(and(eq(knowledgeItems.id, id), eq(knowledgeItems.projectId, project.id)));
 }
 
 export async function deleteKnowledge(id: string) {
-  await ensureAppReady();
-  await db.delete(knowledgeItems).where(eq(knowledgeItems.id, id));
+  const project = await getActiveProject();
+  await db.delete(knowledgeItems).where(and(eq(knowledgeItems.id, id), eq(knowledgeItems.projectId, project.id)));
 }
 
 export async function listKnowledge(query?: string) {
-  await ensureAppReady();
+  const project = await getActiveProject();
   if (!query) {
-    return db.select().from(knowledgeItems).orderBy(desc(knowledgeItems.updatedAt));
+    return db.select().from(knowledgeItems).where(eq(knowledgeItems.projectId, project.id)).orderBy(desc(knowledgeItems.updatedAt));
   }
   const pattern = `%${query}%`;
   return db
     .select()
     .from(knowledgeItems)
     .where(
-      or(
-        like(knowledgeItems.title, pattern),
-        like(knowledgeItems.content, pattern),
-        like(knowledgeItems.tags, pattern),
+      and(
+        eq(knowledgeItems.projectId, project.id),
+        or(
+          like(knowledgeItems.title, pattern),
+          like(knowledgeItems.content, pattern),
+          like(knowledgeItems.tags, pattern),
+        ),
       ),
     )
     .orderBy(desc(knowledgeItems.updatedAt));
@@ -235,31 +321,31 @@ export async function createRule(input: { name: string; content: string; type: R
 }
 
 export async function updateRule(id: string, input: { name: string; content: string; type: RuleType }) {
-  await ensureAppReady();
+  const project = await getActiveProject();
   await db
     .update(rules)
     .set({ name: input.name, content: input.content, type: input.type, updatedAt: nowIso() })
-    .where(eq(rules.id, id));
+    .where(and(eq(rules.id, id), eq(rules.projectId, project.id)));
 }
 
 export async function toggleRule(id: string, enabled: boolean) {
-  await ensureAppReady();
-  await db.update(rules).set({ enabled, updatedAt: nowIso() }).where(eq(rules.id, id));
+  const project = await getActiveProject();
+  await db.update(rules).set({ enabled, updatedAt: nowIso() }).where(and(eq(rules.id, id), eq(rules.projectId, project.id)));
 }
 
 export async function deleteRule(id: string) {
-  await ensureAppReady();
-  await db.delete(rules).where(eq(rules.id, id));
+  const project = await getActiveProject();
+  await db.delete(rules).where(and(eq(rules.id, id), eq(rules.projectId, project.id)));
 }
 
 export async function listRules() {
-  await ensureAppReady();
-  return db.select().from(rules).orderBy(desc(rules.updatedAt));
+  const project = await getActiveProject();
+  return db.select().from(rules).where(eq(rules.projectId, project.id)).orderBy(desc(rules.updatedAt));
 }
 
 export async function listWorkflows() {
-  await ensureAppReady();
-  return db.select().from(workflows).orderBy(desc(workflows.updatedAt));
+  const project = await getActiveProject();
+  return db.select().from(workflows).where(eq(workflows.projectId, project.id)).orderBy(desc(workflows.updatedAt));
 }
 
 export async function getWorkflow(id: string) {
@@ -293,11 +379,11 @@ export async function updateWorkflowDefinition(id: string, definition: WorkflowD
 }
 
 export async function updateWorkflowMeta(id: string, input: { name: string; scenario: string; description: string }) {
-  await ensureAppReady();
+  const project = await getActiveProject();
   await db
     .update(workflows)
     .set({ name: input.name, scenario: input.scenario, description: input.description, updatedAt: nowIso() })
-    .where(eq(workflows.id, id));
+    .where(and(eq(workflows.id, id), eq(workflows.projectId, project.id)));
 }
 
 export async function duplicateWorkflow(id: string) {
@@ -319,9 +405,9 @@ export async function duplicateWorkflow(id: string) {
 }
 
 export async function deleteWorkflow(id: string) {
-  await ensureAppReady();
+  const project = await getActiveProject();
   if (id.startsWith("workflow_")) throw new Error("Default workflows cannot be deleted. Duplicate it first.");
-  await db.delete(workflows).where(eq(workflows.id, id));
+  await db.delete(workflows).where(and(eq(workflows.id, id), eq(workflows.projectId, project.id)));
 }
 
 export async function listAgents() {
@@ -401,8 +487,8 @@ export async function updateAgentHealth(id: string, status: string) {
 }
 
 export async function listRuns() {
-  await ensureAppReady();
-  return db.select().from(runs).orderBy(desc(runs.createdAt));
+  const project = await getActiveProject();
+  return db.select().from(runs).where(eq(runs.projectId, project.id)).orderBy(desc(runs.createdAt));
 }
 
 export async function getRun(id: string) {
@@ -412,8 +498,8 @@ export async function getRun(id: string) {
 }
 
 export async function listOutputs() {
-  await ensureAppReady();
-  return db.select().from(outputs).orderBy(desc(outputs.updatedAt));
+  const project = await getActiveProject();
+  return db.select().from(outputs).where(eq(outputs.projectId, project.id)).orderBy(desc(outputs.updatedAt));
 }
 
 export async function getOutput(id: string) {

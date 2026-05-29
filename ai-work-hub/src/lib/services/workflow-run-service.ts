@@ -51,11 +51,12 @@ export async function recommendKnowledge(query: string) {
 }
 
 export async function buildContextPreview(input: Omit<WorkflowRunInput, "workflowId" | "agentId">) {
+  const project = await getDefaultProject();
   const selectedKnowledge = input.selectedKnowledgeIds.length
-    ? await db.select().from(knowledgeItems).where(inArray(knowledgeItems.id, input.selectedKnowledgeIds))
+    ? await db.select().from(knowledgeItems).where(and(eq(knowledgeItems.projectId, project.id), inArray(knowledgeItems.id, input.selectedKnowledgeIds)))
     : [];
   const selectedRules = input.selectedRuleIds.length
-    ? await db.select().from(rules).where(inArray(rules.id, input.selectedRuleIds))
+    ? await db.select().from(rules).where(and(eq(rules.projectId, project.id), inArray(rules.id, input.selectedRuleIds)))
     : [];
 
   const knowledgeBlock = selectedKnowledge
@@ -75,7 +76,7 @@ export async function buildContextPreview(input: Omit<WorkflowRunInput, "workflo
 
 export async function createWorkflowRun(input: WorkflowRunInput) {
   const project = await getDefaultProject();
-  const [workflow] = await db.select().from(workflows).where(eq(workflows.id, input.workflowId)).limit(1);
+  const [workflow] = await db.select().from(workflows).where(and(eq(workflows.id, input.workflowId), eq(workflows.projectId, project.id))).limit(1);
   if (!workflow) throw new Error("Workflow not found");
   const [agent] = await db.select().from(agents).where(eq(agents.id, input.agentId)).limit(1);
   if (!agent) throw new Error("Agent not found");
@@ -235,8 +236,8 @@ export async function getWorkflowRun(id: string) {
 }
 
 export async function listWorkflowRuns() {
-  await getDefaultProject();
-  return db.select().from(workflowRuns).orderBy(desc(workflowRuns.createdAt));
+  const project = await getDefaultProject();
+  return db.select().from(workflowRuns).where(eq(workflowRuns.projectId, project.id)).orderBy(desc(workflowRuns.createdAt));
 }
 
 async function runAgentStep(run: typeof workflowRuns.$inferSelect, stepRunId: string) {

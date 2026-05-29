@@ -5,17 +5,21 @@ import { cookies } from "next/headers";
 import {
   createAgent,
   createKnowledge,
+  createProject,
   createRule,
   createWorkflowFromTemplate,
   deleteAgent,
   deleteKnowledge,
+  deleteProject,
   deleteRule,
   deleteWorkflow,
   duplicateWorkflow,
   toggleAgent,
   toggleRule,
+  setActiveProject,
   updateAgent,
   updateKnowledge,
+  updateProject,
   updateRule,
   updateWorkflowMeta,
 } from "@/lib/services/app-service";
@@ -63,6 +67,34 @@ export async function createKnowledgeAction(formData: FormData) {
     tags: tags(formData),
   });
   redirect("/knowledge");
+}
+
+export async function createProjectAction(formData: FormData) {
+  const id = await createProject({
+    name: value(formData, "name"),
+    description: value(formData, "description"),
+  });
+  await setActiveProject(id);
+  redirect("/projects");
+}
+
+export async function switchProjectAction(formData: FormData) {
+  await setActiveProject(value(formData, "projectId"));
+  redirect("/");
+}
+
+export async function updateProjectAction(formData: FormData) {
+  await updateProject(value(formData, "projectId"), {
+    name: value(formData, "name"),
+    description: value(formData, "description"),
+  });
+  redirect("/projects");
+}
+
+export async function deleteProjectAction(formData: FormData) {
+  requireConfirmation(formData);
+  await deleteProject(value(formData, "projectId"));
+  redirect("/projects");
 }
 
 export async function updateKnowledgeAction(formData: FormData) {
