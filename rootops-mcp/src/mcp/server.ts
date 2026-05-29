@@ -3,7 +3,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import { AuditLog } from '../core/audit.js';
-import { ConfirmationQueue } from '../core/confirmation.js';
+import { ConfirmationQueue, stripApprovalToken } from '../core/confirmation.js';
 import { PolicyEngine } from '../core/policy-engine.js';
 import { classifyToolRisk } from '../core/risk.js';
 import { SafetySwitch } from '../core/safety-switch.js';
@@ -29,8 +29,10 @@ const defaultProfile = (process.env.ROOTOPS_PROFILE ?? 'read_only') as ToolProfi
 
 export async function startMcpServer(): Promise<void> {
   const taskScopes = new TaskScopeStore();
+  await taskScopes.init();
   const safety = new SafetySwitch();
   const confirmations = new ConfirmationQueue();
+  await confirmations.init();
   const audit = new AuditLog();
   await audit.init();
   let activeScope = taskScopes.active();
@@ -51,65 +53,69 @@ export async function startMcpServer(): Promise<void> {
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const name = request.params.name;
     const args = request.params.arguments ?? {};
-    const ctx: ToolCallContext = { taskId: activeScope.taskId, actor, toolName: name, profile: defaultProfile, args, risk: classifyToolRisk(name) };
+    const approvalToken = extractApprovalToken(args);
+    const cleanArgs = stripApprovalToken(args);
+    const ctx: ToolCallContext = { taskId: activeScope.taskId, actor, toolName: name, profile: defaultProfile, args: cleanArgs, risk: classifyToolRisk(name) };
     if (!safety.allows(name)) return jsonToolResult({ ok: false, error: 'safety_freeze_active', safety: safety.status() });
     const policy = new PolicyEngine(activeScope);
     const decision = policy.authorize(ctx);
-    await audit.record({ ...ctx, decision });
-    if (!decision.allowed) {
-      const confirmation = decision.requiresConfirmation ? confirmations.create(ctx, decision.reason) : undefined;
+    const approvedByToken = !decision.allowed && decision.requiresConfirmation ? await confirmations.consume(name, args, approvalToken) : false;
+    await audit.record({ ...ctx, decision: approvedByToken ? { ...decision, allowed: true, requiresConfirmation: false, reason: 'approved by one-time token' } : decision });
+    if (!decision.allowed && !approvedByToken) {
+      const confirmation = decision.requiresConfirmation ? await confirmations.create(ctx, decision.reason) : undefined;
       return jsonToolResult({ ok: false, error: 'authorization_required', decision, confirmation });
     }
     try {
       switch (name) {
-        case 'policy.check': { const parsed = PolicyCheckArgs.parse(args); const risk = classifyToolRisk(parsed.tool_name); const check = policy.authorize({ taskId: activeScope.taskId, actor, toolName: parsed.tool_name, profile: parsed.profile ?? defaultProfile, args: parsed.args ?? {}, risk }); return jsonToolResult({ ok: true, risk, decision: check }); }
-        case 'task.scope.create': { const parsed = TaskScopeCreateArgs.parse(args); const scope = taskScopes.create({ allowedRoots: parsed.allowed_roots, autoAllow: parsed.auto_allow, requiresConfirm: parsed.requires_confirm, ttlMinutes: parsed.ttl_minutes, limits: parsed.limits }); reloadScope(); return jsonToolResult({ ok: true, scope }); }
+        case 'policy.check': { const parsed = PolicyCheckArgs.parse(cleanArgs); const risk = classifyToolRisk(parsed.tool_name); const check = policy.authorize({ taskId: activeScope.taskId, actor, toolName: parsed.tool_name, profile: parsed.profile ?? defaultProfile, args: parsed.args ?? {}, risk }); return jsonToolResult({ ok: true, risk, decision: check }); }
+        case 'task.scope.create': { const parsed = TaskScopeCreateArgs.parse(cleanArgs); const scope = await taskScopes.create({ allowedRoots: parsed.allowed_roots, autoAllow: parsed.auto_allow, requiresConfirm: parsed.requires_confirm, ttlMinutes: parsed.ttl_minutes, limits: parsed.limits }); reloadScope(); return jsonToolResult({ ok: true, scope }); }
         case 'task.scope.active': return jsonToolResult({ ok: true, scope: taskScopes.active() });
         case 'task.scope.list': return jsonToolResult({ ok: true, scopes: taskScopes.list() });
-        case 'task.scope.use': { const parsed = TaskScopeUseArgs.parse(args); const scope = taskScopes.setActive(parsed.task_id); reloadScope(); return jsonToolResult({ ok: true, scope }); }
+        case 'task.scope.use': { const parsed = TaskScopeUseArgs.parse(cleanArgs); const scope = await taskScopes.setActive(parsed.task_id); reloadScope(); return jsonToolResult({ ok: true, scope }); }
         case 'confirmation.list': return jsonToolResult({ ok: true, confirmations: confirmations.list() });
-        case 'confirmation.clear': { const parsed = ConfirmationClearArgs.parse(args); return jsonToolResult(confirmations.clear(parsed.confirmation_id)); }
+        case 'confirmation.clear': { const parsed = ConfirmationClearArgs.parse(cleanArgs); return jsonToolResult(await confirmations.clear(parsed.confirmation_id)); }
+        case 'confirmation.approve': { const parsed = ConfirmationApproveArgs.parse(cleanArgs); return jsonToolResult({ ok: true, ...(await confirmations.approve(parsed.confirmation_id, parsed.ttl_minutes)) }); }
         case 'safety.status': return jsonToolResult({ ok: true, safety: safety.status() });
-        case 'safety.freeze': { const parsed = SafetyFreezeArgs.parse(args); return jsonToolResult({ ok: true, safety: safety.freeze(parsed.reason) }); }
-        case 'safety.unfreeze': { const parsed = SafetyFreezeArgs.parse(args); return jsonToolResult({ ok: true, safety: safety.unfreeze(parsed.reason) }); }
-        case 'audit.list': { const parsed = AuditListArgs.parse(args); return jsonToolResult({ ok: true, events: parsed.source === 'disk' ? await audit.listFromDisk(parsed.date) : audit.list() }); }
-        case 'audit.export': { const parsed = AuditListArgs.parse(args); const events = parsed.source === 'disk' ? await audit.listFromDisk(parsed.date) : audit.list(); return jsonToolResult({ ok: true, format: 'json', events }); }
-        case 'file.read': { const parsed = FileReadArgs.parse(args); return jsonToolResult({ ok: true, ...(await fileEngine.readLines(parsed.path, parsed.offset_line, parsed.limit_lines, { maxBytes: parsed.max_bytes, withLineNumbers: parsed.with_line_numbers })) }); }
-        case 'file.read_many': { const parsed = FileReadManyArgs.parse(args); return jsonToolResult({ ok: true, ...(await fileEngine.readMany(parsed.items, parsed.max_total_bytes)) }); }
-        case 'file.search': { const parsed = FileSearchArgs.parse(args); return jsonToolResult({ ok: true, ...(await fileEngine.search(parsed)) }); }
-        case 'file.outline': { const parsed = FileOutlineArgs.parse(args); return jsonToolResult({ ok: true, ...(await fileEngine.outline(parsed.path, parsed.max_bytes, parsed.max_items)) }); }
-        case 'file.hash': { const parsed = FileHashArgs.parse(args); return jsonToolResult({ ok: true, ...(await fileEngine.hash(parsed.path)) }); }
-        case 'snapshot.create': { const parsed = SnapshotCreateArgs.parse(args); return jsonToolResult({ ok: true, snapshot: await patchEngine.createSnapshot(parsed.path, parsed.reason) }); }
-        case 'snapshot.restore': { const parsed = SnapshotRestoreArgs.parse(args); return jsonToolResult({ ok: true, restore: await patchEngine.restoreSnapshot(parsed.snapshot_id, parsed.target_path) }); }
-        case 'patch.dry_run': { const parsed = PatchDryRunArgs.parse(args); const patch = toPatchOperation(parsed); const preview = await patchEngine.dryRun(patch); const localRisk = parsed.with_local_risk ? await local.classifyPatchRisk(patch).catch((error) => ({ error: String(error) })) : undefined; return jsonToolResult({ ok: true, preview, localRisk }); }
-        case 'patch.plan': { const parsed = PatchPlanArgs.parse(args); const patches = parsed.patches.map(toPatchOperation); return jsonToolResult({ ok: true, plan: await buildPatchPlan(patchEngine, { patches, maxFilesChanged: parsed.max_files_changed, maxLinesChanged: parsed.max_lines_changed }) }); }
-        case 'patch.apply': { const parsed = PatchApplyArgs.parse(args); return jsonToolResult({ ok: true, result: await patchEngine.apply(toPatchOperation(parsed)) }); }
-        case 'patch.verify': { const parsed = PatchVerifyArgs.parse(args); return jsonToolResult({ ok: true, verify: await patchEngine.verify(parsed.path, parsed.expected_text, parsed.old_text) }); }
-        case 'remote.session.open': { const parsed = RemoteSessionOpenArgs.parse(args); return jsonToolResult({ ok: true, session: sessions.open(parsed.target, parsed.cwd) }); }
+        case 'safety.freeze': { const parsed = SafetyFreezeArgs.parse(cleanArgs); return jsonToolResult({ ok: true, safety: safety.freeze(parsed.reason) }); }
+        case 'safety.unfreeze': { const parsed = SafetyFreezeArgs.parse(cleanArgs); return jsonToolResult({ ok: true, safety: safety.unfreeze(parsed.reason) }); }
+        case 'audit.list': { const parsed = AuditListArgs.parse(cleanArgs); return jsonToolResult({ ok: true, events: parsed.source === 'disk' ? await audit.listFromDisk(parsed.date) : audit.list() }); }
+        case 'audit.export': { const parsed = AuditListArgs.parse(cleanArgs); const events = parsed.source === 'disk' ? await audit.listFromDisk(parsed.date) : audit.list(); return jsonToolResult({ ok: true, format: 'json', events }); }
+        case 'file.read': { const parsed = FileReadArgs.parse(cleanArgs); return jsonToolResult({ ok: true, ...(await fileEngine.readLines(parsed.path, parsed.offset_line, parsed.limit_lines, { maxBytes: parsed.max_bytes, withLineNumbers: parsed.with_line_numbers })) }); }
+        case 'file.read_many': { const parsed = FileReadManyArgs.parse(cleanArgs); return jsonToolResult({ ok: true, ...(await fileEngine.readMany(parsed.items, parsed.max_total_bytes)) }); }
+        case 'file.search': { const parsed = FileSearchArgs.parse(cleanArgs); return jsonToolResult({ ok: true, ...(await fileEngine.search(parsed)) }); }
+        case 'file.outline': { const parsed = FileOutlineArgs.parse(cleanArgs); return jsonToolResult({ ok: true, ...(await fileEngine.outline(parsed.path, parsed.max_bytes, parsed.max_items)) }); }
+        case 'file.hash': { const parsed = FileHashArgs.parse(cleanArgs); return jsonToolResult({ ok: true, ...(await fileEngine.hash(parsed.path)) }); }
+        case 'snapshot.create': { const parsed = SnapshotCreateArgs.parse(cleanArgs); return jsonToolResult({ ok: true, snapshot: await patchEngine.createSnapshot(parsed.path, parsed.reason) }); }
+        case 'snapshot.restore': { const parsed = SnapshotRestoreArgs.parse(cleanArgs); return jsonToolResult({ ok: true, restore: await patchEngine.restoreSnapshot(parsed.snapshot_id, parsed.target_path) }); }
+        case 'patch.dry_run': { const parsed = PatchDryRunArgs.parse(cleanArgs); const patch = toPatchOperation(parsed); const preview = await patchEngine.dryRun(patch); const localRisk = parsed.with_local_risk ? await local.classifyPatchRisk(patch).catch((error) => ({ error: String(error) })) : undefined; return jsonToolResult({ ok: true, preview, localRisk }); }
+        case 'patch.plan': { const parsed = PatchPlanArgs.parse(cleanArgs); const patches = parsed.patches.map(toPatchOperation); return jsonToolResult({ ok: true, plan: await buildPatchPlan(patchEngine, { patches, maxFilesChanged: parsed.max_files_changed, maxLinesChanged: parsed.max_lines_changed }) }); }
+        case 'patch.apply': { const parsed = PatchApplyArgs.parse(cleanArgs); return jsonToolResult({ ok: true, result: await patchEngine.apply(toPatchOperation(parsed)) }); }
+        case 'patch.verify': { const parsed = PatchVerifyArgs.parse(cleanArgs); return jsonToolResult({ ok: true, verify: await patchEngine.verify(parsed.path, parsed.expected_text, parsed.old_text) }); }
+        case 'remote.session.open': { const parsed = RemoteSessionOpenArgs.parse(cleanArgs); return jsonToolResult({ ok: true, session: sessions.open(parsed.target, parsed.cwd) }); }
         case 'remote.session.list': return jsonToolResult({ ok: true, sessions: sessions.list() });
-        case 'remote.session.close': { const parsed = RemoteSessionCloseArgs.parse(args); return jsonToolResult(sessions.close(parsed.session_id)); }
-        case 'remote.exec': { const parsed = RemoteExecArgs.parse(args); const session = parsed.session_id ? sessions.get(parsed.session_id) : undefined; const target = parsed.target ?? session?.target; if (!target) throw new Error('target or session_id required'); return jsonToolResult({ ok: true, result: await remote.sshExec(target, parsed.command, { cwd: parsed.cwd ?? session?.cwd, timeoutMs: parsed.timeout_ms }) }); }
-        case 'remote.exec_stream.start': { const parsed = RemoteStreamStartArgs.parse(args); return jsonToolResult({ ok: true, stream: streams.start(parsed.target, parsed.command, { cwd: parsed.cwd }) }); }
-        case 'remote.exec_stream.read': { const parsed = RemoteStreamReadArgs.parse(args); return jsonToolResult({ ok: true, stream: streams.read(parsed.stream_id, parsed.clear) }); }
-        case 'remote.exec_stream.kill': { const parsed = RemoteStreamKillArgs.parse(args); return jsonToolResult(streams.kill(parsed.stream_id, parsed.signal as NodeJS.Signals)); }
+        case 'remote.session.close': { const parsed = RemoteSessionCloseArgs.parse(cleanArgs); return jsonToolResult(sessions.close(parsed.session_id)); }
+        case 'remote.exec': { const parsed = RemoteExecArgs.parse(cleanArgs); const session = parsed.session_id ? sessions.get(parsed.session_id) : undefined; const target = parsed.target ?? session?.target; if (!target) throw new Error('target or session_id required'); return jsonToolResult({ ok: true, result: await remote.sshExec(target, parsed.command, { cwd: parsed.cwd ?? session?.cwd, timeoutMs: parsed.timeout_ms }) }); }
+        case 'remote.exec_stream.start': { const parsed = RemoteStreamStartArgs.parse(cleanArgs); return jsonToolResult({ ok: true, stream: streams.start(parsed.target, parsed.command, { cwd: parsed.cwd }) }); }
+        case 'remote.exec_stream.read': { const parsed = RemoteStreamReadArgs.parse(cleanArgs); return jsonToolResult({ ok: true, stream: streams.read(parsed.stream_id, parsed.clear) }); }
+        case 'remote.exec_stream.kill': { const parsed = RemoteStreamKillArgs.parse(cleanArgs); return jsonToolResult(streams.kill(parsed.stream_id, parsed.signal as NodeJS.Signals)); }
         case 'remote.exec_stream.list': return jsonToolResult({ ok: true, streams: streams.list() });
-        case 'remote.pty.open': { const parsed = RemotePtyOpenArgs.parse(args); return jsonToolResult({ ok: true, pty: ptys.open(parsed.target, parsed.cwd) }); }
-        case 'remote.pty.write': { const parsed = RemotePtyWriteArgs.parse(args); return jsonToolResult(ptys.write(parsed.pty_id, parsed.input)); }
-        case 'remote.pty.read': { const parsed = RemotePtyReadArgs.parse(args); return jsonToolResult({ ok: true, pty: ptys.read(parsed.pty_id, parsed.clear) }); }
-        case 'remote.pty.close': { const parsed = RemotePtyCloseArgs.parse(args); return jsonToolResult(ptys.close(parsed.pty_id)); }
+        case 'remote.pty.open': { const parsed = RemotePtyOpenArgs.parse(cleanArgs); return jsonToolResult({ ok: true, pty: ptys.open(parsed.target, parsed.cwd) }); }
+        case 'remote.pty.write': { const parsed = RemotePtyWriteArgs.parse(cleanArgs); return jsonToolResult(ptys.write(parsed.pty_id, parsed.input)); }
+        case 'remote.pty.read': { const parsed = RemotePtyReadArgs.parse(cleanArgs); return jsonToolResult({ ok: true, pty: ptys.read(parsed.pty_id, parsed.clear) }); }
+        case 'remote.pty.close': { const parsed = RemotePtyCloseArgs.parse(cleanArgs); return jsonToolResult(ptys.close(parsed.pty_id)); }
         case 'remote.pty.list': return jsonToolResult({ ok: true, ptys: ptys.list() });
-        case 'remote.tunnel.open': { const parsed = RemoteTunnelOpenArgs.parse(args); return jsonToolResult({ ok: true, tunnel: tunnels.open({ target: parsed.target, localHost: parsed.local_host, localPort: parsed.local_port, remoteHost: parsed.remote_host, remotePort: parsed.remote_port }) }); }
+        case 'remote.tunnel.open': { const parsed = RemoteTunnelOpenArgs.parse(cleanArgs); return jsonToolResult({ ok: true, tunnel: tunnels.open({ target: parsed.target, localHost: parsed.local_host, localPort: parsed.local_port, remoteHost: parsed.remote_host, remotePort: parsed.remote_port }) }); }
         case 'remote.tunnel.list': return jsonToolResult({ ok: true, tunnels: tunnels.list() });
-        case 'remote.tunnel.close': { const parsed = RemoteTunnelCloseArgs.parse(args); return jsonToolResult(tunnels.close(parsed.tunnel_id)); }
-        case 'remote.agent.bootstrap': { const parsed = RemoteAgentBootstrapArgs.parse(args); return jsonToolResult({ ok: true, result: await agent.install(parsed.target, parsed.install_path) }); }
-        case 'remote.rsync_push': { const parsed = RemoteRsyncPushArgs.parse(args); return jsonToolResult({ ok: true, result: await remote.rsyncPush(parsed.source, parsed.target, parsed.destination) }); }
-        case 'remote.rsync_pull': { const parsed = RemoteRsyncPullArgs.parse(args); return jsonToolResult({ ok: true, result: await remote.rsyncPull(parsed.target, parsed.source, parsed.destination) }); }
-        case 'remote.group.register': { const parsed = RemoteGroupRegisterArgs.parse(args); return jsonToolResult({ ok: true, group: groups.register(parsed.name, parsed.targets) }); }
-        case 'remote.group.exec': { const parsed = RemoteGroupExecArgs.parse(args); const group = groups.get(parsed.name); return jsonToolResult({ ok: true, results: await remote.groupExec(group.targets, parsed.command, { cwd: parsed.cwd, timeoutMs: parsed.timeout_ms }) }); }
-        case 'local.embed': { const parsed = LocalEmbedArgs.parse(args); return jsonToolResult({ ok: true, embeddings: await local.embed(parsed.texts) }); }
-        case 'local.rerank': { const parsed = LocalRerankArgs.parse(args); return jsonToolResult({ ok: true, items: await local.rerank(parsed.query, parsed.candidates) }); }
-        case 'local.summarize': { const parsed = LocalSummarizeArgs.parse(args); return jsonToolResult({ ok: true, ...(await local.summarizeLargeText(parsed.text)) }); }
-        case 'local.context_pack': { const parsed = LocalContextPackArgs.parse(args); return jsonToolResult({ ok: true, ...(await buildContextPack(fileEngine, { root: parsed.root, query: parsed.query, maxFiles: parsed.max_files, maxTotalBytes: parsed.max_total_bytes, linesPerFile: parsed.lines_per_file, fileGlob: parsed.file_glob })) }); }
+        case 'remote.tunnel.close': { const parsed = RemoteTunnelCloseArgs.parse(cleanArgs); return jsonToolResult(tunnels.close(parsed.tunnel_id)); }
+        case 'remote.agent.bootstrap': { const parsed = RemoteAgentBootstrapArgs.parse(cleanArgs); return jsonToolResult({ ok: true, result: await agent.install(parsed.target, parsed.install_path) }); }
+        case 'remote.rsync_push': { const parsed = RemoteRsyncPushArgs.parse(cleanArgs); return jsonToolResult({ ok: true, result: await remote.rsyncPush(parsed.source, parsed.target, parsed.destination) }); }
+        case 'remote.rsync_pull': { const parsed = RemoteRsyncPullArgs.parse(cleanArgs); return jsonToolResult({ ok: true, result: await remote.rsyncPull(parsed.target, parsed.source, parsed.destination) }); }
+        case 'remote.group.register': { const parsed = RemoteGroupRegisterArgs.parse(cleanArgs); return jsonToolResult({ ok: true, group: groups.register(parsed.name, parsed.targets) }); }
+        case 'remote.group.exec': { const parsed = RemoteGroupExecArgs.parse(cleanArgs); const group = groups.get(parsed.name); return jsonToolResult({ ok: true, results: await remote.groupExec(group.targets, parsed.command, { cwd: parsed.cwd, timeoutMs: parsed.timeout_ms }) }); }
+        case 'local.embed': { const parsed = LocalEmbedArgs.parse(cleanArgs); return jsonToolResult({ ok: true, embeddings: await local.embed(parsed.texts) }); }
+        case 'local.rerank': { const parsed = LocalRerankArgs.parse(cleanArgs); return jsonToolResult({ ok: true, items: await local.rerank(parsed.query, parsed.candidates) }); }
+        case 'local.summarize': { const parsed = LocalSummarizeArgs.parse(cleanArgs); return jsonToolResult({ ok: true, ...(await local.summarizeLargeText(parsed.text)) }); }
+        case 'local.context_pack': { const parsed = LocalContextPackArgs.parse(cleanArgs); return jsonToolResult({ ok: true, ...(await buildContextPack(fileEngine, { root: parsed.root, query: parsed.query, maxFiles: parsed.max_files, maxTotalBytes: parsed.max_total_bytes, linesPerFile: parsed.lines_per_file, fileGlob: parsed.file_glob })) }); }
         default: return jsonToolResult({ ok: false, error: `unknown tool: ${name}` });
       }
     } catch (error) { return jsonToolResult({ ok: false, error: error instanceof Error ? error.message : String(error) }); }
@@ -118,6 +124,7 @@ export async function startMcpServer(): Promise<void> {
 }
 
 function jsonToolResult(value: unknown) { return { content: [{ type: 'text' as const, text: JSON.stringify(value, null, 2) }] }; }
+function extractApprovalToken(value: unknown): string | undefined { return value && typeof value === 'object' ? (value as Record<string, unknown>).approval_token as string | undefined : undefined; }
 function toPatchOperation(parsed: z.infer<typeof PatchDryRunArgs>): PatchOperation { return { path: parsed.path, expectedHash: parsed.expected_hash, oldText: parsed.old_text, newText: parsed.new_text, risk: parsed.risk, dryRunRequired: parsed.dry_run_required, autoSnapshot: parsed.auto_snapshot }; }
 
 const SshTargetSchema = z.object({ host: z.string(), user: z.string().optional(), port: z.number().int().min(1).max(65535).optional(), identityFile: z.string().optional() });
@@ -125,6 +132,7 @@ const PolicyCheckArgs = z.object({ tool_name: z.string(), profile: z.string().op
 const TaskScopeCreateArgs = z.object({ allowed_roots: z.array(z.string()).optional(), auto_allow: z.array(z.string()).optional(), requires_confirm: z.array(z.string()).optional(), ttl_minutes: z.number().int().min(1).max(1440).default(60), limits: z.object({ maxFilesChanged: z.number().int().optional(), maxLinesChanged: z.number().int().optional(), maxCommandSeconds: z.number().int().optional(), maxLocalModelBatchTokens: z.number().int().optional() }).optional() });
 const TaskScopeUseArgs = z.object({ task_id: z.string() });
 const ConfirmationClearArgs = z.object({ confirmation_id: z.string() });
+const ConfirmationApproveArgs = z.object({ confirmation_id: z.string(), ttl_minutes: z.number().int().min(1).max(60).default(10) });
 const SafetyFreezeArgs = z.object({ reason: z.string().default('manual') });
 const AuditListArgs = z.object({ source: z.enum(['memory', 'disk']).default('memory'), date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional() });
 const FileReadArgs = z.object({ path: z.string(), offset_line: z.number().int().min(1).default(1), limit_lines: z.number().int().min(1).max(2000).default(200), max_bytes: z.number().int().min(1).max(1024 * 1024).default(512 * 1024), with_line_numbers: z.boolean().default(true) });

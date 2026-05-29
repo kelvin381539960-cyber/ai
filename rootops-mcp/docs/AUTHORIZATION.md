@@ -1,6 +1,6 @@
 # Authorization and Safety
 
-Phase 5 adds the low-friction authorization layer.
+Phase 5 provides the low-friction authorization layer.
 
 ## Tools
 
@@ -15,6 +15,7 @@ Merged confirmation queue:
 
 - `confirmation.list`
 - `confirmation.clear`
+- `confirmation.approve`
 
 Safety switch:
 
@@ -25,6 +26,47 @@ Safety switch:
 Audit export:
 
 - `audit.export`
+
+## Persistent state
+
+State is stored under:
+
+```text
+.var/state/task-scopes.json
+.var/state/confirmations.json
+```
+
+Override with:
+
+```text
+ROOTOPS_STATE_DIR=/path/to/state
+```
+
+## Approval token flow
+
+1. A high-risk or non-allowed tool call returns `authorization_required` and a confirmation object.
+2. Approve it:
+
+```json
+{
+  "confirmation_id": "confirm_...",
+  "ttl_minutes": 10
+}
+```
+
+3. Retry the exact same tool call with:
+
+```json
+{
+  "approval_token": "appr_..."
+}
+```
+
+The token is single-use and bound to:
+
+- tool name
+- arguments, excluding `approval_token`
+- expiry time
 
 ## Task scope example
 
@@ -69,18 +111,3 @@ When frozen, only these are allowed:
 - local intelligence tools
 
 Everything else returns `safety_freeze_active`.
-
-## Confirmation behavior
-
-If a tool is not allowed, the server returns:
-
-```json
-{
-  "ok": false,
-  "error": "authorization_required",
-  "decision": {},
-  "confirmation": {}
-}
-```
-
-The confirmation queue is intentionally separate from execution. A future version should add explicit user approval tokens.

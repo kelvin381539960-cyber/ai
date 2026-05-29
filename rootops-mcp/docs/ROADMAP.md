@@ -65,6 +65,13 @@
 - [x] risk threshold limits
 - [x] audit export
 - [x] emergency freeze
-- [ ] explicit approval token apply flow
-- [ ] persistent task scopes
-- [ ] persistent confirmation queue
+- [x] explicit approval token apply flow
+- [x] persistent task scopes
+- [x] persistent confirmation queue
+
+## Phase 6: Intelligence upgrades
+
+- [ ] tree-sitter outline
+- [ ] SQLite FTS5 index
+- [ ] embedding index
+- [ ] real remote agent daemon

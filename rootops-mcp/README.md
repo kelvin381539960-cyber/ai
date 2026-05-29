@@ -34,6 +34,8 @@ Runnable MCP server with:
 - remote ops tools
 - task-level authorization
 - merged confirmation payloads
+- one-time approval tokens
+- persistent task scopes and confirmation queue
 - emergency freeze
 - audit export
 
@@ -46,9 +48,8 @@ Runnable MCP server with:
 
 ## Next build order
 
-1. Add explicit approval token apply flow.
-2. Persist task scopes and confirmation queue.
-3. Add tree-sitter outline.
-4. Add SQLite FTS5 index.
-5. Add embedding index.
-6. Add real remote agent daemon.
+1. Add tree-sitter outline.
+2. Add SQLite FTS5 index.
+3. Add embedding index.
+4. Add real remote agent daemon.
+5. Add install/test CI scripts.
