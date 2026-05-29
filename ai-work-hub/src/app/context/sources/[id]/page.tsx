@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
-import { Badge, Button, Card, PageHeader, TextInput } from "@/components/ui";
-import { indexProjectSourceAction } from "@/app/actions";
+import { Badge, Button, Card, PageHeader, TextArea, TextInput } from "@/components/ui";
+import { deleteProjectSourceAction, indexProjectSourceAction, updateProjectSourceAction } from "@/app/actions";
 import { getProjectSource, defaultSourcePatterns } from "@/lib/services/context-source-service";
+import { parseJson } from "@/lib/services/app-service";
 
 export const dynamic = "force-dynamic";
 
@@ -40,6 +41,26 @@ export default async function SourcePage({
             <form action={indexProjectSourceAction} className="mt-4">
               <input type="hidden" name="sourceId" value={source.id} />
               <Button type="submit">重新索引</Button>
+            </form>
+          </Card>
+
+          <Card>
+            <h2 className="mb-3 text-lg font-semibold">编辑资料源</h2>
+            <form action={updateProjectSourceAction} className="space-y-3">
+              <input type="hidden" name="sourceId" value={source.id} />
+              <TextInput name="name" defaultValue={source.name} required />
+              <TextInput value={source.rootPath} readOnly />
+              <TextArea name="includePatterns" defaultValue={parseJson<string[]>(source.includePatterns, patterns.includes).join("\n")} className="min-h-32" />
+              <TextArea name="excludePatterns" defaultValue={parseJson<string[]>(source.excludePatterns, patterns.excludes).join("\n")} className="min-h-40" />
+              <Button type="submit">保存资料源</Button>
+            </form>
+            <form action={deleteProjectSourceAction} className="mt-4 border-t border-slate-100 pt-3">
+              <input type="hidden" name="sourceId" value={source.id} />
+              <label className="flex items-center gap-2 text-xs text-slate-500">
+                <input type="checkbox" name="confirmDelete" value="yes" required />
+                确认删除资料源记录和索引，不删除真实目录
+              </label>
+              <Button type="submit" className="mt-2 bg-rose-700">删除资料源</Button>
             </form>
           </Card>
 

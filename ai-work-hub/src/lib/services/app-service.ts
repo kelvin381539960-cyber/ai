@@ -174,6 +174,30 @@ export async function createKnowledge(input: {
   return id;
 }
 
+export async function updateKnowledge(id: string, input: {
+  title: string;
+  content: string;
+  type: KnowledgeType;
+  tags: string[];
+}) {
+  await ensureAppReady();
+  await db
+    .update(knowledgeItems)
+    .set({
+      title: input.title,
+      content: input.content,
+      type: input.type,
+      tags: JSON.stringify(input.tags),
+      updatedAt: nowIso(),
+    })
+    .where(eq(knowledgeItems.id, id));
+}
+
+export async function deleteKnowledge(id: string) {
+  await ensureAppReady();
+  await db.delete(knowledgeItems).where(eq(knowledgeItems.id, id));
+}
+
 export async function listKnowledge(query?: string) {
   await ensureAppReady();
   if (!query) {
@@ -208,6 +232,24 @@ export async function createRule(input: { name: string; content: string; type: R
     updatedAt: now,
   });
   return id;
+}
+
+export async function updateRule(id: string, input: { name: string; content: string; type: RuleType }) {
+  await ensureAppReady();
+  await db
+    .update(rules)
+    .set({ name: input.name, content: input.content, type: input.type, updatedAt: nowIso() })
+    .where(eq(rules.id, id));
+}
+
+export async function toggleRule(id: string, enabled: boolean) {
+  await ensureAppReady();
+  await db.update(rules).set({ enabled, updatedAt: nowIso() }).where(eq(rules.id, id));
+}
+
+export async function deleteRule(id: string) {
+  await ensureAppReady();
+  await db.delete(rules).where(eq(rules.id, id));
 }
 
 export async function listRules() {
@@ -250,6 +292,38 @@ export async function updateWorkflowDefinition(id: string, definition: WorkflowD
   await db.update(workflows).set({ definition: JSON.stringify(definition), updatedAt: nowIso() }).where(eq(workflows.id, id));
 }
 
+export async function updateWorkflowMeta(id: string, input: { name: string; scenario: string; description: string }) {
+  await ensureAppReady();
+  await db
+    .update(workflows)
+    .set({ name: input.name, scenario: input.scenario, description: input.description, updatedAt: nowIso() })
+    .where(eq(workflows.id, id));
+}
+
+export async function duplicateWorkflow(id: string) {
+  const workflow = await getWorkflow(id);
+  if (!workflow) throw new Error("Workflow not found");
+  const now = nowIso();
+  const copyId = newId("workflow");
+  await db.insert(workflows).values({
+    id: copyId,
+    projectId: workflow.projectId,
+    name: `${workflow.name} Copy`,
+    scenario: workflow.scenario,
+    description: workflow.description,
+    definition: workflow.definition,
+    createdAt: now,
+    updatedAt: now,
+  });
+  return copyId;
+}
+
+export async function deleteWorkflow(id: string) {
+  await ensureAppReady();
+  if (id.startsWith("workflow_")) throw new Error("Default workflows cannot be deleted. Duplicate it first.");
+  await db.delete(workflows).where(eq(workflows.id, id));
+}
+
 export async function listAgents() {
   await ensureAppReady();
   return db.select().from(agents).orderBy(desc(agents.updatedAt));
@@ -285,6 +359,40 @@ export async function createAgent(input: {
     updatedAt: now,
   });
   return id;
+}
+
+export async function updateAgent(id: string, input: {
+  name: string;
+  type: AgentType;
+  agentKey: string;
+  command: string;
+  capabilities: string[];
+  timeoutSeconds: number;
+}) {
+  await ensureAppReady();
+  await db
+    .update(agents)
+    .set({
+      name: input.name,
+      type: input.type,
+      agentKey: input.agentKey,
+      command: input.command,
+      capabilities: JSON.stringify(input.capabilities),
+      timeoutSeconds: input.timeoutSeconds,
+      updatedAt: nowIso(),
+    })
+    .where(eq(agents.id, id));
+}
+
+export async function toggleAgent(id: string, enabled: boolean) {
+  await ensureAppReady();
+  await db.update(agents).set({ enabled, updatedAt: nowIso() }).where(eq(agents.id, id));
+}
+
+export async function deleteAgent(id: string) {
+  await ensureAppReady();
+  if (id.startsWith("agent_")) throw new Error("Default agents cannot be deleted. Disable them instead.");
+  await db.delete(agents).where(eq(agents.id, id));
 }
 
 export async function updateAgentHealth(id: string, status: string) {

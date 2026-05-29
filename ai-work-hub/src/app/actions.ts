@@ -7,6 +7,17 @@ import {
   createKnowledge,
   createRule,
   createWorkflowFromTemplate,
+  deleteAgent,
+  deleteKnowledge,
+  deleteRule,
+  deleteWorkflow,
+  duplicateWorkflow,
+  toggleAgent,
+  toggleRule,
+  updateAgent,
+  updateKnowledge,
+  updateRule,
+  updateWorkflowMeta,
 } from "@/lib/services/app-service";
 import {
   cancelRun,
@@ -25,7 +36,9 @@ import {
 } from "@/lib/services/workflow-run-service";
 import {
   createProjectSource,
+  deleteProjectSource,
   indexProjectSource,
+  updateProjectSource,
 } from "@/lib/services/context-source-service";
 import { testCommand } from "@/lib/runtime/health";
 import { updateAgentHealth } from "@/lib/services/app-service";
@@ -52,6 +65,22 @@ export async function createKnowledgeAction(formData: FormData) {
   redirect("/knowledge");
 }
 
+export async function updateKnowledgeAction(formData: FormData) {
+  await updateKnowledge(value(formData, "knowledgeId"), {
+    title: value(formData, "title"),
+    content: value(formData, "content"),
+    type: value(formData, "type") as KnowledgeType,
+    tags: tags(formData),
+  });
+  redirect("/knowledge");
+}
+
+export async function deleteKnowledgeAction(formData: FormData) {
+  requireConfirmation(formData);
+  await deleteKnowledge(value(formData, "knowledgeId"));
+  redirect("/knowledge");
+}
+
 export async function createProjectSourceAction(formData: FormData) {
   const id = await createProjectSource({
     name: value(formData, "name"),
@@ -68,6 +97,22 @@ export async function indexProjectSourceAction(formData: FormData) {
   const id = value(formData, "sourceId");
   await indexProjectSource(id);
   redirect(`/context/sources/${id}`);
+}
+
+export async function updateProjectSourceAction(formData: FormData) {
+  const id = value(formData, "sourceId");
+  await updateProjectSource(id, {
+    name: value(formData, "name"),
+    includePatterns: lines(value(formData, "includePatterns")),
+    excludePatterns: lines(value(formData, "excludePatterns")),
+  });
+  redirect(`/context/sources/${id}`);
+}
+
+export async function deleteProjectSourceAction(formData: FormData) {
+  requireConfirmation(formData);
+  await deleteProjectSource(value(formData, "sourceId"));
+  redirect("/context");
 }
 
 export async function loginAction(formData: FormData) {
@@ -99,9 +144,50 @@ export async function createRuleAction(formData: FormData) {
   redirect("/settings");
 }
 
+export async function updateRuleAction(formData: FormData) {
+  await updateRule(value(formData, "ruleId"), {
+    name: value(formData, "name"),
+    content: value(formData, "content"),
+    type: value(formData, "type") as RuleType,
+  });
+  redirect("/settings");
+}
+
+export async function toggleRuleAction(formData: FormData) {
+  await toggleRule(value(formData, "ruleId"), value(formData, "enabled") === "true");
+  redirect("/settings");
+}
+
+export async function deleteRuleAction(formData: FormData) {
+  requireConfirmation(formData);
+  await deleteRule(value(formData, "ruleId"));
+  redirect("/settings");
+}
+
 export async function createWorkflowAction(formData: FormData) {
   const id = await createWorkflowFromTemplate(value(formData, "templateId"));
   redirect(`/workflows/${id}`);
+}
+
+export async function updateWorkflowMetaAction(formData: FormData) {
+  const id = value(formData, "workflowId");
+  await updateWorkflowMeta(id, {
+    name: value(formData, "name"),
+    scenario: value(formData, "scenario"),
+    description: value(formData, "description"),
+  });
+  redirect(`/workflows/${id}`);
+}
+
+export async function duplicateWorkflowAction(formData: FormData) {
+  const id = await duplicateWorkflow(value(formData, "workflowId"));
+  redirect(`/workflows/${id}`);
+}
+
+export async function deleteWorkflowAction(formData: FormData) {
+  requireConfirmation(formData);
+  await deleteWorkflow(value(formData, "workflowId"));
+  redirect("/workflows");
 }
 
 export async function createAgentAction(formData: FormData) {
@@ -112,6 +198,29 @@ export async function createAgentAction(formData: FormData) {
     command: value(formData, "command"),
     capabilities: tags(formData),
   });
+  redirect("/agents");
+}
+
+export async function updateAgentAction(formData: FormData) {
+  await updateAgent(value(formData, "agentId"), {
+    name: value(formData, "name"),
+    type: value(formData, "type") as AgentType,
+    agentKey: value(formData, "agentKey"),
+    command: value(formData, "command"),
+    capabilities: tags(formData),
+    timeoutSeconds: Number(value(formData, "timeoutSeconds") || 300),
+  });
+  redirect("/agents");
+}
+
+export async function toggleAgentAction(formData: FormData) {
+  await toggleAgent(value(formData, "agentId"), value(formData, "enabled") === "true");
+  redirect("/agents");
+}
+
+export async function deleteAgentAction(formData: FormData) {
+  requireConfirmation(formData);
+  await deleteAgent(value(formData, "agentId"));
   redirect("/agents");
 }
 
@@ -168,6 +277,12 @@ function parseFileRefs(formData: FormData): WorkflowFileReference[] {
       reason: "Workflow 启动时选择",
     };
   }).filter((ref) => ref.sourceId && ref.filePath);
+}
+
+function requireConfirmation(formData: FormData) {
+  if (value(formData, "confirmDelete") !== "yes") {
+    throw new Error("Delete confirmation is required.");
+  }
 }
 
 export async function startWorkflowRunAction(formData: FormData) {

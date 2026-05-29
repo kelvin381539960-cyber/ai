@@ -1,6 +1,6 @@
 import { AppShell } from "@/components/app-shell";
 import { Badge, Button, Card, PageHeader, Select, TextArea, TextInput } from "@/components/ui";
-import { createKnowledgeAction } from "@/app/actions";
+import { createKnowledgeAction, deleteKnowledgeAction, updateKnowledgeAction } from "@/app/actions";
 import { listKnowledge, parseJson } from "@/lib/services/app-service";
 
 export const dynamic = "force-dynamic";
@@ -42,19 +42,39 @@ export default async function KnowledgePage({
           </form>
           {items.map((item) => (
             <Card key={item.id}>
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <h3 className="text-base font-semibold">{item.title}</h3>
-                  <div className="mt-1 flex flex-wrap gap-2">
+              <form action={updateKnowledgeAction} className="space-y-3">
+                <input type="hidden" name="knowledgeId" value={item.id} />
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex flex-wrap gap-2">
                     <Badge tone="blue">{item.type}</Badge>
                     {parseJson<string[]>(item.tags, []).map((tag) => (
                       <Badge key={tag}>{tag}</Badge>
                     ))}
                   </div>
+                  <span className="text-xs text-slate-500">{new Date(item.updatedAt).toLocaleString()}</span>
                 </div>
-                <span className="text-xs text-slate-500">{new Date(item.updatedAt).toLocaleString()}</span>
-              </div>
-              <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-700">{item.content}</p>
+                <TextInput name="title" defaultValue={item.title} required />
+                <Select name="type" defaultValue={item.type}>
+                  <option value="background">项目背景</option>
+                  <option value="prd">PRD</option>
+                  <option value="rule">规则</option>
+                  <option value="research">调研</option>
+                  <option value="decision">决策</option>
+                  <option value="output">历史输出</option>
+                  <option value="note">备注</option>
+                </Select>
+                <TextInput name="tags" defaultValue={parseJson<string[]>(item.tags, []).join(",")} />
+                <TextArea name="content" defaultValue={item.content} className="min-h-44" required />
+                <Button type="submit">保存修改</Button>
+              </form>
+              <form action={deleteKnowledgeAction} className="mt-4 border-t border-slate-100 pt-3">
+                <input type="hidden" name="knowledgeId" value={item.id} />
+                <label className="flex items-center gap-2 text-xs text-slate-500">
+                  <input type="checkbox" name="confirmDelete" value="yes" required />
+                  确认删除这条知识
+                </label>
+                <Button type="submit" className="mt-2 bg-rose-700">删除</Button>
+              </form>
             </Card>
           ))}
         </div>

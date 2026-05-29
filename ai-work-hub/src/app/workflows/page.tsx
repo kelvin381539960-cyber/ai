@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
 import { Badge, Button, Card, PageHeader } from "@/components/ui";
-import { createWorkflowAction } from "@/app/actions";
+import { createWorkflowAction, deleteWorkflowAction, duplicateWorkflowAction, updateWorkflowMetaAction } from "@/app/actions";
 import { listWorkflows } from "@/lib/services/app-service";
 import { workflowTemplates } from "@/lib/templates/workflows";
 
@@ -34,19 +34,39 @@ export default async function WorkflowsPage() {
         </Card>
         <div className="grid gap-4 md:grid-cols-2">
           {workflows.map((workflow) => (
-            <Link key={workflow.id} href={`/workflows/${workflow.id}/start`}>
-              <Card className="h-full hover:bg-slate-50">
+            <Card key={workflow.id} className="h-full">
+              <form action={updateWorkflowMetaAction} className="space-y-3">
+                <input type="hidden" name="workflowId" value={workflow.id} />
                 <div className="flex items-start justify-between gap-3">
-                  <h3 className="font-semibold">{workflow.name}</h3>
                   <Badge>{workflow.scenario}</Badge>
                 </div>
-                <p className="mt-3 text-sm leading-6 text-slate-600">{workflow.description}</p>
-                <div className="mt-4 flex items-center justify-between gap-3">
+                <input className="h-10 w-full rounded-md border border-slate-300 px-3 text-sm" name="name" defaultValue={workflow.name} required />
+                <input className="h-10 w-full rounded-md border border-slate-300 px-3 text-sm" name="scenario" defaultValue={workflow.scenario} required />
+                <textarea className="min-h-24 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" name="description" defaultValue={workflow.description} />
+                <div className="flex items-center justify-between gap-3">
                   <span className="text-xs text-slate-500">{new Date(workflow.updatedAt).toLocaleString()}</span>
-                  <span className="text-sm font-medium text-slate-900">开始运行</span>
+                  <Button type="submit">保存</Button>
                 </div>
-              </Card>
-            </Link>
+              </form>
+              <div className="mt-4 flex flex-wrap gap-3 border-t border-slate-100 pt-3">
+                <Link href={`/workflows/${workflow.id}/start`} className="rounded-md bg-slate-950 px-4 py-2 text-sm font-medium text-white">开始运行</Link>
+                <Link href={`/workflows/${workflow.id}`} className="rounded-md bg-slate-700 px-4 py-2 text-sm font-medium text-white">查看画布</Link>
+                <form action={duplicateWorkflowAction}>
+                  <input type="hidden" name="workflowId" value={workflow.id} />
+                  <Button type="submit" className="bg-slate-700">复制</Button>
+                </form>
+                {!workflow.id.startsWith("workflow_") ? (
+                  <form action={deleteWorkflowAction}>
+                    <input type="hidden" name="workflowId" value={workflow.id} />
+                    <label className="mr-3 inline-flex items-center gap-2 text-xs text-slate-500">
+                      <input type="checkbox" name="confirmDelete" value="yes" required />
+                      确认删除
+                    </label>
+                    <Button type="submit" className="bg-rose-700">删除</Button>
+                  </form>
+                ) : null}
+              </div>
+            </Card>
           ))}
         </div>
       </div>

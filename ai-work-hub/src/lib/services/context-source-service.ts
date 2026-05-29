@@ -85,6 +85,30 @@ export async function createProjectSource(input: {
   return id;
 }
 
+export async function updateProjectSource(id: string, input: {
+  name: string;
+  includePatterns: string[];
+  excludePatterns: string[];
+}) {
+  await getDefaultProject();
+  await db
+    .update(projectSources)
+    .set({
+      name: input.name,
+      includePatterns: JSON.stringify(input.includePatterns.length ? input.includePatterns : defaultIncludes),
+      excludePatterns: JSON.stringify(input.excludePatterns.length ? input.excludePatterns : defaultExcludes),
+      status: "pending",
+      updatedAt: nowIso(),
+    })
+    .where(eq(projectSources.id, id));
+}
+
+export async function deleteProjectSource(id: string) {
+  await getDefaultProject();
+  await db.delete(sourceFiles).where(eq(sourceFiles.sourceId, id));
+  await db.delete(projectSources).where(eq(projectSources.id, id));
+}
+
 export async function listProjectSources() {
   await getDefaultProject();
   return db.select().from(projectSources).orderBy(desc(projectSources.updatedAt));
