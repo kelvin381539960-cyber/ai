@@ -1,8 +1,8 @@
 # Remote Agent Daemon
 
-`remote.agent.bootstrap` now installs and starts a lightweight Node.js HTTP daemon on the remote host.
+`remote.agent.bootstrap` installs and starts a lightweight Node.js HTTP daemon on the remote host.
 
-## Install/start
+## Bootstrap with nohup
 
 ```json
 {
@@ -11,30 +11,61 @@
 }
 ```
 
-The result returns:
+The result returns `installPath`, `port`, `token`, `pidFile`, `logFile`, and `probe`.
 
-- `installPath`
-- `port`
-- `token`
-- `pidFile`
-- `logFile`
-- `probe`
+## Systemd install
 
-Default port:
+For persistence across reboots:
 
-```text
-18765
+```json
+{
+  "target": { "host": "example.com", "user": "root" },
+  "install_path": "/opt/aix-rootops-agent/aix-rootops-agent.js",
+  "service_name": "aix-rootops-agent",
+  "port": 18765,
+  "user": "root"
+}
 ```
 
-Override from the MCP host before starting the server:
+Tools:
 
-```text
-ROOTOPS_REMOTE_AGENT_PORT=18765
+- `remote.agent.systemd_install`
+- `remote.agent.systemd_start`
+- `remote.agent.systemd_stop`
+- `remote.agent.systemd_status`
+
+## Client tools
+
+After exposing the remote agent through an SSH tunnel, use:
+
+- `remote.agent.health`
+- `remote.agent.hash`
+- `remote.agent.read`
+- `remote.agent.search`
+- `remote.agent.exec`
+
+Example tunnel:
+
+```json
+{
+  "target": { "host": "example.com", "user": "root" },
+  "local_port": 18765,
+  "remote_port": 18765
+}
+```
+
+Then call:
+
+```json
+{
+  "base_url": "http://127.0.0.1:18765",
+  "token": "ra_..."
+}
 ```
 
 ## HTTP API
 
-The daemon binds to `127.0.0.1` on the remote host. Access it through SSH tunnel or local remote execution.
+The daemon binds to `127.0.0.1` on the remote host.
 
 Auth:
 
@@ -49,17 +80,6 @@ Endpoints:
 - `GET /v1/read?path=/path/file&offset=0&length=65536`
 - `GET /v1/search?root=/opt/app&q=query&max=50`
 - `POST /v1/exec` with `{ "command": "uptime", "cwd": "/opt/app", "timeoutMs": 300000 }`
-
-## CLI compatibility
-
-The installed script also supports:
-
-```bash
-/tmp/aix-rootops-agent.js health
-/tmp/aix-rootops-agent.js hash /path/file
-/tmp/aix-rootops-agent.js stat /path/file
-/tmp/aix-rootops-agent.js which rg git node python3
-```
 
 ## Safety
 

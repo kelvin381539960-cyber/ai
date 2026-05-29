@@ -10,7 +10,7 @@ export const DEFAULT_TASK_SCOPE: TaskScope = {
     'patch.dry_run', 'patch.plan', 'patch.verify', 'patch.apply', 'snapshot.create',
     'remote.session.open', 'remote.session.list', 'remote.session.close', 'remote.exec', 'remote.exec_stream.start', 'remote.exec_stream.read', 'remote.exec_stream.kill', 'remote.exec_stream.list',
     'remote.pty.open', 'remote.pty.write', 'remote.pty.read', 'remote.pty.close', 'remote.pty.list',
-    'remote.tunnel.open', 'remote.tunnel.list', 'remote.tunnel.close', 'remote.agent.bootstrap',
+    'remote.tunnel.open', 'remote.tunnel.list', 'remote.tunnel.close', 'remote.agent.bootstrap', 'remote.agent.systemd_install', 'remote.agent.systemd_start', 'remote.agent.systemd_stop', 'remote.agent.systemd_status', 'remote.agent.health', 'remote.agent.hash', 'remote.agent.read', 'remote.agent.search', 'remote.agent.exec',
     'remote.rsync_push', 'remote.rsync_pull', 'remote.group.register', 'remote.group.exec',
     'git.status', 'git.diff', 'git.log', 'build.run',
     'local.embed', 'local.rerank', 'local.summarize', 'local.patch_risk', 'local.context_pack'
