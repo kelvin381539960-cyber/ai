@@ -1,0 +1,26 @@
+name: RootOps MCP CI
+
+on:
+  push:
+    paths:
+      - 'rootops-mcp/**'
+  pull_request:
+    paths:
+      - 'rootops-mcp/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rootops-mcp
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: rootops-mcp/package-lock.json
+      - run: npm install --include=optional
+      - run: npm run ci
+      - run: npm run smoke:agent-client
