@@ -44,6 +44,34 @@ export async function initDb() {
             created_at TEXT NOT NULL,
             updated_at TEXT NOT NULL
           )`,
+          `CREATE TABLE IF NOT EXISTS project_sources (
+            id TEXT PRIMARY KEY,
+            project_id TEXT NOT NULL,
+            name TEXT NOT NULL,
+            type TEXT NOT NULL,
+            root_path TEXT NOT NULL DEFAULT '',
+            include_patterns TEXT NOT NULL DEFAULT '[]',
+            exclude_patterns TEXT NOT NULL DEFAULT '[]',
+            readonly INTEGER NOT NULL DEFAULT 1,
+            status TEXT NOT NULL DEFAULT 'pending',
+            file_count INTEGER NOT NULL DEFAULT 0,
+            last_indexed_at TEXT,
+            error_message TEXT NOT NULL DEFAULT '',
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+          )`,
+          `CREATE TABLE IF NOT EXISTS source_files (
+            id TEXT PRIMARY KEY,
+            source_id TEXT NOT NULL,
+            path TEXT NOT NULL,
+            language TEXT NOT NULL DEFAULT 'text',
+            size_bytes INTEGER NOT NULL DEFAULT 0,
+            mtime_ms INTEGER NOT NULL DEFAULT 0,
+            hash TEXT NOT NULL DEFAULT '',
+            summary TEXT NOT NULL DEFAULT '',
+            risk_level TEXT NOT NULL DEFAULT 'normal',
+            indexed_at TEXT NOT NULL
+          )`,
           `CREATE TABLE IF NOT EXISTS rules (
             id TEXT PRIMARY KEY,
             project_id TEXT NOT NULL,
@@ -110,6 +138,8 @@ export async function initDb() {
             current_step_id TEXT,
             selected_knowledge_ids TEXT NOT NULL DEFAULT '[]',
             selected_rule_ids TEXT NOT NULL DEFAULT '[]',
+            selected_file_refs TEXT NOT NULL DEFAULT '[]',
+            workspace_path TEXT NOT NULL DEFAULT '',
             temporary_rules TEXT NOT NULL DEFAULT '',
             context_snapshot TEXT NOT NULL DEFAULT '',
             prompt TEXT NOT NULL DEFAULT '',
@@ -155,6 +185,8 @@ export async function initDb() {
             updated_at TEXT NOT NULL
           )`,
           `CREATE INDEX IF NOT EXISTS idx_knowledge_search ON knowledge_items(project_id, type, title)`,
+          `CREATE INDEX IF NOT EXISTS idx_project_sources_project ON project_sources(project_id, status)`,
+          `CREATE INDEX IF NOT EXISTS idx_source_files_source ON source_files(source_id, path)`,
           `CREATE INDEX IF NOT EXISTS idx_rules_project ON rules(project_id, enabled)`,
           `CREATE INDEX IF NOT EXISTS idx_runs_project ON runs(project_id, created_at)`,
           `CREATE INDEX IF NOT EXISTS idx_outputs_project ON outputs(project_id, updated_at)`,
@@ -164,7 +196,17 @@ export async function initDb() {
         ],
         "write",
       );
+      await ensureColumn("workflow_runs", "selected_file_refs", "TEXT NOT NULL DEFAULT '[]'");
+      await ensureColumn("workflow_runs", "workspace_path", "TEXT NOT NULL DEFAULT ''");
     })();
   }
   await globalForDb.aiWorkHubReady;
+}
+
+async function ensureColumn(table: string, column: string, definition: string) {
+  const result = await client.execute(`PRAGMA table_info(${table})`);
+  const exists = result.rows.some((row) => String(row.name) === column);
+  if (!exists) {
+    await client.execute(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+  }
 }

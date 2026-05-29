@@ -20,6 +20,36 @@ export const knowledgeItems = sqliteTable("knowledge_items", {
   updatedAt: text("updated_at").notNull(),
 });
 
+export const projectSources = sqliteTable("project_sources", {
+  id: text("id").primaryKey(),
+  projectId: text("project_id").notNull(),
+  name: text("name").notNull(),
+  type: text("type").notNull(),
+  rootPath: text("root_path").notNull().default(""),
+  includePatterns: text("include_patterns").notNull().default("[]"),
+  excludePatterns: text("exclude_patterns").notNull().default("[]"),
+  readonly: integer("readonly", { mode: "boolean" }).notNull().default(true),
+  status: text("status").notNull().default("pending"),
+  fileCount: integer("file_count").notNull().default(0),
+  lastIndexedAt: text("last_indexed_at"),
+  errorMessage: text("error_message").notNull().default(""),
+  createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
+});
+
+export const sourceFiles = sqliteTable("source_files", {
+  id: text("id").primaryKey(),
+  sourceId: text("source_id").notNull(),
+  path: text("path").notNull(),
+  language: text("language").notNull().default("text"),
+  sizeBytes: integer("size_bytes").notNull().default(0),
+  mtimeMs: integer("mtime_ms").notNull().default(0),
+  hash: text("hash").notNull().default(""),
+  summary: text("summary").notNull().default(""),
+  riskLevel: text("risk_level").notNull().default("normal"),
+  indexedAt: text("indexed_at").notNull(),
+});
+
 export const rules = sqliteTable("rules", {
   id: text("id").primaryKey(),
   projectId: text("project_id").notNull(),
@@ -90,6 +120,8 @@ export const workflowRuns = sqliteTable("workflow_runs", {
   currentStepId: text("current_step_id"),
   selectedKnowledgeIds: text("selected_knowledge_ids").notNull().default("[]"),
   selectedRuleIds: text("selected_rule_ids").notNull().default("[]"),
+  selectedFileRefs: text("selected_file_refs").notNull().default("[]"),
+  workspacePath: text("workspace_path").notNull().default(""),
   temporaryRules: text("temporary_rules").notNull().default(""),
   contextSnapshot: text("context_snapshot").notNull().default(""),
   prompt: text("prompt").notNull().default(""),

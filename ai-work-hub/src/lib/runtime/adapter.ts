@@ -29,6 +29,7 @@ export async function runAgent(
       ["run", "--agent", agent.agentKey, "--prompt", request.prompt],
       "",
       request.timeoutSeconds,
+      request.workspacePath || undefined,
     );
     return {
       runId: request.runId,
@@ -41,7 +42,7 @@ export async function runAgent(
     };
   }
 
-  const result = await runProcess(agent.command, [], request.prompt, request.timeoutSeconds);
+  const result = await runProcess(agent.command, [], request.prompt, request.timeoutSeconds, request.workspacePath || undefined);
   return {
     runId: request.runId,
     agentId: agent.id,

@@ -9,6 +9,7 @@ import {
   listRules,
   parseJson,
 } from "@/lib/services/app-service";
+import { getProjectSource, listProjectSources } from "@/lib/services/context-source-service";
 
 export const dynamic = "force-dynamic";
 
@@ -16,8 +17,10 @@ export default async function WorkflowStartPage({ params }: { params: Promise<{ 
   const { id } = await params;
   const workflow = await getWorkflow(id);
   if (!workflow) notFound();
-  const [knowledge, rules, agents] = await Promise.all([listKnowledge(), listRules(), listAgents()]);
+  const [knowledge, rules, agents, sources] = await Promise.all([listKnowledge(), listRules(), listAgents(), listProjectSources()]);
+  const sourceDetails = await Promise.all(sources.filter((source) => source.status === "indexed").map((source) => getProjectSource(source.id)));
   const enabledRules = rules.filter((rule) => rule.enabled);
+  const defaultWorkspacePath = sources.find((source) => source.type === "server_folder" && source.status === "indexed")?.rootPath ?? "";
 
   return (
     <AppShell>
@@ -68,6 +71,46 @@ export default async function WorkflowStartPage({ params }: { params: Promise<{ 
           <Card>
             <div className="mb-4 flex items-center gap-2">
               <Badge tone="blue">3</Badge>
+              <h2 className="text-lg font-semibold">选择代码/文件引用</h2>
+            </div>
+            <TextInput name="workspacePath" placeholder="Agent 工作目录，例如 /opt/AIX代码" defaultValue={defaultWorkspacePath} />
+            <div className="mt-3 space-y-3">
+              {sourceDetails.length === 0 ? <p className="text-sm text-slate-500">暂无已索引资料源，可先到 Project Context 注册服务器目录。</p> : null}
+              {sourceDetails.map((detail) => detail ? (
+                <div key={detail.source.id} className="rounded-md border border-slate-200 p-3">
+                  <div className="mb-2 flex items-center justify-between gap-3">
+                    <div>
+                      <div className="text-sm font-medium">{detail.source.name}</div>
+                      <div className="text-xs text-slate-500">{detail.source.rootPath}</div>
+                    </div>
+                    <Badge tone="green">{detail.source.fileCount} files</Badge>
+                  </div>
+                  <div className="max-h-72 space-y-2 overflow-auto">
+                    {detail.files.slice(0, 30).map((file) => (
+                      <label key={file.id} className="flex gap-3 rounded border border-slate-100 p-2 hover:bg-slate-50">
+                        <input
+                          name="fileRefs"
+                          value={`${detail.source.id}::${file.path}`}
+                          type="checkbox"
+                          className="mt-1"
+                          disabled={file.riskLevel === "blocked"}
+                        />
+                        <span>
+                          <span className="block text-xs font-medium">{file.path}</span>
+                          <span className="mt-1 block text-xs text-slate-500">{file.language} · {file.riskLevel} · {file.sizeBytes} bytes</span>
+                          {file.summary ? <span className="mt-1 block line-clamp-2 text-xs leading-5 text-slate-600">{file.summary}</span> : null}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              ) : null)}
+            </div>
+          </Card>
+
+          <Card>
+            <div className="mb-4 flex items-center gap-2">
+              <Badge tone="blue">4</Badge>
               <h2 className="text-lg font-semibold">选择规则</h2>
             </div>
             <div className="grid gap-3 md:grid-cols-2">
@@ -89,7 +132,7 @@ export default async function WorkflowStartPage({ params }: { params: Promise<{ 
         <div className="space-y-5">
           <Card>
             <div className="mb-4 flex items-center gap-2">
-              <Badge tone="blue">4</Badge>
+              <Badge tone="blue">5</Badge>
               <h2 className="text-lg font-semibold">执行确认</h2>
             </div>
             <Select name="agentId" defaultValue="agent_manual">

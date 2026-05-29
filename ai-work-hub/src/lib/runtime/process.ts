@@ -12,12 +12,14 @@ export function runProcess(
   args: string[],
   input: string,
   timeoutSeconds: number,
+  cwd?: string,
 ): Promise<ProcessResult> {
   return new Promise((resolve) => {
     const child = spawn(command, args, {
       stdio: ["pipe", "pipe", "pipe"],
       env: process.env,
       shell: false,
+      cwd,
     });
 
     let stdout = "";

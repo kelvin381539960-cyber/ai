@@ -16,8 +16,8 @@ export default async function HomePage() {
       />
       <div className="grid gap-4 lg:grid-cols-4">
         <Card>
-          <div className="text-sm text-slate-500">项目知识</div>
-          <div className="mt-2 text-3xl font-semibold">{dashboard.knowledge.length}</div>
+          <div className="text-sm text-slate-500">上下文源</div>
+          <div className="mt-2 text-3xl font-semibold">{dashboard.sources.length}</div>
         </Card>
         <Card>
           <div className="text-sm text-slate-500">Workflow</div>
@@ -32,6 +32,27 @@ export default async function HomePage() {
           <div className="mt-2 text-3xl font-semibold">{dashboard.outputs.length}</div>
         </Card>
       </div>
+
+      <Card className="mt-5">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Project Context</h2>
+          <Link className="text-sm font-medium text-slate-700 hover:text-slate-950" href="/context">
+            管理资料源
+          </Link>
+        </div>
+        <div className="grid gap-3 md:grid-cols-3">
+          {dashboard.sources.length === 0 ? <p className="text-sm text-slate-500">还没有服务器目录或代码库资料源。</p> : null}
+          {dashboard.sources.map((source) => (
+            <Link key={source.id} href={`/context/sources/${source.id}`} className="rounded-md border border-slate-200 p-3 hover:bg-slate-50">
+              <div className="flex items-center justify-between gap-2">
+                <div className="font-medium">{source.name}</div>
+                <Badge tone={source.status === "indexed" ? "green" : source.status === "failed" ? "red" : "amber"}>{source.status}</Badge>
+              </div>
+              <div className="mt-2 truncate text-xs text-slate-500">{source.rootPath}</div>
+            </Link>
+          ))}
+        </div>
+      </Card>
 
       <div className="mt-5 grid gap-5 lg:grid-cols-[1.3fr_1fr]">
         <Card>

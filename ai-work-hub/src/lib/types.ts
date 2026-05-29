@@ -11,6 +11,17 @@ export type RuleType = "output" | "workflow" | "project" | "quality";
 
 export type AgentType = "harness" | "direct_cli" | "manual";
 
+export type SourceType = "manual" | "server_folder" | "git_repo" | "output_library";
+
+export type FileReferenceMode = "reference_only" | "summary" | "snippet" | "full_file";
+
+export type WorkflowFileReference = {
+  sourceId: string;
+  filePath: string;
+  mode: FileReferenceMode;
+  reason?: string;
+};
+
 export type RunStatus =
   | "pending"
   | "running"
@@ -47,6 +58,8 @@ export type WorkflowRunInput = {
   constraints: string;
   selectedKnowledgeIds: string[];
   selectedRuleIds: string[];
+  selectedFileRefs: WorkflowFileReference[];
+  workspacePath: string;
   temporaryRules: string;
   agentId: string;
 };

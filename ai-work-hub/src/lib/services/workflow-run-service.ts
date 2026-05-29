@@ -11,8 +11,9 @@ import {
 } from "@/lib/db/schema";
 import { newId, nowIso } from "@/lib/id";
 import { runAgent } from "@/lib/runtime/adapter";
+import { resolveFileReferences } from "@/lib/services/context-source-service";
 import { getDefaultProject, parseJson } from "@/lib/services/app-service";
-import type { WorkflowRunInput } from "@/lib/types";
+import type { WorkflowFileReference, WorkflowRunInput } from "@/lib/types";
 
 const runtimeSteps = [
   { stepId: "input", stepType: "input", title: "确认目标" },
@@ -61,8 +62,15 @@ export async function buildContextPreview(input: Omit<WorkflowRunInput, "workflo
     .map((item, index) => `## K${index + 1}. ${item.title}\n类型：${item.type}\n标签：${parseJson<string[]>(item.tags, []).join(", ") || "无"}\n${item.content}`)
     .join("\n\n");
   const rulesBlock = selectedRules.map((rule, index) => `R${index + 1}. ${rule.name}\n${rule.content}`).join("\n\n");
+  const resolvedFiles = await resolveFileReferences(input.selectedFileRefs);
+  const fileBlock = resolvedFiles
+    .map(({ ref, source, file }, index) => {
+      const mode = ref.mode === "full_file" ? "reference_only" : ref.mode;
+      return `F${index + 1}. ${source.name}/${file.path}\n引用方式：${mode}\n语言：${file.language}\n大小：${file.sizeBytes} bytes\n摘要：${file.summary || "无摘要"}\n原因：${ref.reason || "用户选择"}`;
+    })
+    .join("\n\n");
 
-  return `# 任务\n标题：${input.title}\n目标：${input.goal}\n背景：${input.background || "无"}\n预期输出：${input.expectedOutput || "无"}\n限制条件：${input.constraints || "无"}\n\n# 已选资料\n${knowledgeBlock || "未选择资料。"}\n\n# 已选规则\n${rulesBlock || "未选择规则。"}\n\n# 临时规则\n${input.temporaryRules || "无"}`;
+  return `# 任务\n标题：${input.title}\n目标：${input.goal}\n背景：${input.background || "无"}\n预期输出：${input.expectedOutput || "无"}\n限制条件：${input.constraints || "无"}\n工作目录：${input.workspacePath || "未指定"}\n\n# 已选资料\n${knowledgeBlock || "未选择资料。"}\n\n# 已选代码/文件引用\n${fileBlock || "未选择文件引用。"}\n\n# 已选规则\n${rulesBlock || "未选择规则。"}\n\n# 临时规则\n${input.temporaryRules || "无"}`;
 }
 
 export async function createWorkflowRun(input: WorkflowRunInput) {
@@ -91,6 +99,8 @@ export async function createWorkflowRun(input: WorkflowRunInput) {
     currentStepId: "input",
     selectedKnowledgeIds: JSON.stringify(input.selectedKnowledgeIds),
     selectedRuleIds: JSON.stringify(input.selectedRuleIds),
+    selectedFileRefs: JSON.stringify(input.selectedFileRefs),
+    workspacePath: input.workspacePath,
     temporaryRules: input.temporaryRules,
     contextSnapshot,
     prompt,
@@ -240,6 +250,7 @@ async function runAgentStep(run: typeof workflowRuns.$inferSelect, stepRunId: st
       agentId: agent.id,
       prompt: run.prompt,
       contextSnapshot: run.contextSnapshot,
+      workspacePath: run.workspacePath || undefined,
       timeoutSeconds: agent.timeoutSeconds,
     },
     agent,
@@ -311,7 +322,10 @@ function getStepOutput(run: typeof workflowRuns.$inferSelect, stepType: string) 
   if (stepType === "input") return "目标已确认。";
   if (stepType === "select_knowledge") return `${parseJson<string[]>(run.selectedKnowledgeIds, []).length} 条资料已选择。`;
   if (stepType === "select_rules") return `${parseJson<string[]>(run.selectedRuleIds, []).length} 条规则已选择。`;
-  if (stepType === "build_context") return "Context Preview 已生成。";
+  if (stepType === "build_context") {
+    const refs = parseJson<WorkflowFileReference[]>(run.selectedFileRefs, []);
+    return `Context Preview 已生成，包含 ${refs.length} 个文件引用。`;
+  }
   if (stepType === "select_agent") return `Agent 已选择：${run.agentId ?? "未选择"}`;
   if (stepType === "save_output") return run.outputId ? "Output 已保存。" : "等待 Output。";
   return "步骤完成。";

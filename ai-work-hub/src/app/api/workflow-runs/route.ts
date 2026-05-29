@@ -19,6 +19,8 @@ export async function POST(request: NextRequest) {
     constraints: String(body.constraints ?? ""),
     selectedKnowledgeIds: Array.isArray(body.selectedKnowledgeIds) ? body.selectedKnowledgeIds : [],
     selectedRuleIds: Array.isArray(body.selectedRuleIds) ? body.selectedRuleIds : [],
+    selectedFileRefs: Array.isArray(body.selectedFileRefs) ? body.selectedFileRefs : [],
+    workspacePath: String(body.workspacePath ?? ""),
     temporaryRules: String(body.temporaryRules ?? ""),
     agentId: String(body.agentId),
   });

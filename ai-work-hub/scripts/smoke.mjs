@@ -1,5 +1,9 @@
+import { mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
+
 const baseUrl = process.env.AI_WORK_HUB_BASE_URL ?? "http://127.0.0.1:3000";
 const token = process.env.AI_WORK_HUB_SMOKE_TOKEN;
+const fixtureDir = path.join(process.cwd(), "data", "smoke-codebase");
 
 async function request(path, options) {
   const response = await fetch(`${baseUrl}${path}`, {
@@ -40,6 +44,31 @@ const rule = await request("/api/rules", {
 });
 console.log("rule", rule.id);
 
+await mkdir(fixtureDir, { recursive: true });
+await writeFile(
+  path.join(fixtureDir, "README.md"),
+  "# Smoke Codebase\n\nThis fixture verifies server folder context source indexing.\n",
+);
+await writeFile(
+  path.join(fixtureDir, "product.ts"),
+  "export const smokeProduct = { name: 'AI Work Hub', scenario: 'context source' };\n",
+);
+
+const source = await request("/api/context/sources", {
+  method: "POST",
+  body: JSON.stringify({
+    name: "Smoke Codebase",
+    type: "server_folder",
+    rootPath: fixtureDir,
+    includePatterns: ["**/*.md", "**/*.ts"],
+    indexNow: true,
+  }),
+});
+const sourceDetail = await request(`/api/context/sources/${source.id}`);
+const sourceFile = sourceDetail.files.find((file) => file.path === "product.ts") ?? sourceDetail.files[0];
+if (!sourceFile) throw new Error("Source indexing produced no files");
+console.log("source", source.id, sourceFile.path);
+
 const workflows = await request("/api/workflows");
 const workflow = workflows.items[0];
 if (!workflow) throw new Error("No workflow seeded");
@@ -61,6 +90,8 @@ const workflowRun = await request("/api/workflow-runs", {
     constraints: "保持简洁。",
     selectedKnowledgeIds: [knowledge.id],
     selectedRuleIds: [rule.id],
+    selectedFileRefs: [{ sourceId: source.id, filePath: sourceFile.path, mode: "reference_only" }],
+    workspacePath: fixtureDir,
     temporaryRules: "输出 Markdown。",
     agentId: manual.id,
   }),

@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { Bot, Boxes, Database, FileText, GitBranch, Home, Library, Settings } from "lucide-react";
+import { Bot, Boxes, Database, FileText, FolderGit2, GitBranch, Home, Library, Settings } from "lucide-react";
 import { cn } from "@/lib/ui";
 
 const nav = [
   { href: "/", label: "工作台", icon: Home },
+  { href: "/context", label: "项目上下文", icon: FolderGit2 },
   { href: "/workflows", label: "Workflow", icon: GitBranch },
   { href: "/knowledge", label: "知识库", icon: Database },
   { href: "/agents", label: "Agent", icon: Bot },

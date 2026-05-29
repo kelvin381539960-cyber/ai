@@ -23,9 +23,13 @@ import {
   retryWorkflowStep,
   startWorkflowRun,
 } from "@/lib/services/workflow-run-service";
+import {
+  createProjectSource,
+  indexProjectSource,
+} from "@/lib/services/context-source-service";
 import { testCommand } from "@/lib/runtime/health";
 import { updateAgentHealth } from "@/lib/services/app-service";
-import type { AgentType, KnowledgeType, RuleType } from "@/lib/types";
+import type { AgentType, KnowledgeType, RuleType, SourceType, WorkflowFileReference } from "@/lib/types";
 
 function value(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
@@ -46,6 +50,24 @@ export async function createKnowledgeAction(formData: FormData) {
     tags: tags(formData),
   });
   redirect("/knowledge");
+}
+
+export async function createProjectSourceAction(formData: FormData) {
+  const id = await createProjectSource({
+    name: value(formData, "name"),
+    type: value(formData, "type") as SourceType,
+    rootPath: value(formData, "rootPath"),
+    includePatterns: lines(value(formData, "includePatterns")),
+    excludePatterns: lines(value(formData, "excludePatterns")),
+  });
+  await indexProjectSource(id);
+  redirect(`/context/sources/${id}`);
+}
+
+export async function indexProjectSourceAction(formData: FormData) {
+  const id = value(formData, "sourceId");
+  await indexProjectSource(id);
+  redirect(`/context/sources/${id}`);
 }
 
 export async function loginAction(formData: FormData) {
@@ -120,11 +142,32 @@ export async function createWorkflowRunAction(formData: FormData) {
     constraints: value(formData, "constraints"),
     selectedKnowledgeIds: formData.getAll("knowledgeIds").map(String),
     selectedRuleIds: formData.getAll("ruleIds").map(String),
+    selectedFileRefs: parseFileRefs(formData),
+    workspacePath: value(formData, "workspacePath"),
     temporaryRules: value(formData, "temporaryRules"),
     agentId: value(formData, "agentId"),
   });
   await startWorkflowRun(id);
   redirect(`/workflow-runs/${id}`);
+}
+
+function lines(text: string) {
+  return text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
+function parseFileRefs(formData: FormData): WorkflowFileReference[] {
+  return formData.getAll("fileRefs").map((raw) => {
+    const [sourceId, filePath] = String(raw).split("::");
+    return {
+      sourceId,
+      filePath,
+      mode: "reference_only" as const,
+      reason: "Workflow 启动时选择",
+    };
+  }).filter((ref) => ref.sourceId && ref.filePath);
 }
 
 export async function startWorkflowRunAction(formData: FormData) {

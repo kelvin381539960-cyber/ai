@@ -4,6 +4,7 @@ import {
   agents,
   knowledgeItems,
   outputs,
+  projectSources,
   projects,
   rules,
   runs,
@@ -136,7 +137,7 @@ export async function getDefaultProject() {
 
 export async function getDashboard() {
   const project = await getDefaultProject();
-  const [knowledge, workflowList, agentList, runList, outputList, ruleList] =
+  const [knowledge, workflowList, agentList, runList, outputList, ruleList, sourceList] =
     await Promise.all([
       db.select().from(knowledgeItems).orderBy(desc(knowledgeItems.updatedAt)).limit(5),
       db.select().from(workflows).orderBy(desc(workflows.updatedAt)),
@@ -144,8 +145,9 @@ export async function getDashboard() {
       db.select().from(runs).orderBy(desc(runs.createdAt)).limit(5),
       db.select().from(outputs).orderBy(desc(outputs.updatedAt)).limit(5),
       db.select().from(rules).where(eq(rules.enabled, true)),
+      db.select().from(projectSources).orderBy(desc(projectSources.updatedAt)).limit(5),
     ]);
-  return { project, knowledge, workflows: workflowList, agents: agentList, runs: runList, outputs: outputList, rules: ruleList };
+  return { project, knowledge, workflows: workflowList, agents: agentList, runs: runList, outputs: outputList, rules: ruleList, sources: sourceList };
 }
 
 export async function createKnowledge(input: {

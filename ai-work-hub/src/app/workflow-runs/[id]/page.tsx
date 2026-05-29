@@ -9,6 +9,8 @@ import {
   startWorkflowRunAction,
 } from "@/app/actions";
 import { getWorkflowRun } from "@/lib/services/workflow-run-service";
+import { parseJson } from "@/lib/services/app-service";
+import type { WorkflowFileReference } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +27,7 @@ export default async function WorkflowRunPage({ params }: { params: Promise<{ id
   if (!data) notFound();
   const { run, steps, workflow, agent, output } = data;
   const currentStep = steps.find((step) => step?.stepId === run.currentStepId) ?? steps.find((step) => step?.status === "waiting_user") ?? steps[0];
+  const fileRefs = parseJson<WorkflowFileReference[]>(run.selectedFileRefs, []);
 
   return (
     <AppShell>
@@ -69,6 +72,17 @@ export default async function WorkflowRunPage({ params }: { params: Promise<{ id
 
           <Card>
             <h2 className="mb-3 text-lg font-semibold">Context Snapshot</h2>
+            {run.workspacePath ? <div className="mb-3 rounded-md bg-slate-50 p-3 text-sm text-slate-600">Agent 工作目录：{run.workspacePath}</div> : null}
+            {fileRefs.length > 0 ? (
+              <div className="mb-3 rounded-md border border-slate-200 p-3">
+                <div className="mb-2 text-sm font-medium">文件引用</div>
+                <div className="space-y-1">
+                  {fileRefs.map((ref) => (
+                    <div key={`${ref.sourceId}:${ref.filePath}`} className="font-mono text-xs text-slate-600">{ref.filePath}</div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
             <pre className="max-h-96 overflow-auto whitespace-pre-wrap rounded-md bg-slate-950 p-4 text-xs leading-6 text-slate-100">{run.contextSnapshot}</pre>
           </Card>
 
