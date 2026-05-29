@@ -6,7 +6,7 @@ export const DEFAULT_TASK_SCOPE: TaskScope = {
   expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
   autoAllow: [
     'policy.check', 'task.scope.create', 'task.scope.active', 'task.scope.list', 'task.scope.use', 'confirmation.list', 'confirmation.clear', 'safety.status', 'safety.freeze', 'safety.unfreeze', 'audit.list', 'audit.export',
-    'file.read', 'file.read_many', 'file.list', 'file.search', 'file.hash', 'file.outline', 'file.related',
+    'file.read', 'file.read_many', 'file.list', 'file.search', 'file.index_build', 'file.index_search', 'file.index_stats', 'file.hash', 'file.outline', 'file.related',
     'patch.dry_run', 'patch.plan', 'patch.verify', 'patch.apply', 'snapshot.create',
     'remote.session.open', 'remote.session.list', 'remote.session.close', 'remote.exec', 'remote.exec_stream.start', 'remote.exec_stream.read', 'remote.exec_stream.kill', 'remote.exec_stream.list',
     'remote.pty.open', 'remote.pty.write', 'remote.pty.read', 'remote.pty.close', 'remote.pty.list',
