@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
-import { Badge, Button, Card, PageHeader, Select, TextArea } from "@/components/ui";
+import { Button, Card, PageHeader, Select, TextArea } from "@/components/ui";
 import { WorkflowCanvas } from "@/components/workflow-canvas";
 import { runWorkflowAction } from "@/app/actions";
 import { getWorkflow, listAgents, parseJson } from "@/lib/services/app-service";
@@ -21,7 +22,11 @@ export default async function WorkflowDetailPage({
 
   return (
     <AppShell>
-      <PageHeader title={workflow.name} description={workflow.description} action={<Badge tone="blue">{workflow.scenario}</Badge>} />
+      <PageHeader
+        title={workflow.name}
+        description={workflow.description}
+        action={<Link className="rounded-md bg-slate-950 px-4 py-2 text-sm font-medium text-white" href={`/workflows/${workflow.id}/start`}>开始运行</Link>}
+      />
       <div className="grid gap-5 xl:grid-cols-[1fr_360px]">
         <div className="space-y-4">
           <WorkflowCanvas definition={definition} />

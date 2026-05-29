@@ -1,4 +1,4 @@
-import { desc, eq, like, or } from "drizzle-orm";
+import { desc, eq, like, or, inArray } from "drizzle-orm";
 import { db, initDb } from "@/lib/db/client";
 import {
   agents,
@@ -310,4 +310,16 @@ export async function getOutput(id: string) {
   await ensureAppReady();
   const [output] = await db.select().from(outputs).where(eq(outputs.id, id)).limit(1);
   return output;
+}
+
+export async function getOutputFamily(id: string) {
+  const output = await getOutput(id);
+  if (!output) return { output: null, versions: [] };
+  const rootId = output.parentId ?? output.id;
+  const versions = await db
+    .select()
+    .from(outputs)
+    .where(or(eq(outputs.id, rootId), eq(outputs.parentId, rootId), inArray(outputs.id, [output.id])))
+    .orderBy(desc(outputs.version));
+  return { output, versions };
 }

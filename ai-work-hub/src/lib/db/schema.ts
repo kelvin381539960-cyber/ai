@@ -76,6 +76,55 @@ export const runs = sqliteTable("runs", {
   updatedAt: text("updated_at").notNull(),
 });
 
+export const workflowRuns = sqliteTable("workflow_runs", {
+  id: text("id").primaryKey(),
+  projectId: text("project_id").notNull(),
+  workflowId: text("workflow_id").notNull(),
+  agentId: text("agent_id"),
+  title: text("title").notNull(),
+  goal: text("goal").notNull(),
+  background: text("background").notNull().default(""),
+  expectedOutput: text("expected_output").notNull().default(""),
+  constraints: text("constraints").notNull().default(""),
+  status: text("status").notNull(),
+  currentStepId: text("current_step_id"),
+  selectedKnowledgeIds: text("selected_knowledge_ids").notNull().default("[]"),
+  selectedRuleIds: text("selected_rule_ids").notNull().default("[]"),
+  temporaryRules: text("temporary_rules").notNull().default(""),
+  contextSnapshot: text("context_snapshot").notNull().default(""),
+  prompt: text("prompt").notNull().default(""),
+  outputId: text("output_id"),
+  createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
+});
+
+export const workflowStepRuns = sqliteTable("workflow_step_runs", {
+  id: text("id").primaryKey(),
+  workflowRunId: text("workflow_run_id").notNull(),
+  stepId: text("step_id").notNull(),
+  stepType: text("step_type").notNull(),
+  title: text("title").notNull(),
+  status: text("status").notNull(),
+  input: text("input").notNull().default(""),
+  output: text("output").notNull().default(""),
+  error: text("error").notNull().default(""),
+  startedAt: text("started_at"),
+  endedAt: text("ended_at"),
+  createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
+});
+
+export const agentHealthChecks = sqliteTable("agent_health_checks", {
+  id: text("id").primaryKey(),
+  agentId: text("agent_id").notNull(),
+  commandExists: integer("command_exists", { mode: "boolean" }).notNull().default(false),
+  harnessDetected: integer("harness_detected", { mode: "boolean" }).notNull().default(false),
+  canRunPrompt: integer("can_run_prompt", { mode: "boolean" }).notNull().default(false),
+  status: text("status").notNull(),
+  message: text("message").notNull().default(""),
+  checkedAt: text("checked_at").notNull(),
+});
+
 export const outputs = sqliteTable("outputs", {
   id: text("id").primaryKey(),
   projectId: text("project_id").notNull(),

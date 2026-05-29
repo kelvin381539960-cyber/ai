@@ -38,6 +38,19 @@ export type WorkflowStep = {
   config?: Record<string, string>;
 };
 
+export type WorkflowRunInput = {
+  workflowId: string;
+  title: string;
+  goal: string;
+  background: string;
+  expectedOutput: string;
+  constraints: string;
+  selectedKnowledgeIds: string[];
+  selectedRuleIds: string[];
+  temporaryRules: string;
+  agentId: string;
+};
+
 export type WorkflowDefinition = {
   nodes: Array<{
     id: string;

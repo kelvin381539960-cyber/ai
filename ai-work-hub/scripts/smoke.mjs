@@ -50,20 +50,38 @@ const manual = agents.items.find((item) => item.id === "agent_manual") ?? agents
 if (!manual) throw new Error("No agent seeded");
 console.log("agent", manual.id);
 
-const run = await request(`/api/workflows/${workflow.id}/run`, {
+const workflowRun = await request("/api/workflow-runs", {
   method: "POST",
   body: JSON.stringify({
+    workflowId: workflow.id,
+    title: "Smoke v2 PRD",
     goal: "生成一个 smoke test PRD 片段",
+    background: "验证成熟 Workflow 主路径。",
+    expectedOutput: "PRD 片段",
+    constraints: "保持简洁。",
+    selectedKnowledgeIds: [knowledge.id],
+    selectedRuleIds: [rule.id],
+    temporaryRules: "输出 Markdown。",
     agentId: manual.id,
   }),
 });
-console.log("run", run.id);
+console.log("workflowRun", workflowRun.id);
 
-const runDetail = await request(`/api/runs/${run.id}`);
-if (!runDetail.outputId) throw new Error("Run did not produce output");
-console.log("output", runDetail.outputId);
+await request(`/api/workflow-runs/${workflowRun.id}/start`, { method: "POST" });
+let runDetail = await request(`/api/workflow-runs/${workflowRun.id}`);
+if (runDetail.run.status !== "waiting_user") throw new Error(`Expected waiting_user, got ${runDetail.run.status}`);
 
-const version = await request(`/api/outputs/${runDetail.outputId}/new-version`, {
+await request(`/api/workflow-runs/${workflowRun.id}/steps/complete`, {
+  method: "POST",
+  body: JSON.stringify({
+    content: "# Smoke Output\n\n这是 v2 workflow run 回填的输出。",
+  }),
+});
+runDetail = await request(`/api/workflow-runs/${workflowRun.id}`);
+if (!runDetail.run.outputId) throw new Error("Workflow run did not produce output");
+console.log("output", runDetail.run.outputId);
+
+const version = await request(`/api/outputs/${runDetail.run.outputId}/new-version`, {
   method: "POST",
   body: JSON.stringify({
     content: "# Smoke Output\n\n这是另存的新版本。",

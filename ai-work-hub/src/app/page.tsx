@@ -2,7 +2,6 @@ import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
 import { Badge, Card, PageHeader } from "@/components/ui";
 import { getDashboard, parseJson } from "@/lib/services/app-service";
-import { workflowTemplates } from "@/lib/templates/workflows";
 
 export const dynamic = "force-dynamic";
 
@@ -43,16 +42,16 @@ export default async function HomePage() {
             </Link>
           </div>
           <div className="grid gap-3 md:grid-cols-2">
-            {workflowTemplates.map((template) => (
-              <div key={template.id} className="rounded-md border border-slate-200 p-4">
+            {dashboard.workflows.slice(0, 5).map((workflow) => (
+              <Link key={workflow.id} href={`/workflows/${workflow.id}/start`} className="rounded-md border border-slate-200 p-4 hover:bg-slate-50">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <h3 className="font-semibold">{template.name}</h3>
-                    <p className="mt-1 text-sm leading-6 text-slate-600">{template.description}</p>
+                    <h3 className="font-semibold">{workflow.name}</h3>
+                    <p className="mt-1 text-sm leading-6 text-slate-600">{workflow.description}</p>
                   </div>
-                  <Badge tone="blue">{template.scenario}</Badge>
+                  <Badge tone="blue">{workflow.scenario}</Badge>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </Card>

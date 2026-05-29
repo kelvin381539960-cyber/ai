@@ -34,14 +34,17 @@ export default async function WorkflowsPage() {
         </Card>
         <div className="grid gap-4 md:grid-cols-2">
           {workflows.map((workflow) => (
-            <Link key={workflow.id} href={`/workflows/${workflow.id}`}>
+            <Link key={workflow.id} href={`/workflows/${workflow.id}/start`}>
               <Card className="h-full hover:bg-slate-50">
                 <div className="flex items-start justify-between gap-3">
                   <h3 className="font-semibold">{workflow.name}</h3>
                   <Badge>{workflow.scenario}</Badge>
                 </div>
                 <p className="mt-3 text-sm leading-6 text-slate-600">{workflow.description}</p>
-                <div className="mt-4 text-xs text-slate-500">{new Date(workflow.updatedAt).toLocaleString()}</div>
+                <div className="mt-4 flex items-center justify-between gap-3">
+                  <span className="text-xs text-slate-500">{new Date(workflow.updatedAt).toLocaleString()}</span>
+                  <span className="text-sm font-medium text-slate-900">开始运行</span>
+                </div>
               </Card>
             </Link>
           ))}

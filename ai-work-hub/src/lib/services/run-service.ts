@@ -151,6 +151,7 @@ export async function markOutputFinal(outputId: string) {
   const [output] = await db.select().from(outputs).where(eq(outputs.id, outputId)).limit(1);
   if (!output) throw new Error("Output not found");
   const familyId = output.parentId ?? output.id;
+  await db.update(outputs).set({ isFinal: false, updatedAt: nowIso() }).where(eq(outputs.id, familyId));
   await db
     .update(outputs)
     .set({ isFinal: false, updatedAt: nowIso() })

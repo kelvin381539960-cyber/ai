@@ -16,6 +16,13 @@ import {
   runWorkflow,
   saveOutputVersion,
 } from "@/lib/services/run-service";
+import {
+  cancelWorkflowRun,
+  completeManualStep,
+  createWorkflowRun,
+  retryWorkflowStep,
+  startWorkflowRun,
+} from "@/lib/services/workflow-run-service";
 import { testCommand } from "@/lib/runtime/health";
 import { updateAgentHealth } from "@/lib/services/app-service";
 import type { AgentType, KnowledgeType, RuleType } from "@/lib/types";
@@ -101,6 +108,47 @@ export async function runWorkflowAction(formData: FormData) {
     agentId: value(formData, "agentId") || undefined,
   });
   redirect(`/runs/${id}`);
+}
+
+export async function createWorkflowRunAction(formData: FormData) {
+  const id = await createWorkflowRun({
+    workflowId: value(formData, "workflowId"),
+    title: value(formData, "title"),
+    goal: value(formData, "goal"),
+    background: value(formData, "background"),
+    expectedOutput: value(formData, "expectedOutput"),
+    constraints: value(formData, "constraints"),
+    selectedKnowledgeIds: formData.getAll("knowledgeIds").map(String),
+    selectedRuleIds: formData.getAll("ruleIds").map(String),
+    temporaryRules: value(formData, "temporaryRules"),
+    agentId: value(formData, "agentId"),
+  });
+  await startWorkflowRun(id);
+  redirect(`/workflow-runs/${id}`);
+}
+
+export async function startWorkflowRunAction(formData: FormData) {
+  const id = value(formData, "workflowRunId");
+  await startWorkflowRun(id);
+  redirect(`/workflow-runs/${id}`);
+}
+
+export async function continueWorkflowRunAction(formData: FormData) {
+  const id = value(formData, "workflowRunId");
+  await completeManualStep(id, value(formData, "manualOutput"));
+  redirect(`/workflow-runs/${id}`);
+}
+
+export async function cancelWorkflowRunAction(formData: FormData) {
+  const id = value(formData, "workflowRunId");
+  await cancelWorkflowRun(id);
+  redirect(`/workflow-runs/${id}`);
+}
+
+export async function retryWorkflowStepAction(formData: FormData) {
+  const id = value(formData, "workflowRunId");
+  await retryWorkflowStep(id, value(formData, "stepId"));
+  redirect(`/workflow-runs/${id}`);
 }
 
 export async function cancelRunAction(formData: FormData) {
