@@ -36,6 +36,7 @@ Runnable MCP server with:
 - SQLite FTS5 index and Ollama embedding index
 - transactional patch tools
 - remote ops tools
+- remote Node.js HTTP agent daemon bootstrap
 - task-level authorization
 - merged confirmation payloads
 - one-time approval tokens
@@ -47,6 +48,7 @@ Runnable MCP server with:
 
 - `docs/MCP_TOOLS.md`
 - `docs/REMOTE_OPS.md`
+- `docs/REMOTE_AGENT_DAEMON.md`
 - `docs/AUTHORIZATION.md`
 - `docs/FILE_INDEX.md`
 - `docs/EMBEDDING_INDEX.md`
@@ -54,5 +56,6 @@ Runnable MCP server with:
 
 ## Next build order
 
-1. Add real remote agent daemon.
-2. Add install/test CI scripts.
+1. Add systemd service template for remote agent.
+2. Add remote agent client tools.
+3. Add install/test CI scripts.

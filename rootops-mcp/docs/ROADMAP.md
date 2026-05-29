@@ -35,10 +35,53 @@
 - [x] register file.index_* MCP handlers
 - [x] embedding index
 
+## Phase 3: Patch transaction
+
+- [x] snapshot provider
+- [x] unified diff preview
+- [x] expected_hash dry-run
+- [x] local_patch_risk hook
+- [x] apply patch tool
+- [x] verify step
+- [x] rollback/restore step
+- [x] batch patch plan
+
+## Phase 4: Remote ops
+
+- [x] SSH exec
+- [x] basic session records
+- [x] rsync pull
+- [x] rsync push
+- [x] server groups
+- [x] command risk screening
+- [x] streaming exec
+- [x] pseudo PTY sessions
+- [x] tunnel management
+- [x] remote agent bootstrap
+- [x] real remote agent daemon
+
+## Phase 5: Low-friction authorization
+
+- [x] task scope creation
+- [x] merged confirmation payload
+- [x] risk threshold limits
+- [x] audit export
+- [x] emergency freeze
+- [x] explicit approval token apply flow
+- [x] persistent task scopes
+- [x] persistent confirmation queue
+
 ## Phase 6: Intelligence upgrades
 
 - [x] tree-sitter outline backend with regex fallback
 - [x] SQLite FTS5 index core
 - [x] file.index_* MCP handler wiring
 - [x] embedding index
-- [ ] real remote agent daemon
+- [x] real remote agent daemon
+
+## Phase 7: Hardening
+
+- [ ] systemd service template for remote agent
+- [ ] remote agent client tools
+- [ ] install/test CI scripts
+- [ ] typed integration tests
