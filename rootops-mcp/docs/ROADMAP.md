@@ -30,7 +30,7 @@
 - [x] read_many with byte budget
 - [x] lightweight file.outline
 - [x] context_pack
-- [ ] tree-sitter outline
+- [x] tree-sitter outline backend with regex fallback
 - [ ] SQLite FTS5 index
 - [ ] embedding index
 
@@ -71,7 +71,7 @@
 
 ## Phase 6: Intelligence upgrades
 
-- [ ] tree-sitter outline
+- [x] tree-sitter outline backend with regex fallback
 - [ ] SQLite FTS5 index
 - [ ] embedding index
 - [ ] real remote agent daemon

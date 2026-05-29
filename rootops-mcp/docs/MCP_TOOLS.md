@@ -11,6 +11,28 @@
 - `file.hash`
 - `local.context_pack`
 
+## file.outline
+
+Extracts a source outline.
+
+Backends:
+
+- `auto`: try tree-sitter and fallback to regex.
+- `tree_sitter`: try tree-sitter and fallback to regex with diagnostics if unavailable.
+- `regex`: force regex backend.
+
+Example:
+
+```json
+{
+  "path": "/opt/AIX代码/src/index.ts",
+  "outline_backend": "auto",
+  "max_items": 500
+}
+```
+
+The result includes `backend` and optional `diagnostics`.
+
 ## Snapshot and patch tools
 
 ### snapshot.create
@@ -24,21 +46,6 @@ Previews a text replacement patch. It checks `expected_hash`, returns a unified 
 ### patch.plan
 
 Builds a batch patch plan. It dry-runs each patch, estimates files/lines changed, and reports blockers. It does not write files.
-
-```json
-{
-  "patches": [
-    {
-      "path": "/opt/AIX代码/src/index.ts",
-      "expected_hash": "sha256...",
-      "old_text": "old block",
-      "new_text": "new block"
-    }
-  ],
-  "max_files_changed": 30,
-  "max_lines_changed": 8000
-}
-```
 
 ### patch.apply
 

@@ -25,11 +25,14 @@ sudo apt-get install ripgrep
 brew install ripgrep
 ```
 
+Optional tree-sitter parsers improve `file.outline` precision. If they fail to install, `file.outline` falls back to regex.
+
 ## Current status
 
 Runnable MCP server with:
 
 - file read/search/context
+- tree-sitter outline backend with regex fallback
 - transactional patch tools
 - remote ops tools
 - task-level authorization
@@ -48,8 +51,7 @@ Runnable MCP server with:
 
 ## Next build order
 
-1. Add tree-sitter outline.
-2. Add SQLite FTS5 index.
-3. Add embedding index.
-4. Add real remote agent daemon.
-5. Add install/test CI scripts.
+1. Add SQLite FTS5 index.
+2. Add embedding index.
+3. Add real remote agent daemon.
+4. Add install/test CI scripts.

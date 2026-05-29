@@ -3,8 +3,10 @@ import { stat, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import fg from 'fast-glob';
 import { decodeCursor, encodeCursor, stableOptionsHash } from './cursor.js';
-import { buildFileOutline } from './outline.js';
+import { buildRegexFileOutline } from './outline.js';
+import type { OutlineBackend } from './outline-types.js';
 import { searchWithRipgrep } from './rg-search.js';
+import { buildTreeSitterOutline } from './tree-sitter-outline.js';
 
 export interface ReadLineOptions {
   maxBytes: number;
@@ -90,11 +92,12 @@ export class FileEngine {
     return { results, bytesUsed, truncated };
   }
 
-  async outline(filePath: string, maxBytes = 512 * 1024, maxItems = 300): Promise<ReturnType<typeof buildFileOutline>> {
+  async outline(filePath: string, maxBytes = 512 * 1024, maxItems = 300, backend: OutlineBackend = 'auto'): Promise<ReturnType<typeof buildRegexFileOutline> | Awaited<ReturnType<typeof buildTreeSitterOutline>>> {
     const safePath = this.resolveAllowedPath(filePath);
     const data = await readFile(safePath);
     const text = data.subarray(0, maxBytes).toString('utf8');
-    return buildFileOutline(safePath, text, maxItems);
+    if (backend === 'regex') return buildRegexFileOutline(safePath, text, maxItems);
+    return buildTreeSitterOutline(safePath, text, maxItems);
   }
 
   async readBytes(filePath: string, offset = 0, length = 64 * 1024): Promise<Buffer> {

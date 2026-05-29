@@ -26,7 +26,8 @@ export async function runSmoke(): Promise<void> {
   const fileEngine = new FileEngine([process.cwd()]);
   const readmePath = `${process.cwd()}/README.md`;
   const readme = await fileEngine.readLines(readmePath, 1, 20, { maxBytes: 64 * 1024, withLineNumbers: true }).catch((error) => ({ error: String(error) }));
-  const outline = await fileEngine.outline(`${process.cwd()}/src/mcp/server.ts`).catch((error) => ({ error: String(error) }));
+  const outlineRegex = await fileEngine.outline(`${process.cwd()}/src/mcp/server.ts`, 512 * 1024, 300, 'regex').catch((error) => ({ error: String(error) }));
+  const outlineAuto = await fileEngine.outline(`${process.cwd()}/src/mcp/server.ts`, 512 * 1024, 300, 'auto').catch((error) => ({ error: String(error) }));
   const readMany = await fileEngine.readMany([
     { path: readmePath, limit_lines: 10 },
     { path: `${process.cwd()}/docs/ROADMAP.md`, limit_lines: 20 }
@@ -68,5 +69,5 @@ export async function runSmoke(): Promise<void> {
     linesPerFile: 80
   });
 
-  console.log(JSON.stringify({ ok: true, decision, event, readme, outline, readMany, search, searchNext, contextPack }, null, 2));
+  console.log(JSON.stringify({ ok: true, decision, event, readme, outlineRegex, outlineAuto, readMany, search, searchNext, contextPack }, null, 2));
 }
