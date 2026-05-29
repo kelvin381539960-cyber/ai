@@ -32,13 +32,13 @@
 - [x] context_pack
 - [x] tree-sitter outline backend with regex fallback
 - [x] SQLite FTS5 index core
-- [ ] register file.index_* MCP handlers
-- [ ] embedding index
+- [x] register file.index_* MCP handlers
+- [x] embedding index
 
 ## Phase 6: Intelligence upgrades
 
 - [x] tree-sitter outline backend with regex fallback
 - [x] SQLite FTS5 index core
-- [ ] file.index_* MCP handler wiring
-- [ ] embedding index
+- [x] file.index_* MCP handler wiring
+- [x] embedding index
 - [ ] real remote agent daemon

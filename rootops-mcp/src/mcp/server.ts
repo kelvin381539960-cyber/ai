@@ -9,6 +9,8 @@ import { classifyToolRisk } from '../core/risk.js';
 import { SafetySwitch } from '../core/safety-switch.js';
 import { TaskScopeStore } from '../core/task-scope-store.js';
 import { buildContextPack } from '../file/context-pack.js';
+import { EmbeddingIndex } from '../file/embedding-index.js';
+import { FileIndex } from '../file/file-index.js';
 import { FileEngine } from '../file/file-engine.js';
 import { LocalIntelligence } from '../local/local-intelligence.js';
 import { OllamaClient } from '../local/ollama-client.js';
@@ -37,6 +39,7 @@ export async function startMcpServer(): Promise<void> {
   await audit.init();
   let activeScope = taskScopes.active();
   let fileEngine = new FileEngine(activeScope.allowedRoots);
+  let fileIndex = new FileIndex(activeScope.allowedRoots);
   let patchEngine = new PatchEngine(fileEngine);
   const remote = new RemoteOps();
   const sessions = new RemoteSessionPool();
@@ -47,8 +50,9 @@ export async function startMcpServer(): Promise<void> {
   const agent = new AgentBootstrap(remote);
   const ollama = new OllamaClient({ baseUrl: process.env.OLLAMA_BASE_URL ?? 'http://127.0.0.1:11434', embeddingModel: process.env.OLLAMA_EMBEDDING_MODEL ?? 'nomic-embed-text', instructModel: process.env.OLLAMA_INSTRUCT_MODEL ?? 'qwen2.5-coder:7b' });
   const local = new LocalIntelligence(ollama);
+  let embeddingIndex = new EmbeddingIndex(activeScope.allowedRoots, ollama);
   const server = new Server({ name: 'aix-rootops-mcp', version: '0.1.0' }, { capabilities: { tools: {} } });
-  const reloadScope = () => { activeScope = taskScopes.active(); fileEngine = new FileEngine(activeScope.allowedRoots); patchEngine = new PatchEngine(fileEngine); };
+  const reloadScope = () => { activeScope = taskScopes.active(); fileEngine = new FileEngine(activeScope.allowedRoots); fileIndex = new FileIndex(activeScope.allowedRoots); embeddingIndex = new EmbeddingIndex(activeScope.allowedRoots, ollama); patchEngine = new PatchEngine(fileEngine); };
   server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: toolDefinitions }));
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const name = request.params.name;
@@ -83,6 +87,12 @@ export async function startMcpServer(): Promise<void> {
         case 'file.read': { const parsed = FileReadArgs.parse(cleanArgs); return jsonToolResult({ ok: true, ...(await fileEngine.readLines(parsed.path, parsed.offset_line, parsed.limit_lines, { maxBytes: parsed.max_bytes, withLineNumbers: parsed.with_line_numbers })) }); }
         case 'file.read_many': { const parsed = FileReadManyArgs.parse(cleanArgs); return jsonToolResult({ ok: true, ...(await fileEngine.readMany(parsed.items, parsed.max_total_bytes)) }); }
         case 'file.search': { const parsed = FileSearchArgs.parse(cleanArgs); return jsonToolResult({ ok: true, ...(await fileEngine.search(parsed)) }); }
+        case 'file.index_build': { const parsed = FileIndexBuildArgs.parse(cleanArgs); return jsonToolResult({ ok: true, ...(await fileIndex.build({ root: parsed.root, fileGlob: parsed.file_glob, maxFileBytes: parsed.max_file_bytes, force: parsed.force })) }); }
+        case 'file.index_search': { const parsed = FileIndexSearchArgs.parse(cleanArgs); return jsonToolResult({ ok: true, ...(await fileIndex.search({ root: parsed.root, query: parsed.query, limit: parsed.limit, offset: parsed.offset, snippetChars: parsed.snippet_chars })) }); }
+        case 'file.index_stats': { const parsed = FileIndexStatsArgs.parse(cleanArgs); return jsonToolResult({ ok: true, ...(await fileIndex.stats(parsed.root)) }); }
+        case 'embedding.index_build': { const parsed = EmbeddingIndexBuildArgs.parse(cleanArgs); return jsonToolResult({ ok: true, ...(await embeddingIndex.build({ root: parsed.root, fileGlob: parsed.file_glob, maxFileBytes: parsed.max_file_bytes, chunkChars: parsed.chunk_chars, force: parsed.force })) }); }
+        case 'embedding.index_search': { const parsed = EmbeddingIndexSearchArgs.parse(cleanArgs); return jsonToolResult({ ok: true, ...(await embeddingIndex.search({ root: parsed.root, query: parsed.query, limit: parsed.limit })) }); }
+        case 'embedding.index_stats': { const parsed = EmbeddingIndexStatsArgs.parse(cleanArgs); return jsonToolResult({ ok: true, ...(await embeddingIndex.stats(parsed.root)) }); }
         case 'file.outline': { const parsed = FileOutlineArgs.parse(cleanArgs); return jsonToolResult({ ok: true, ...(await fileEngine.outline(parsed.path, parsed.max_bytes, parsed.max_items, parsed.outline_backend)) }); }
         case 'file.hash': { const parsed = FileHashArgs.parse(cleanArgs); return jsonToolResult({ ok: true, ...(await fileEngine.hash(parsed.path)) }); }
         case 'snapshot.create': { const parsed = SnapshotCreateArgs.parse(cleanArgs); return jsonToolResult({ ok: true, snapshot: await patchEngine.createSnapshot(parsed.path, parsed.reason) }); }
@@ -138,6 +148,12 @@ const AuditListArgs = z.object({ source: z.enum(['memory', 'disk']).default('mem
 const FileReadArgs = z.object({ path: z.string(), offset_line: z.number().int().min(1).default(1), limit_lines: z.number().int().min(1).max(2000).default(200), max_bytes: z.number().int().min(1).max(1024 * 1024).default(512 * 1024), with_line_numbers: z.boolean().default(true) });
 const FileReadManyArgs = z.object({ items: z.array(z.object({ path: z.string(), offset_line: z.number().int().min(1).optional(), limit_lines: z.number().int().min(1).max(2000).optional(), max_bytes: z.number().int().min(1).max(1024 * 1024).optional(), with_line_numbers: z.boolean().optional() })).min(1).max(100), max_total_bytes: z.number().int().min(1).max(4 * 1024 * 1024).default(512 * 1024) });
 const FileSearchArgs = z.object({ path: z.string().optional(), query: z.string().min(1), max_results: z.number().int().min(1).max(500).default(50), file_glob: z.string().optional(), regex: z.boolean().default(false), case_sensitive: z.boolean().default(false), include_filenames: z.boolean().default(true), include_contents: z.boolean().default(true), max_file_bytes: z.number().int().min(1).max(10 * 1024 * 1024).default(256 * 1024), context_before: z.number().int().min(0).max(20).default(0), context_after: z.number().int().min(0).max(20).default(0), cursor: z.string().optional(), backend: z.enum(['auto', 'rg', 'native']).default('auto') });
+const FileIndexBuildArgs = z.object({ root: z.string().optional(), file_glob: z.string().optional(), max_file_bytes: z.number().int().min(1).max(10 * 1024 * 1024).default(1024 * 1024), force: z.boolean().default(false) });
+const FileIndexSearchArgs = z.object({ root: z.string().optional(), query: z.string().min(1), limit: z.number().int().min(1).max(200).default(20), offset: z.number().int().min(0).default(0), snippet_chars: z.number().int().min(80).max(2000).default(400) });
+const FileIndexStatsArgs = z.object({ root: z.string().optional() });
+const EmbeddingIndexBuildArgs = z.object({ root: z.string().optional(), file_glob: z.string().optional(), max_file_bytes: z.number().int().min(1).max(5 * 1024 * 1024).default(512 * 1024), chunk_chars: z.number().int().min(500).max(12000).default(3000), force: z.boolean().default(false) });
+const EmbeddingIndexSearchArgs = z.object({ root: z.string().optional(), query: z.string().min(1), limit: z.number().int().min(1).max(100).default(10) });
+const EmbeddingIndexStatsArgs = z.object({ root: z.string().optional() });
 const FileOutlineArgs = z.object({ path: z.string(), max_bytes: z.number().int().min(1).max(2 * 1024 * 1024).default(512 * 1024), max_items: z.number().int().min(1).max(2000).default(300), outline_backend: z.enum(['auto', 'tree_sitter', 'regex']).default('auto') });
 const FileHashArgs = z.object({ path: z.string() });
 const SnapshotCreateArgs = z.object({ path: z.string(), reason: z.string().default('manual') });
