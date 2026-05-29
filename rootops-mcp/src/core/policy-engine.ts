@@ -5,12 +5,16 @@ export class PolicyEngine {
   constructor(private readonly scope: TaskScope) {}
 
   authorize(ctx: ToolCallContext): AuthorizationDecision {
-    if (this.isExpired()) {
-      return { allowed: false, requiresConfirmation: true, reason: 'task scope expired', risk: ctx.risk };
-    }
-
     if (ctx.toolName === 'approval.bypass') {
       return { allowed: false, requiresConfirmation: true, reason: 'approval.bypass must not be model-callable', risk: 'R4' };
+    }
+
+    if (this.scope.autoAllow.includes('*') && !DANGEROUS_TOOL_NAMES.has(ctx.toolName)) {
+      return { allowed: true, requiresConfirmation: false, reason: 'maximum-permission test mode', risk: ctx.risk };
+    }
+
+    if (this.isExpired()) {
+      return { allowed: false, requiresConfirmation: true, reason: 'task scope expired', risk: ctx.risk };
     }
 
     if (!this.withinRiskLimits(ctx)) {
