@@ -38,7 +38,6 @@ export class RemoteAgentSystemd {
       `[Unit]`,
       `Description=AIX RootOps Remote Agent`,
       `After=network.target`,
-      ``,
       `[Service]`,
       `Type=simple`,
       `User=${user}`,
@@ -47,7 +46,6 @@ export class RemoteAgentSystemd {
       `Restart=always`,
       `RestartSec=3`,
       `NoNewPrivileges=false`,
-      ``,
       `[Install]`,
       `WantedBy=multi-user.target`,
       `EOF`,
@@ -66,6 +64,30 @@ export class RemoteAgentSystemd {
       ? `systemctl --no-pager --full status ${shellQuote(serviceName)} | head -120`
       : `systemctl ${action} ${shellQuote(serviceName)} && systemctl --no-pager --full status ${shellQuote(serviceName)} | head -80`;
     return this.remote.sshExec(target, command, { timeoutMs: 120000 });
+  }
+
+  async uninstall(target: SshTarget, serviceName = 'aix-rootops-agent'): Promise<unknown> {
+    const servicePath = `/etc/systemd/system/${serviceName}.service`;
+    const envPath = `/etc/${serviceName}.env`;
+    const command = [
+      `systemctl stop ${shellQuote(serviceName)} || true`,
+      `systemctl disable ${shellQuote(serviceName)} || true`,
+      `rm -f ${shellQuote(servicePath)}`,
+      `rm -f ${shellQuote(envPath)}`,
+      `systemctl daemon-reload`
+    ].join('\n');
+    return this.remote.sshExec(target, command, { timeoutMs: 60000 });
+  }
+
+  async rotateToken(target: SshTarget, serviceName = 'aix-rootops-agent', newToken?: string): Promise<string> {
+    const token = newToken ?? `ra_${randomBytes(24).toString('hex')}`;
+    const envPath = `/etc/${serviceName}.env`;
+    const command = [
+      `sed -i '/^ROOTOPS_AGENT_TOKEN=/c\\ROOTOPS_AGENT_TOKEN=${token}' ${shellQuote(envPath)}`,
+      `systemctl restart ${shellQuote(serviceName)}`
+    ].join('\n');
+    await this.remote.sshExec(target, command, { timeoutMs: 60000 });
+    return token;
   }
 }
 
