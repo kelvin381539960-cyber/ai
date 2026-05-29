@@ -126,6 +126,8 @@ export async function startMcpServer(): Promise<void> {
         case 'remote.agent.systemd_start': { const parsed = RemoteAgentSystemdActionArgs.parse(cleanArgs); return jsonToolResult({ ok: true, result: await agentSystemd.action(parsed.target, parsed.service_name, 'start') }); }
         case 'remote.agent.systemd_stop': { const parsed = RemoteAgentSystemdActionArgs.parse(cleanArgs); return jsonToolResult({ ok: true, result: await agentSystemd.action(parsed.target, parsed.service_name, 'stop') }); }
         case 'remote.agent.systemd_status': { const parsed = RemoteAgentSystemdActionArgs.parse(cleanArgs); return jsonToolResult({ ok: true, result: await agentSystemd.action(parsed.target, parsed.service_name, 'status') }); }
+        case 'remote.agent.systemd_uninstall': { const parsed = RemoteAgentSystemdActionArgs.parse(cleanArgs); return jsonToolResult({ ok: true, result: await agentSystemd.uninstall(parsed.target, parsed.service_name) }); }
+        case 'remote.agent.systemd_rotate_token': { const parsed = RemoteAgentSystemdRotateTokenArgs.parse(cleanArgs); return jsonToolResult({ ok: true, token: await agentSystemd.rotateToken(parsed.target, parsed.service_name, parsed.new_token) }); }
         case 'remote.agent.health': { const parsed = RemoteAgentClientBaseArgs.parse(cleanArgs); return jsonToolResult({ ok: true, ...(await agentClient.health(parsed.base_url, parsed.token)) }); }
         case 'remote.agent.hash': { const parsed = RemoteAgentHashArgs.parse(cleanArgs); return jsonToolResult({ ok: true, ...(await agentClient.hash(parsed.base_url, parsed.token, parsed.path)) }); }
         case 'remote.agent.read': { const parsed = RemoteAgentReadArgs.parse(cleanArgs); return jsonToolResult({ ok: true, ...(await agentClient.read(parsed.base_url, parsed.token, parsed.path, parsed.offset, parsed.length)) }); }
@@ -190,6 +192,7 @@ const RemoteTunnelCloseArgs = z.object({ tunnel_id: z.string() });
 const RemoteAgentBootstrapArgs = z.object({ target: SshTargetSchema, install_path: z.string().default('/tmp/aix-rootops-agent.js') });
 const RemoteAgentSystemdInstallArgs = z.object({ target: SshTargetSchema, install_path: z.string().default('/opt/aix-rootops-agent/aix-rootops-agent.js'), service_name: z.string().default('aix-rootops-agent'), port: z.number().int().min(1).max(65535).default(18765), token: z.string().optional(), user: z.string().default('root') });
 const RemoteAgentSystemdActionArgs = z.object({ target: SshTargetSchema, service_name: z.string().default('aix-rootops-agent') });
+const RemoteAgentSystemdRotateTokenArgs = z.object({ target: SshTargetSchema, service_name: z.string().default('aix-rootops-agent'), new_token: z.string().optional() });
 const RemoteAgentClientBaseArgs = z.object({ base_url: z.string().url(), token: z.string() });
 const RemoteAgentHashArgs = RemoteAgentClientBaseArgs.extend({ path: z.string() });
 const RemoteAgentReadArgs = RemoteAgentClientBaseArgs.extend({ path: z.string(), offset: z.number().int().min(0).default(0), length: z.number().int().min(1).max(1024 * 1024).default(65536) });
