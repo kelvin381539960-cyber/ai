@@ -27,30 +27,28 @@ brew install ripgrep
 
 ## Current status
 
-Runnable MCP server with read/search/context, transactional patch tools, and remote ops tools.
+Runnable MCP server with:
 
-Registered tool groups:
-
-- policy/audit
-- file read/search/outline/hash
-- snapshot/patch transaction
-- local model sidecar
-- remote SSH / streaming / pseudo PTY / tunnels / rsync / server groups / remote agent bootstrap
-
-No sudo/systemctl/git push/deploy tools are registered as first-class tools yet.
+- file read/search/context
+- transactional patch tools
+- remote ops tools
+- task-level authorization
+- merged confirmation payloads
+- emergency freeze
+- audit export
 
 ## Docs
 
 - `docs/MCP_TOOLS.md`
 - `docs/REMOTE_OPS.md`
+- `docs/AUTHORIZATION.md`
 - `docs/ROADMAP.md`
 
 ## Next build order
 
-1. Add task scope creation.
-2. Add merged confirmation payload.
-3. Add risk threshold limits.
-4. Add audit export.
-5. Add emergency freeze.
-6. Add tree-sitter outline.
-7. Add SQLite FTS5 index.
+1. Add explicit approval token apply flow.
+2. Persist task scopes and confirmation queue.
+3. Add tree-sitter outline.
+4. Add SQLite FTS5 index.
+5. Add embedding index.
+6. Add real remote agent daemon.

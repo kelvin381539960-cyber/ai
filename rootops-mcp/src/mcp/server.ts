@@ -2,10 +2,12 @@ import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
-import { DEFAULT_TASK_SCOPE } from '../config/default-policy.js';
 import { AuditLog } from '../core/audit.js';
+import { ConfirmationQueue } from '../core/confirmation.js';
 import { PolicyEngine } from '../core/policy-engine.js';
 import { classifyToolRisk } from '../core/risk.js';
+import { SafetySwitch } from '../core/safety-switch.js';
+import { TaskScopeStore } from '../core/task-scope-store.js';
 import { buildContextPack } from '../file/context-pack.js';
 import { FileEngine } from '../file/file-engine.js';
 import { LocalIntelligence } from '../local/local-intelligence.js';
@@ -26,11 +28,14 @@ const actor = process.env.ROOTOPS_ACTOR ?? 'gpt';
 const defaultProfile = (process.env.ROOTOPS_PROFILE ?? 'read_only') as ToolProfile;
 
 export async function startMcpServer(): Promise<void> {
-  const policy = new PolicyEngine(DEFAULT_TASK_SCOPE);
+  const taskScopes = new TaskScopeStore();
+  const safety = new SafetySwitch();
+  const confirmations = new ConfirmationQueue();
   const audit = new AuditLog();
   await audit.init();
-  const fileEngine = new FileEngine(DEFAULT_TASK_SCOPE.allowedRoots);
-  const patchEngine = new PatchEngine(fileEngine);
+  let activeScope = taskScopes.active();
+  let fileEngine = new FileEngine(activeScope.allowedRoots);
+  let patchEngine = new PatchEngine(fileEngine);
   const remote = new RemoteOps();
   const sessions = new RemoteSessionPool();
   const groups = new ServerGroupRegistry();
@@ -41,18 +46,34 @@ export async function startMcpServer(): Promise<void> {
   const ollama = new OllamaClient({ baseUrl: process.env.OLLAMA_BASE_URL ?? 'http://127.0.0.1:11434', embeddingModel: process.env.OLLAMA_EMBEDDING_MODEL ?? 'nomic-embed-text', instructModel: process.env.OLLAMA_INSTRUCT_MODEL ?? 'qwen2.5-coder:7b' });
   const local = new LocalIntelligence(ollama);
   const server = new Server({ name: 'aix-rootops-mcp', version: '0.1.0' }, { capabilities: { tools: {} } });
+  const reloadScope = () => { activeScope = taskScopes.active(); fileEngine = new FileEngine(activeScope.allowedRoots); patchEngine = new PatchEngine(fileEngine); };
   server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: toolDefinitions }));
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const name = request.params.name;
     const args = request.params.arguments ?? {};
-    const ctx: ToolCallContext = { taskId: DEFAULT_TASK_SCOPE.taskId, actor, toolName: name, profile: defaultProfile, args, risk: classifyToolRisk(name) };
+    const ctx: ToolCallContext = { taskId: activeScope.taskId, actor, toolName: name, profile: defaultProfile, args, risk: classifyToolRisk(name) };
+    if (!safety.allows(name)) return jsonToolResult({ ok: false, error: 'safety_freeze_active', safety: safety.status() });
+    const policy = new PolicyEngine(activeScope);
     const decision = policy.authorize(ctx);
     await audit.record({ ...ctx, decision });
-    if (!decision.allowed) return jsonToolResult({ ok: false, error: 'authorization_required', decision });
+    if (!decision.allowed) {
+      const confirmation = decision.requiresConfirmation ? confirmations.create(ctx, decision.reason) : undefined;
+      return jsonToolResult({ ok: false, error: 'authorization_required', decision, confirmation });
+    }
     try {
       switch (name) {
-        case 'policy.check': { const parsed = PolicyCheckArgs.parse(args); const risk = classifyToolRisk(parsed.tool_name); const check = policy.authorize({ taskId: DEFAULT_TASK_SCOPE.taskId, actor, toolName: parsed.tool_name, profile: parsed.profile ?? defaultProfile, args: parsed.args ?? {}, risk }); return jsonToolResult({ ok: true, risk, decision: check }); }
+        case 'policy.check': { const parsed = PolicyCheckArgs.parse(args); const risk = classifyToolRisk(parsed.tool_name); const check = policy.authorize({ taskId: activeScope.taskId, actor, toolName: parsed.tool_name, profile: parsed.profile ?? defaultProfile, args: parsed.args ?? {}, risk }); return jsonToolResult({ ok: true, risk, decision: check }); }
+        case 'task.scope.create': { const parsed = TaskScopeCreateArgs.parse(args); const scope = taskScopes.create({ allowedRoots: parsed.allowed_roots, autoAllow: parsed.auto_allow, requiresConfirm: parsed.requires_confirm, ttlMinutes: parsed.ttl_minutes, limits: parsed.limits }); reloadScope(); return jsonToolResult({ ok: true, scope }); }
+        case 'task.scope.active': return jsonToolResult({ ok: true, scope: taskScopes.active() });
+        case 'task.scope.list': return jsonToolResult({ ok: true, scopes: taskScopes.list() });
+        case 'task.scope.use': { const parsed = TaskScopeUseArgs.parse(args); const scope = taskScopes.setActive(parsed.task_id); reloadScope(); return jsonToolResult({ ok: true, scope }); }
+        case 'confirmation.list': return jsonToolResult({ ok: true, confirmations: confirmations.list() });
+        case 'confirmation.clear': { const parsed = ConfirmationClearArgs.parse(args); return jsonToolResult(confirmations.clear(parsed.confirmation_id)); }
+        case 'safety.status': return jsonToolResult({ ok: true, safety: safety.status() });
+        case 'safety.freeze': { const parsed = SafetyFreezeArgs.parse(args); return jsonToolResult({ ok: true, safety: safety.freeze(parsed.reason) }); }
+        case 'safety.unfreeze': { const parsed = SafetyFreezeArgs.parse(args); return jsonToolResult({ ok: true, safety: safety.unfreeze(parsed.reason) }); }
         case 'audit.list': { const parsed = AuditListArgs.parse(args); return jsonToolResult({ ok: true, events: parsed.source === 'disk' ? await audit.listFromDisk(parsed.date) : audit.list() }); }
+        case 'audit.export': { const parsed = AuditListArgs.parse(args); const events = parsed.source === 'disk' ? await audit.listFromDisk(parsed.date) : audit.list(); return jsonToolResult({ ok: true, format: 'json', events }); }
         case 'file.read': { const parsed = FileReadArgs.parse(args); return jsonToolResult({ ok: true, ...(await fileEngine.readLines(parsed.path, parsed.offset_line, parsed.limit_lines, { maxBytes: parsed.max_bytes, withLineNumbers: parsed.with_line_numbers })) }); }
         case 'file.read_many': { const parsed = FileReadManyArgs.parse(args); return jsonToolResult({ ok: true, ...(await fileEngine.readMany(parsed.items, parsed.max_total_bytes)) }); }
         case 'file.search': { const parsed = FileSearchArgs.parse(args); return jsonToolResult({ ok: true, ...(await fileEngine.search(parsed)) }); }
@@ -101,6 +122,10 @@ function toPatchOperation(parsed: z.infer<typeof PatchDryRunArgs>): PatchOperati
 
 const SshTargetSchema = z.object({ host: z.string(), user: z.string().optional(), port: z.number().int().min(1).max(65535).optional(), identityFile: z.string().optional() });
 const PolicyCheckArgs = z.object({ tool_name: z.string(), profile: z.string().optional() as z.ZodOptional<z.ZodType<ToolProfile>>, args: z.unknown().optional() });
+const TaskScopeCreateArgs = z.object({ allowed_roots: z.array(z.string()).optional(), auto_allow: z.array(z.string()).optional(), requires_confirm: z.array(z.string()).optional(), ttl_minutes: z.number().int().min(1).max(1440).default(60), limits: z.object({ maxFilesChanged: z.number().int().optional(), maxLinesChanged: z.number().int().optional(), maxCommandSeconds: z.number().int().optional(), maxLocalModelBatchTokens: z.number().int().optional() }).optional() });
+const TaskScopeUseArgs = z.object({ task_id: z.string() });
+const ConfirmationClearArgs = z.object({ confirmation_id: z.string() });
+const SafetyFreezeArgs = z.object({ reason: z.string().default('manual') });
 const AuditListArgs = z.object({ source: z.enum(['memory', 'disk']).default('memory'), date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional() });
 const FileReadArgs = z.object({ path: z.string(), offset_line: z.number().int().min(1).default(1), limit_lines: z.number().int().min(1).max(2000).default(200), max_bytes: z.number().int().min(1).max(1024 * 1024).default(512 * 1024), with_line_numbers: z.boolean().default(true) });
 const FileReadManyArgs = z.object({ items: z.array(z.object({ path: z.string(), offset_line: z.number().int().min(1).optional(), limit_lines: z.number().int().min(1).max(2000).optional(), max_bytes: z.number().int().min(1).max(1024 * 1024).optional(), with_line_numbers: z.boolean().optional() })).min(1).max(100), max_total_bytes: z.number().int().min(1).max(4 * 1024 * 1024).default(512 * 1024) });

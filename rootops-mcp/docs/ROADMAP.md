@@ -60,8 +60,11 @@
 
 ## Phase 5: Low-friction authorization
 
-- [ ] task scope creation
-- [ ] merged confirmation payload
-- [ ] risk threshold limits
-- [ ] audit export
-- [ ] emergency freeze
+- [x] task scope creation
+- [x] merged confirmation payload
+- [x] risk threshold limits
+- [x] audit export
+- [x] emergency freeze
+- [ ] explicit approval token apply flow
+- [ ] persistent task scopes
+- [ ] persistent confirmation queue
