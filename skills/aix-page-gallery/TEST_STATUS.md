@@ -14,6 +14,8 @@
 - Expo Web export with enforced 4GB Node heap
 - Generic screenshot audit
 - Delivery HTML and ZIP generation
+- In-place delivery output regression
+- Real AIX Home/Card/KYC/Splash pipeline: 4 rendered, 0 errors, 0 blanks
 - ZIP integrity validation
 - Mac direct CDP fixture capture: 2 rendered + 1 non-visual
 - Existing AIX final baseline: 87 PNG, 0 runtime errors, 0 blank visual pages

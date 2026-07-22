@@ -13,13 +13,21 @@ def main():
     ap=argparse.ArgumentParser(description='Build browsable Page Gallery delivery')
     ap.add_argument('--results',required=True); ap.add_argument('--screenshots',required=True)
     ap.add_argument('--output',required=True); ap.add_argument('--site'); ap.add_argument('--name',default='Page_Gallery_Final')
-    a=ap.parse_args(); out=Path(a.output).resolve(); shutil.rmtree(out,ignore_errors=True); out.mkdir(parents=True)
-    data=json.loads(Path(a.results).read_text()); shots=Path(a.screenshots).resolve()
-    shutil.copytree(shots,out/'screenshots'); shutil.copy2(a.results,out/'routes.json')
+    a=ap.parse_args(); out=Path(a.output).resolve(); results=Path(a.results).resolve(); shots=Path(a.screenshots).resolve()
+    data=json.loads(results.read_text()); in_place=out == results.parent
+    if not in_place:
+        shutil.rmtree(out,ignore_errors=True); out.mkdir(parents=True)
+        shutil.copytree(shots,out/'screenshots')
+    else:
+        out.mkdir(parents=True,exist_ok=True)
+        if shots != (out/'screenshots').resolve():
+            shutil.rmtree(out/'screenshots',ignore_errors=True); shutil.copytree(shots,out/'screenshots')
+    if results != (out/'routes.json').resolve(): shutil.copy2(results,out/'routes.json')
     for n in ('capture-results.csv','CAPTURE_REPORT.md','audit-report.json','AUDIT_REPORT.md'):
-        p=Path(a.results).parent/n
-        if p.exists(): shutil.copy2(p,out/n)
-    if a.site: shutil.copytree(Path(a.site).resolve(),out/'page-gallery'/'site')
+        p=results.parent/n; dst=out/n
+        if p.exists() and p.resolve()!=dst.resolve(): shutil.copy2(p,dst)
+    if a.site:
+        site_dst=out/'page-gallery'/'site'; shutil.rmtree(site_dst,ignore_errors=True); site_dst.parent.mkdir(parents=True,exist_ok=True); shutil.copytree(Path(a.site).resolve(),site_dst)
     groups={}
     for x in data: groups.setdefault(x.get('category','other'),[]).append(x)
     css='body{font-family:-apple-system,sans-serif;margin:0;background:#f5f6f8;color:#161616}.h{position:sticky;top:0;background:#fff;padding:18px 24px;border-bottom:1px solid #ddd;z-index:2}.w{padding:24px}.g{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px}.c{background:#fff;border-radius:14px;padding:12px;box-shadow:0 1px 5px #0001}.c img{width:100%;border:1px solid #eee;border-radius:10px}.r{font-size:12px;word-break:break-all;margin-top:8px}.s{font-size:11px;color:#666}.nv{border:2px dashed #aaa;padding:50px 8px;text-align:center;border-radius:10px;color:#777}'

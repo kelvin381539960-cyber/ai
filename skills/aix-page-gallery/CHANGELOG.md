@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.1 - 2026-07-22
+
+- Fixed in-place delivery when capture output and delivery output are the same directory.
+- Added real AIX four-route delivery regression with valid full and screenshot-only ZIPs.
+
 ## 1.0.0 - 2026-07-22
 
 - Added generic Chrome CDP screenshot pipeline.

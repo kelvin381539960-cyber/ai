@@ -1,6 +1,6 @@
 {
   "name": "aix-page-gallery",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "files": [
     {
       "path": ".gitignore",
@@ -9,8 +9,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "91fc0635d2b1ed5c5768bbe3f995a37c4fea8836e8862e425be28c95fc163e75",
-      "size": 435
+      "sha256": "f9f687aecfd6994400da7a7f4b81226e01407bc0b9e26dfdfc243b041eab698f",
+      "size": 639
     },
     {
       "path": "LICENSE",
@@ -24,17 +24,17 @@
     },
     {
       "path": "SKILL.md",
-      "sha256": "eb22acb27f6a28809a4854a7134b4837a2bb7c57b5520db42b23e143906dc2e6",
+      "sha256": "4138b06e1b9cbbf09c82201e44f2f1c6929e1fe9aae4c92f9d7341993e9cc9d1",
       "size": 10434
     },
     {
       "path": "TEST_STATUS.md",
-      "sha256": "b27b44cfff977c9f558d65fca903a13341e74fcec0d957afb6ae819b13ea0af9",
-      "size": 987
+      "sha256": "5fc5ec031a12938881733ae8855292c5c43cf7a6cbc79b9efb00ae22752152c0",
+      "size": 1098
     },
     {
       "path": "VERSION",
-      "sha256": "59854984853104df5c353e2f681a15fc7924742f9a2e468c29af248dce45ce03",
+      "sha256": "44e161e4495cac2cf7858043e9e6418e9579f0ddcfae826f9a372622968ce066",
       "size": 6
     },
     {
@@ -289,8 +289,8 @@
     },
     {
       "path": "scripts/build_delivery.py",
-      "sha256": "be0ffc34967511a8c05ffb4de9dfb9927640c84b4f081c2419354e910e744af7",
-      "size": 3443
+      "sha256": "af3e6fd46cc400524592baa10cb0f877ff717ee1f8b99792403eab75ebac2ab7",
+      "size": 3947
     },
     {
       "path": "scripts/capture_cdp.py",

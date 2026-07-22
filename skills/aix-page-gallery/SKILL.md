@@ -3,7 +3,7 @@ name: aix-page-gallery
 description: Build a complete visual Page Gallery and stable batch screenshots for AIX or other Expo Router / React Native applications. Use when asked to enumerate every business screen, create a browser-preview layer for native pages, mock APIs safely, export Expo Web, capture all routes through Chrome DevTools Protocol, audit blank/error/missing screenshots, or deliver a browsable screenshot gallery.
 license: MIT
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
   verified_project: "AIX Expo Router app"
   verified_date: "2026-07-22"
   verified_routes: "87"
