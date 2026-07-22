@@ -10,7 +10,7 @@ RESULTS_DIR=Path(os.environ.get('GALLERY_RESULTS_DIR',ROOT))
 BASE_URL=os.environ.get('GALLERY_BASE_URL','http://127.0.0.1:19006')
 LIMIT=int(os.environ.get('GALLERY_LIMIT','0'));SETTLE=float(os.environ.get('GALLERY_SETTLE_SECONDS','1.8'))
 ROUTE_FILTER={x.strip() for x in os.environ.get('GALLERY_ROUTES','').split(',') if x.strip()}
-CLEAR_OUTPUT=os.environ.get('GALLERY_CLEAR_OUTPUT','1')!='0';START_SERVER=os.environ.get('GALLERY_START_SERVER','1')!='0';HEALTH_ROUTE=os.environ.get('GALLERY_HEALTH_ROUTE','')
+CLEAR_OUTPUT=os.environ.get('GALLERY_CLEAR_OUTPUT','1')!='0';START_SERVER=os.environ.get('GALLERY_START_SERVER','1')!='0';HEALTH_ROUTE=os.environ.get('GALLERY_HEALTH_ROUTE','');RESUME=os.environ.get('GALLERY_RESUME','0')=='1'
 HTTP_PORT=int(urllib.parse.urlparse(BASE_URL).port or 19006);CDP_PORT=int(os.environ.get('GALLERY_CDP_PORT','9223'))
 DEFAULT_PARAMS={'preview':'1','scenario':'default','transactionId':'preview-card-payment','cardId':'preview-card-001','messageId':'preview-message-001','id':'preview-id','type':'VIRTUAL','status':'SUCCESS','resultType':'success','fullName':'Preview User','originalFullName':'Preview User','countryCode':'SG','currency':'USDT','network':'ETH','networkCode':'ETH','asset':'USDT','amount':'100','sellCurrency':'USDT','buyCurrency':'USDC','nextPath':'/aix/debug/page-gallery','modal':'card','nextParams':'{}'}
 DEFAULT_PARAMS['kycNavParams']=json.dumps({'currentCountryISO':'SG','currentDisplayName':'Singapore','allowCountryISOList':['SG','HK','US'],'targetPage':'/aix/home/home-page','aaiPassportUrl':'preview://passport-verification','aaiLivenessUrl':'preview://face-verification'})
@@ -92,7 +92,7 @@ def main():
     registry=json.loads(REGISTRY.read_text(encoding='utf-8'));items=[x for x in registry if not x.get('internal')]
     if ROUTE_FILTER:items=[x for x in items if x.get('route') in ROUTE_FILTER]
     if LIMIT>0:items=items[:LIMIT]
-    if CLEAR_OUTPUT:shutil.rmtree(OUTPUT,ignore_errors=True)
+    if CLEAR_OUTPUT and not RESUME:shutil.rmtree(OUTPUT,ignore_errors=True)
     OUTPUT.mkdir(parents=True,exist_ok=True);RESULTS_DIR.mkdir(parents=True,exist_ok=True)
     profile=tempfile.mkdtemp(prefix='page-gallery-chrome-');chrome_log=(RESULTS_DIR/'chrome-cdp.log').open('w',encoding='utf-8');http_log=(RESULTS_DIR/'http-server.log').open('w',encoding='utf-8');http_process=None;chrome_process=None;cdp=None
     try:
@@ -101,7 +101,7 @@ def main():
         chrome_process=subprocess.Popen([chrome,'--headless=new',f'--remote-debugging-port={CDP_PORT}','--remote-allow-origins=*',f'--user-data-dir={profile}','--disable-background-networking','--disable-component-update','--disable-sync','--no-first-run','--no-default-browser-check','about:blank'],stdout=chrome_log,stderr=subprocess.STDOUT)
         wait_http(f'http://127.0.0.1:{CDP_PORT}/json/version');targets=get_json(f'http://127.0.0.1:{CDP_PORT}/json/list');page=next(x for x in targets if x.get('type')=='page');cdp=CDP(page['webSocketDebuggerUrl'])
         cdp.call('Page.enable');cdp.call('Runtime.enable');cdp.call('Log.enable');cdp.call('Emulation.setDeviceMetricsOverride',{'width':390,'height':844,'deviceScaleFactor':1,'mobile':True,'screenWidth':390,'screenHeight':844})
-        rows=[];fatal_pattern=re.compile(r'Application Error|Unexpected Application Error|TurboModuleRegistry|getEnforcing|Cannot read properties|Invariant Violation|Module not found',re.I)
+        partial=RESULTS_DIR/'capture-results.partial.json';rows=json.loads(partial.read_text(encoding='utf-8')) if RESUME and partial.is_file() else [];done={x.get('route') for x in rows};items=[x for x in items if x.get('route') not in done];fatal_pattern=re.compile(r'Application Error|Unexpected Application Error|TurboModuleRegistry|getEnforcing|Cannot read properties|Invariant Violation|Module not found',re.I)
         for index,item in enumerate(items,1):
             cdp.events.clear();directory=OUTPUT/item.get('category','other');directory.mkdir(parents=True,exist_ok=True);shot_path=directory/f"{safe_name(item['route'])}.png";nav_error='';body='';visual=0;page_errors=[];diagnostics=[]
             try:
@@ -113,7 +113,7 @@ def main():
             for event in cdp.take({'Runtime.exceptionThrown','Log.entryAdded'}):
                 message=event_message(event)
                 if not message:continue
-                if event.get('method')=='Runtime.exceptionThrown' and fatal_pattern.search(message):
+                if event.get('method')=='Runtime.exceptionThrown':
                     if message not in page_errors:page_errors.append(message)
                 elif message not in diagnostics:diagnostics.append(message)
             body_error=bool(fatal_pattern.search(body));status='non-visual' if item.get('nonVisual') else ('error' if nav_error or page_errors or body_error else ('rendered' if body.strip() or visual>0 else 'blank'))
@@ -121,8 +121,8 @@ def main():
             try:relative=str(shot_path.relative_to(ROOT))
             except ValueError:relative=str(shot_path)
             rows.append({'route':item['route'],'category':item.get('category','other'),'status':status,'screenshot':relative,'bodyTextLength':len(body.strip()),'visualNodeCount':visual,'bodyTextPreview':body.strip()[:500],'finalUrl':final_url,'navigationError':nav_error,'pageErrors':page_errors[:10],'diagnostics':diagnostics[:10]})
-            print(f"[{index}/{len(items)}] {status} {item['route']}",flush=True)
-        print('Summary:',write_reports(rows),flush=True)
+            partial.write_text(json.dumps(rows,ensure_ascii=False,indent=2)+'\n',encoding='utf-8');print(f"[{index}/{len(items)}] {status} {item['route']}",flush=True)
+        print('Summary:',write_reports(rows),flush=True);partial.unlink(missing_ok=True)
     finally:
         if cdp:
             try:cdp.close()

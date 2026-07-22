@@ -80,3 +80,9 @@ routes → individual pages. Fix shared causes before patching individual routes
 
 State exact build/capture machines, output paths, route/status counts, PNG count,
 dimensions, duplicate reasons, and whether source is committed or only on disk.
+
+## Recovery
+
+For interrupted Mac captures, rerun with `GALLERY_RESUME=1`. The CDP skill writes a
+checkpoint after each route and skips completed routes. Targeted reruns must use a
+separate output or `GALLERY_CLEAR_OUTPUT=0`.

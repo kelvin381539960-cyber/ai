@@ -48,3 +48,11 @@ overwrite the final full-output directory.
 
 Outputs include PNGs, JSON/CSV results, Markdown report, Chrome log, and HTTP log.
 Always run the audit skill next.
+
+## Resume and partial reruns
+
+- `GALLERY_RESUME=1` loads `capture-results.partial.json` and skips completed routes.
+- A checkpoint is written after every route.
+- `GALLERY_CLEAR_OUTPUT=0` preserves existing screenshots for targeted reruns.
+- `GALLERY_RESULTS_DIR` separates reports from screenshot storage.
+- Never run a filtered capture with clearing enabled against the final full-output directory.
