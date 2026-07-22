@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.page-gallery-backup/
+run/
+screenshots/
+*.zip
+chrome-cdp.log
+http-server.log

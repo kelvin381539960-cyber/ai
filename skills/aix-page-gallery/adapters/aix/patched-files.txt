@@ -1,0 +1,11 @@
+metro.config.js
+.npmrc
+package.json
+src/aix/debug/OldHomePage.tsx
+src/aix/debug/useDebugItems.tsx
+src/aix/splash/SplashPage.tsx
+src/app/aix/home/home-page.tsx
+src/app/index.tsx
+src/app/_layout.tsx
+src/network/AixUserAgent.ts
+tsconfig.json

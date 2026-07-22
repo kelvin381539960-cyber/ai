@@ -1,0 +1,288 @@
+--- a/metro.config.js
++++ b/metro.config.js
+@@ -41,6 +41,47 @@
+     sourceExts: [...config.resolver.sourceExts, 'svg'],
+ };
+ 
++
++const previewCodegenComponent = path.resolve(projectRoot, 'src/preview/stubs/codegenNativeComponent.web.tsx');
++const previewCodegenCommands = path.resolve(projectRoot, 'src/preview/stubs/codegenNativeCommands.web.ts');
++const previewUIManager = path.resolve(projectRoot, 'src/preview/stubs/UIManager.web.ts');
++const previewNativeModuleAliases = new Map([
++    ['react-native-moengage', 'src/preview/stubs/MoEngage.web.ts'],
++    ['react-native-expo-moengage', 'src/preview/stubs/MoEngage.web.ts'],
++    ['react-native-appsflyer', 'src/preview/stubs/AppsFlyer.web.ts'],
++    ['@react-native-firebase/remote-config', 'src/preview/stubs/RemoteConfig.web.ts'],
++    ['@react-native-firebase/crashlytics', 'src/preview/stubs/Crashlytics.web.ts'],
++    ['react-native-device-info', 'src/preview/stubs/DeviceInfo.web.ts'],
++    ['react-native-share', 'src/preview/stubs/Share.web.ts'],
++    ['react-native-view-shot', 'src/preview/stubs/ViewShot.web.ts'],
++    ['react-native-webview', 'src/preview/stubs/WebView.web.tsx'],
++    ['@react-native-cookies/cookies', 'src/preview/stubs/Cookies.web.ts'],
++].map(([name, filePath]) => [name, path.resolve(projectRoot, filePath)]));
++
++config.resolver.resolveRequest = (context, moduleName, platform) => {
++    if (platform === 'web') {
++        const previewAlias = previewNativeModuleAliases.get(moduleName);
++        if (previewAlias) {
++            return { type: 'sourceFile', filePath: previewAlias };
++        }
++        if (moduleName === 'react-native/Libraries/Utilities/codegenNativeComponent') {
++            return { type: 'sourceFile', filePath: previewCodegenComponent };
++        }
++        if (moduleName === 'react-native/Libraries/Utilities/codegenNativeCommands') {
++            return { type: 'sourceFile', filePath: previewCodegenCommands };
++        }
++        const isInternalUIManager =
++            moduleName === 'react-native/Libraries/ReactNative/UIManager' ||
++            (moduleName === '../ReactNative/UIManager' && context.originModulePath.includes('/react-native/Libraries/Utilities/')) ||
++            ((moduleName === './BridgelessUIManager' || moduleName === './PaperUIManager') &&
++                context.originModulePath.includes('/react-native/Libraries/ReactNative/'));
++        if (isInternalUIManager) {
++            return { type: 'sourceFile', filePath: previewUIManager };
++        }
++    }
++    return context.resolveRequest(context, moduleName, platform);
++};
++
+ config.transformer = {
+     ...config.transformer,
+     babelTransformerPath: require.resolve('react-native-svg-transformer'),
+--- a/src/aix/debug/OldHomePage.tsx
++++ b/src/aix/debug/OldHomePage.tsx
+@@ -139,7 +139,7 @@
+                 } else if (item.id === 10) {
+                   showSetAixTagBottomSheet();
+                 } else if (item.id === 11) {
+-                  router.push(RouterNamesPlayground.Core);
++                  router.push(RouterNamesPlayground.Core as any);
+                 } else if (item.id === 12) {
+                   router.push(RouterNames.SetNickName);
+                 } else if (item.id === 13) {
+--- a/src/aix/debug/useDebugItems.tsx
++++ b/src/aix/debug/useDebugItems.tsx
+@@ -51,13 +51,13 @@
+             {
+                 content: 'Test Page',
+                 action: () => {
+-                    router.push(RouterNamesPlayground.OldHomePage);
++                    router.push(RouterNamesPlayground.OldHomePage as any);
+                 }
+             },
+             {
+                 content: 'App Share',
+                 action: () => {
+-                    router.push(RouterNamesPlayground.Share);
++                    router.push(RouterNamesPlayground.Share as any);
+                 }
+             },
+             {
+@@ -129,7 +129,7 @@
+                 content: 'WebView Bridge Debug',
+                 description: '测试 Bridge 通信、权限、分片文件保存等功能',
+                 action: () => {
+-                    router.push(RouterNamesPlayground.WebviewDebugTest);
++                    router.push(RouterNamesPlayground.WebviewDebugTest as any);
+                 }
+             },
+             {
+--- a/src/aix/splash/SplashPage.tsx
++++ b/src/aix/splash/SplashPage.tsx
+@@ -2,7 +2,7 @@
+ import { Assets } from "@aix/resources";
+ import { useLocalSearchParams } from "expo-router";
+ import { useEffect } from "react";
+-import { View, Image, StyleSheet } from "react-native";
++import { View, Image, StyleSheet, Platform } from "react-native";
+ import { SplashCreator } from "./useSplashStore";
+ 
+ export function SplashPage() {
+@@ -14,6 +14,9 @@
+       const gotoNext = store(s => s.gotoNext)
+ 
+       useEffect(() => {
++            if (Platform.OS === 'web') {
++                  return;
++            }
+             if (deeplink == null) {
+                   setDeepLink(null)
+             } else {
+--- a/src/app/aix/home/home-page.tsx
++++ b/src/app/aix/home/home-page.tsx
+@@ -1,8 +1,6 @@
+ import { BasePage } from "@aix/common";
+ import { lightTheme as aixTheme } from "@aix/config";
+ import HomePage from "@/aix/home/HomePage";
+-import UIDemo from "@/app/playground/(playground)/ui-demo";
+-import ComponentDemo from "@/app/playground/components/uiDemo/component-demo";
+ 
+ const Login = () => {
+   return (
+--- a/src/app/index.tsx
++++ b/src/app/index.tsx
+@@ -1,5 +1,5 @@
+ import { Redirect } from 'expo-router';
+ 
+-export default function HomeIndex() {
+-  return <Redirect href="/aix/splash" />;
+-} 
+\ No newline at end of file
++export default function Index() {
++  return <Redirect href="/aix/debug/page-gallery" />;
++}
+--- a/src/app/_layout.tsx
++++ b/src/app/_layout.tsx
+@@ -1,129 +1 @@
+-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+-import { useFonts } from 'expo-font';
+-import { Stack } from 'expo-router';
+-import { StyleSheet, View } from 'react-native';
+-import 'react-native-reanimated';
+-import '../../global.css';
+-import { TamaguiProvider } from '@aix/ui';
+-import { config, typographyTheme } from '@aix/config';
+-import {
+-  OVERLAY_KEY_STANDARD_DIALOG_GLOBAL,
+-  OverlayModalHost,
+-  OverlayModalRoot,
+-  OverlayRegistryProvider,
+-  logger,
+-} from '@aix/common';
+-
+-import { useColorScheme } from '../hooks/useColorScheme';
+-import { initMoEngage } from '../third-party/MoEngage';
+-import { initRemoteConfig } from '../third-party/RemoteConfig';
+-import * as SplashScreen from 'expo-splash-screen';
+-import { useEffect, useRef } from 'react';
+-import { patchAixTypographyTheme } from '@/utils/typography/patchAixTypographyTheme';
+-// 初始化全局请求客户端
+-import '@/network/Api';
+-import { I18nProvider } from '@/i18n/I18nContext';
+-// 初始化全局 services（注册 error flows 等）
+-import '@/services/ServicesIndex';
+-
+-import { initCrashlytics } from '@/third-party/FirebaseCrashlytics';
+-import { initAppsFlyer } from '@/third-party/apps-flyer/AppsFlyer';
+-import { appState } from '@/services/app/AppStatus';
+-import { initAdvertising } from '@/third-party/Advertising';
+-import { initPageTrack } from '@/services/track/InitPageTrack';
+-import { initI18nOta } from '@/services/i18n/I18nOtaService';
+-import '@/constants/Assets';
+-import '@aix/ui/ArtWork';
+-import TopRouteObserver from '@/services/top-route/TopRouteObserver';
+-
+-// 关闭 React Native Firebase v22 模块化 API 迁移警告
+-(globalThis as any).RNFB_SILENCE_MODULAR_DEPRECATION_WARNINGS = true;
+-
+-// Patch typography tokens once at app start so `fontWeight` maps to concrete font families.
+-patchAixTypographyTheme(typographyTheme as any);
+-
+-SplashScreen.setOptions({
+-  duration: 1000,
+-  fade: true,
+-});
+-
+-SplashScreen.preventAutoHideAsync();
+-
+-const styles = StyleSheet.create({
+-  standardDialogOverlay: {
+-    justifyContent: 'center',
+-    alignItems: 'center',
+-  },
+-});
+-
+-
+-export default function RootLayout() {
+-  const colorScheme = useColorScheme();
+-  const statusBarStyle = colorScheme === 'dark' ? 'light' : 'dark';
+-  const [loaded, fontError] = useFonts({
+-    Inter: require('../assets/fonts/Inter-Regular.ttf'),
+-    'Inter-Medium': require('../assets/fonts/Inter-Medium.ttf'),
+-    'Inter-Bold': require('../assets/fonts/Inter-Bold.ttf'),
+-    Aeonik: require('../assets/fonts/aeonik-regular.otf'),
+-    'Aeonik-Medium': require('../assets/fonts/aeonik-medium.otf'),
+-    'Aeonik-SemiBold': require('../assets/fonts/aeonik-semibold.otf'),
+-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+-  });
+-
+-  const hiddenSplash = useRef(false);
+-
+-  useEffect(() => {
+-    if ((loaded || fontError) && !hiddenSplash.current) {
+-      hiddenSplash.current = true;
+-      SplashScreen.hideAsync();
+-    }
+-  }, [loaded, fontError]);
+-
+-  useEffect(() => {
+-    // 页面追踪系统初始化（允许多次调用，会覆盖）
+-    initPageTrack();
+-    
+-    // 使用 appState 保护，确保全局只初始化一次
+-    if (appState.isFirstStart) {
+-      initCrashlytics();
+-      initMoEngage();
+-      initRemoteConfig();
+-      initAppsFlyer();
+-      initAdvertising();
+-      appState.setFirstStart(false);
+-    }
+-
+-    // 异步初始化 I18n OTA，不阻塞应用启动
+-    initI18nOta().catch(err => logger.warn('I18n OTA 初始化失败', err));
+-  }, []);
+-
+-  return (
+-    <TamaguiProvider config={config as any} defaultTheme={colorScheme === 'dark' ? 'dark' : 'light'}>
+-      <I18nProvider>
+-        <View style={{ flex: 1 }}>
+-          <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+-            <OverlayRegistryProvider isRootRegistry trackFocus={false}>
+-              <OverlayModalRoot>
+-                <OverlayModalHost
+-                  overlayKey={OVERLAY_KEY_STANDARD_DIALOG_GLOBAL}
+-                  animationType="fade"
+-                  overlayStyle={styles.standardDialogOverlay}
+-                />
+-              </OverlayModalRoot>
+-              <Stack
+-                screenOptions={{
+-                  headerShown: false,
+-                  statusBarStyle,
+-                }}
+-              >
+-                <Stack.Screen name="aix" options={{ headerShown: false }} />
+-                <Stack.Screen name="+not-found" />
+-              </Stack>
+-            </OverlayRegistryProvider>
+-            <TopRouteObserver />
+-          </ThemeProvider>
+-        </View>
+-      </I18nProvider>
+-    </TamaguiProvider>
+-  );
+-}
+\ No newline at end of file
++export { default } from '@/bootstrap/RootLayoutPlatform';
+--- a/src/network/AixUserAgent.ts
++++ b/src/network/AixUserAgent.ts
+@@ -38,7 +38,7 @@
+ }
+ 
+ function getSystemVersion(): string {
+-    return Platform.Version.toString()
++    return String(Platform.Version ?? 'web')
+ }
+ 
+ function getLanguage(): string {
+--- a/tsconfig.json
++++ b/tsconfig.json
+@@ -32,6 +32,7 @@
+     "jest.config.js",
+     "**/*.stories.ts",
+     "**/*.stories.tsx",
+-    "**/*.figma.tsx"
++    "**/*.figma.tsx",
++    "src/preview/excluded-routes/**"
+   ]
+ }

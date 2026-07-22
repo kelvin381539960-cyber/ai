@@ -1,0 +1,5 @@
+[
+  {"id":"one","title":"Page One","category":"smoke","route":"/page-one","sourcePath":"fixture","params":[],"previewParams":{},"nativeCapabilities":[],"internal":false,"nonVisual":false},
+  {"id":"two","title":"Page Two","category":"smoke","route":"/page-two","sourcePath":"fixture","params":[],"previewParams":{},"nativeCapabilities":[],"internal":false,"nonVisual":false},
+  {"id":"controller","title":"Controller","category":"smoke","route":"/controller","sourcePath":"fixture","params":[],"previewParams":{},"nativeCapabilities":[],"internal":false,"nonVisual":true}
+]

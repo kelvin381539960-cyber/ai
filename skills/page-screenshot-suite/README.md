@@ -13,3 +13,9 @@ A reusable workflow for Expo Router / React Native page inventory, Web Preview, 
 ## Verified baseline
 
 The reference AIX run produced 87 route records: 86 visual screenshots, 1 explicitly non-visual controller route, 0 errors, and 0 unexplained blanks.
+
+## Recommended stable entry
+
+Use `../aix-page-gallery/` for new work. It is the consolidated v1.0.0 skill with fixed-viewport raw Chrome CDP capture, strict audit, a safe AIX overlay installer, enforced 4GB Node heap for Expo export, and complete delivery packaging.
+
+The modular skills in this directory remain as references. The consolidated skill is the supported execution path.

@@ -1,0 +1,1194 @@
+[
+  {
+    "id": "aix-address-address-picker",
+    "title": "Address Picker",
+    "category": "address",
+    "route": "/aix/address/address-picker",
+    "sourcePath": "src/app/aix/address/address-picker.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {
+      "sessionId": "preview-address-session",
+      "prefill": "{\"countryCode\":\"SG\",\"province\":\"Central Singapore\",\"city\":\"Singapore\"}"
+    },
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-address-manual-address-entry",
+    "title": "Manual Address Entry",
+    "category": "address",
+    "route": "/aix/address/manual-address-entry",
+    "sourcePath": "src/app/aix/address/manual-address-entry.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-card-application-billing-address",
+    "title": "Billing Address",
+    "category": "card",
+    "route": "/aix/card/application/billing-address",
+    "sourcePath": "src/app/aix/card/application/billing-address.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-card-application-order-confirm",
+    "title": "Order Confirm",
+    "category": "card",
+    "route": "/aix/card/application/order-confirm",
+    "sourcePath": "src/app/aix/card/application/order-confirm.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {
+      "option": "{\"cardType\":\"VIRTUAL\",\"order\":1,\"canApply\":true,\"email\":\"preview@aixpay.co\",\"fullName\":\"Preview User\",\"originalFullName\":\"Preview User\",\"phoneCountryCode\":\"SG\",\"countryNo\":\"+65\",\"phoneNumber\":\"88888888\",\"cardFee\":{\"cardFee\":\"10\",\"cardFeeDisplay\":\"10 USD\",\"discount\":\"10\",\"discountDisplay\":\"Invite Reward -10 USD\",\"discountTag\":\"Invite Reward\",\"isFree\":true,\"payableCardFee\":\"0\",\"payableCardFeeDisplay\":\"0 USD\"},\"cardFaceList\":[{\"code\":\"ORANGE\",\"name\":\"AIX Orange\",\"colorRgb\":\"#FF6230\",\"order\":1}],\"currencyList\":[{\"code\":\"USDT\",\"name\":\"Tether USD\",\"desc\":\"Widely used with strong liquidity.\",\"order\":1},{\"code\":\"USDC\",\"name\":\"USD Coin\",\"desc\":\"A regulated digital dollar.\",\"order\":2}]}",
+      "selectedCardFaceCode": "ORANGE",
+      "selectedCurrencyCode": "USDT",
+      "applyOrder": "preview-apply-order"
+    },
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-card-application-result",
+    "title": "Result",
+    "category": "card",
+    "route": "/aix/card/application/result",
+    "sourcePath": "src/app/aix/card/application/result.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-card-card-entrance",
+    "title": "Card Entrance",
+    "category": "card",
+    "route": "/aix/card/card_entrance",
+    "sourcePath": "src/app/aix/card/card_entrance.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-card-card-interduce",
+    "title": "Card Interduce",
+    "category": "card",
+    "route": "/aix/card/card-interduce",
+    "sourcePath": "src/app/aix/card/card-interduce.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {
+      "config": "{\"applyOrder\":\"preview-apply-order\",\"hasApplied\":false,\"hasDiscount\":false,\"needTopup\":false,\"cardOptions\":[{\"cardType\":\"VIRTUAL\",\"order\":1,\"canApply\":true,\"email\":\"preview@aixpay.co\",\"fullName\":\"Preview User\",\"originalFullName\":\"Preview User\",\"phoneCountryCode\":\"SG\",\"countryNo\":\"+65\",\"phoneNumber\":\"88888888\",\"cardFee\":{\"cardFee\":\"10\",\"cardFeeDisplay\":\"10 USD\",\"discount\":\"10\",\"discountDisplay\":\"Invite Reward -10 USD\",\"discountTag\":\"Invite Reward\",\"isFree\":true,\"payableCardFee\":\"0\",\"payableCardFeeDisplay\":\"0 USD\"},\"cardFaceList\":[{\"code\":\"ORANGE\",\"name\":\"AIX Orange\",\"colorRgb\":\"#FF6230\",\"order\":1}],\"currencyList\":[{\"code\":\"USDT\",\"name\":\"Tether USD\",\"desc\":\"Widely used with strong liquidity.\",\"order\":1},{\"code\":\"USDC\",\"name\":\"USD Coin\",\"desc\":\"A regulated digital dollar.\",\"order\":2}]},{\"cardType\":\"PHYSICAL\",\"order\":2,\"canApply\":true,\"email\":\"preview@aixpay.co\",\"fullName\":\"Preview User\",\"originalFullName\":\"Preview User\",\"phoneCountryCode\":\"SG\",\"countryNo\":\"+65\",\"phoneNumber\":\"88888888\",\"cardFee\":{\"cardFee\":\"50\",\"cardFeeDisplay\":\"50 USD\",\"discount\":\"10\",\"discountDisplay\":\"Invite Reward -10 USD\",\"discountTag\":\"Invite Reward\",\"isFree\":false,\"payableCardFee\":\"40\",\"payableCardFeeDisplay\":\"40 USD\"},\"cardFaceList\":[{\"code\":\"SILVER\",\"name\":\"AIX Silver\",\"colorRgb\":\"#858585\",\"order\":1}],\"currencyList\":[{\"code\":\"USDT\",\"name\":\"Tether USD\",\"desc\":\"Widely used with strong liquidity.\",\"order\":1},{\"code\":\"USDC\",\"name\":\"USD Coin\",\"desc\":\"A regulated digital dollar.\",\"order\":2}]}],\"selectPlan\":[]}",
+      "faq": "{\"virtual\":{\"faqs\":[{\"questionId\":\"v1\",\"title\":\"How does the virtual card work?\",\"description\":\"Use it immediately for online payments.\"}]},\"physical\":{\"faqs\":[{\"questionId\":\"p1\",\"title\":\"Where can I use the physical card?\",\"description\":\"Use it wherever Visa is accepted.\"}]}}"
+    },
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-card-mailing-address",
+    "title": "Mailing Address",
+    "category": "card",
+    "route": "/aix/card/mailing-address",
+    "sourcePath": "src/app/aix/card/mailing-address.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {
+      "fullName": "Preview User",
+      "originalFullName": "Preview User",
+      "countryNo": "+65",
+      "phoneNumber": "88888888",
+      "phoneCountryCode": "SG"
+    },
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-card-manage-card-confirm-set-pin",
+    "title": "Card Confirm Set Pin",
+    "category": "card",
+    "route": "/aix/card/manage/card-confirm-set-pin",
+    "sourcePath": "src/app/aix/card/manage/card-confirm-set-pin.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-card-manage-card-error",
+    "title": "Card Error",
+    "category": "card",
+    "route": "/aix/card/manage/card-error",
+    "sourcePath": "src/app/aix/card/manage/card-error.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {
+      "title": "Unable to update PIN",
+      "description": "Something went wrong. Please try again.",
+      "buttonText": "Back to card",
+      "baseArtworkType": "Folder",
+      "overlayArtworkType": "AlertF"
+    },
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-card-manage-card-home",
+    "title": "Card Home",
+    "category": "card",
+    "route": "/aix/card/manage/card-home",
+    "sourcePath": "src/app/aix/card/manage/card-home.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-card-manage-card-set-pin",
+    "title": "Card Set Pin",
+    "category": "card",
+    "route": "/aix/card/manage/card-set-pin",
+    "sourcePath": "src/app/aix/card/manage/card-set-pin.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-card-manage-verify-bank-last-four-digits",
+    "title": "Verify Bank Last Four Digits",
+    "category": "card",
+    "route": "/aix/card/manage/verify-bank-last-four-digits",
+    "sourcePath": "src/app/aix/card/manage/verify-bank-last-four-digits.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-card-pick-card-currency",
+    "title": "Pick Card Currency",
+    "category": "card",
+    "route": "/aix/card/pick-card-currency",
+    "sourcePath": "src/app/aix/card/pick-card-currency.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {
+      "option": "{\"cardType\":\"VIRTUAL\",\"order\":1,\"canApply\":true,\"email\":\"preview@aixpay.co\",\"fullName\":\"Preview User\",\"originalFullName\":\"Preview User\",\"phoneCountryCode\":\"SG\",\"countryNo\":\"+65\",\"phoneNumber\":\"88888888\",\"cardFee\":{\"cardFee\":\"10\",\"cardFeeDisplay\":\"10 USD\",\"discount\":\"10\",\"discountDisplay\":\"Invite Reward -10 USD\",\"discountTag\":\"Invite Reward\",\"isFree\":true,\"payableCardFee\":\"0\",\"payableCardFeeDisplay\":\"0 USD\"},\"cardFaceList\":[{\"code\":\"ORANGE\",\"name\":\"AIX Orange\",\"colorRgb\":\"#FF6230\",\"order\":1}],\"currencyList\":[{\"code\":\"USDT\",\"name\":\"Tether USD\",\"desc\":\"Widely used with strong liquidity.\",\"order\":1},{\"code\":\"USDC\",\"name\":\"USD Coin\",\"desc\":\"A regulated digital dollar.\",\"order\":2}]}",
+      "faceCode": "ORANGE",
+      "applyOrder": "preview-apply-order"
+    },
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-card-pick-cards",
+    "title": "Pick Cards",
+    "category": "card",
+    "route": "/aix/card/pick-cards",
+    "sourcePath": "src/app/aix/card/pick-cards.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {
+      "config": "{\"applyOrder\":\"preview-apply-order\",\"hasApplied\":false,\"hasDiscount\":false,\"needTopup\":false,\"cardOptions\":[{\"cardType\":\"VIRTUAL\",\"order\":1,\"canApply\":true,\"email\":\"preview@aixpay.co\",\"fullName\":\"Preview User\",\"originalFullName\":\"Preview User\",\"phoneCountryCode\":\"SG\",\"countryNo\":\"+65\",\"phoneNumber\":\"88888888\",\"cardFee\":{\"cardFee\":\"10\",\"cardFeeDisplay\":\"10 USD\",\"discount\":\"10\",\"discountDisplay\":\"Invite Reward -10 USD\",\"discountTag\":\"Invite Reward\",\"isFree\":true,\"payableCardFee\":\"0\",\"payableCardFeeDisplay\":\"0 USD\"},\"cardFaceList\":[{\"code\":\"ORANGE\",\"name\":\"AIX Orange\",\"colorRgb\":\"#FF6230\",\"order\":1}],\"currencyList\":[{\"code\":\"USDT\",\"name\":\"Tether USD\",\"desc\":\"Widely used with strong liquidity.\",\"order\":1},{\"code\":\"USDC\",\"name\":\"USD Coin\",\"desc\":\"A regulated digital dollar.\",\"order\":2}]},{\"cardType\":\"PHYSICAL\",\"order\":2,\"canApply\":true,\"email\":\"preview@aixpay.co\",\"fullName\":\"Preview User\",\"originalFullName\":\"Preview User\",\"phoneCountryCode\":\"SG\",\"countryNo\":\"+65\",\"phoneNumber\":\"88888888\",\"cardFee\":{\"cardFee\":\"50\",\"cardFeeDisplay\":\"50 USD\",\"discount\":\"10\",\"discountDisplay\":\"Invite Reward -10 USD\",\"discountTag\":\"Invite Reward\",\"isFree\":false,\"payableCardFee\":\"40\",\"payableCardFeeDisplay\":\"40 USD\"},\"cardFaceList\":[{\"code\":\"SILVER\",\"name\":\"AIX Silver\",\"colorRgb\":\"#858585\",\"order\":1}],\"currencyList\":[{\"code\":\"USDT\",\"name\":\"Tether USD\",\"desc\":\"Widely used with strong liquidity.\",\"order\":1},{\"code\":\"USDC\",\"name\":\"USD Coin\",\"desc\":\"A regulated digital dollar.\",\"order\":2}]}],\"selectPlan\":[]}"
+    },
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-card-pick-cards-face",
+    "title": "Pick Cards Face",
+    "category": "card",
+    "route": "/aix/card/pick-cards-face",
+    "sourcePath": "src/app/aix/card/pick-cards-face.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {
+      "option": "{\"cardType\":\"VIRTUAL\",\"order\":1,\"canApply\":true,\"email\":\"preview@aixpay.co\",\"fullName\":\"Preview User\",\"originalFullName\":\"Preview User\",\"phoneCountryCode\":\"SG\",\"countryNo\":\"+65\",\"phoneNumber\":\"88888888\",\"cardFee\":{\"cardFee\":\"10\",\"cardFeeDisplay\":\"10 USD\",\"discount\":\"10\",\"discountDisplay\":\"Invite Reward -10 USD\",\"discountTag\":\"Invite Reward\",\"isFree\":true,\"payableCardFee\":\"0\",\"payableCardFeeDisplay\":\"0 USD\"},\"cardFaceList\":[{\"code\":\"ORANGE\",\"name\":\"AIX Orange\",\"colorRgb\":\"#FF6230\",\"order\":1}],\"currencyList\":[{\"code\":\"USDT\",\"name\":\"Tether USD\",\"desc\":\"Widely used with strong liquidity.\",\"order\":1},{\"code\":\"USDC\",\"name\":\"USD Coin\",\"desc\":\"A regulated digital dollar.\",\"order\":2}]}",
+      "applyOrder": "preview-apply-order"
+    },
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-components-image-preview",
+    "title": "Image Preview",
+    "category": "components",
+    "route": "/aix/components/image-preview",
+    "sourcePath": "src/app/aix/components/image-preview.tsx",
+    "params": [
+      "fileUri",
+      "title"
+    ],
+    "nativeCapabilities": [],
+    "previewParams": {
+      "fileUri": "/assets/packages/resources/src/assets/images/card/card_virtual_pick_image.e2777e45152ed6e0cc029c054b3c8c29@3x.png",
+      "title": "Document preview"
+    },
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-components-webview-general-webview",
+    "title": "General Webview",
+    "category": "components",
+    "route": "/aix/components/webview/general-webview",
+    "sourcePath": "src/app/aix/components/webview/general-webview.tsx",
+    "params": [
+      "title",
+      "url"
+    ],
+    "nativeCapabilities": [
+      "webview"
+    ],
+    "previewParams": {
+      "title": "AIX Pay Help",
+      "url": "about:blank"
+    },
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-components-webview-webview-page",
+    "title": "Webview Page",
+    "category": "components",
+    "route": "/aix/components/webview/webview-page",
+    "sourcePath": "src/app/aix/components/webview/webview-page.tsx",
+    "params": [],
+    "nativeCapabilities": [
+      "webview"
+    ],
+    "previewParams": {
+      "title": "AIX Pay Help",
+      "url": "about:blank",
+      "uiTheme": "BROWSER_STYLE"
+    },
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-countries-select-country",
+    "title": "Select Country",
+    "category": "countries",
+    "route": "/aix/countries/select-country",
+    "sourcePath": "src/app/aix/countries/select-country.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {
+      "sessionId": "preview-country-session"
+    },
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-debug-debug",
+    "title": "Debug",
+    "category": "debug",
+    "route": "/aix/debug/debug",
+    "sourcePath": "src/app/aix/debug/debug.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": true
+  },
+  {
+    "id": "aix-debug-old-home-page",
+    "title": "Old Home Page",
+    "category": "debug",
+    "route": "/aix/debug/old-home-page",
+    "sourcePath": "src/app/aix/debug/old-home-page.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": true
+  },
+  {
+    "id": "aix-debug-test-h5",
+    "title": "Test H5",
+    "category": "debug",
+    "route": "/aix/debug/test-h5",
+    "sourcePath": "src/app/aix/debug/test-h5.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": true
+  },
+  {
+    "id": "aix-home-home-page",
+    "title": "Home Page",
+    "category": "home",
+    "route": "/aix/home/home-page",
+    "sourcePath": "src/app/aix/home/home-page.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-ivs-email-otp-page",
+    "title": "Email Otp Page",
+    "category": "ivs",
+    "route": "/aix/ivs/email-otp-page",
+    "sourcePath": "src/app/aix/ivs/email-otp-page.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {
+      "email": "preview@aixpay.co",
+      "recommendTag": "PREVIEW",
+      "dataConsent": "true"
+    },
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-ivs-ivs-begin-page",
+    "title": "Ivs Begin Page",
+    "category": "ivs",
+    "route": "/aix/ivs/ivs-begin-page",
+    "sourcePath": "src/app/aix/ivs/ivs-begin-page.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {
+      "sessionId": "preview-ivs-session",
+      "modal": "card",
+      "status": "SUCCESS"
+    },
+    "nonVisual": true,
+    "internal": false
+  },
+  {
+    "id": "aix-ivs-ivs-biometric-page",
+    "title": "Ivs Biometric Page",
+    "category": "ivs",
+    "route": "/aix/ivs/ivs-biometric-page",
+    "sourcePath": "src/app/aix/ivs/ivs-biometric-page.tsx",
+    "params": [],
+    "nativeCapabilities": [
+      "biometric"
+    ],
+    "previewParams": {
+      "sessionId": "preview-ivs-session"
+    },
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-ivs-ivs-email-otp-page",
+    "title": "Ivs Email Otp Page",
+    "category": "ivs",
+    "route": "/aix/ivs/ivs-email-otp-page",
+    "sourcePath": "src/app/aix/ivs/ivs-email-otp-page.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {
+      "sessionId": "preview-ivs-session"
+    },
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-ivs-ivs-liveness-aai-page",
+    "title": "Ivs Liveness Aai Page",
+    "category": "ivs",
+    "route": "/aix/ivs/ivs-liveness-aai-page",
+    "sourcePath": "src/app/aix/ivs/ivs-liveness-aai-page.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {
+      "sessionId": "preview-ivs-session",
+      "authUrl": "about:blank"
+    },
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-ivs-ivs-liveness-result-page",
+    "title": "Ivs Liveness Result Page",
+    "category": "ivs",
+    "route": "/aix/ivs/ivs-liveness-result-page",
+    "sourcePath": "src/app/aix/ivs/ivs-liveness-result-page.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {
+      "sessionId": "preview-ivs-session",
+      "code": "SUCCESS"
+    },
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-ivs-ivs-liveness-start-page",
+    "title": "Ivs Liveness Start Page",
+    "category": "ivs",
+    "route": "/aix/ivs/ivs-liveness-start-page",
+    "sourcePath": "src/app/aix/ivs/ivs-liveness-start-page.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {
+      "sessionId": "preview-ivs-session"
+    },
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-ivs-ivs-phone-otp-page",
+    "title": "Ivs Phone Otp Page",
+    "category": "ivs",
+    "route": "/aix/ivs/ivs-phone-otp-page",
+    "sourcePath": "src/app/aix/ivs/ivs-phone-otp-page.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {
+      "sessionId": "preview-ivs-session"
+    },
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-ivs-ivs-pwd-page",
+    "title": "Ivs Pwd Page",
+    "category": "ivs",
+    "route": "/aix/ivs/ivs-pwd-page",
+    "sourcePath": "src/app/aix/ivs/ivs-pwd-page.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {
+      "sessionId": "preview-ivs-session"
+    },
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-ivs-phone-otp-bind-failed-page",
+    "title": "Phone Otp Bind Failed Page",
+    "category": "ivs",
+    "route": "/aix/ivs/phone-otp-bind-failed-page",
+    "sourcePath": "src/app/aix/ivs/phone-otp-bind-failed-page.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-ivs-phone-otp-page",
+    "title": "Phone Otp Page",
+    "category": "ivs",
+    "route": "/aix/ivs/phone-otp-page",
+    "sourcePath": "src/app/aix/ivs/phone-otp-page.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {
+      "phone": "88888888",
+      "areaCode": "+65",
+      "countryCode": "SG",
+      "_PageOptionId": "preview-page-option"
+    },
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-kyc-face-guide",
+    "title": "Face Guide",
+    "category": "kyc",
+    "route": "/aix/kyc/face-guide",
+    "sourcePath": "src/app/aix/kyc/face-guide.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-kyc-face-scan",
+    "title": "Face Scan",
+    "category": "kyc",
+    "route": "/aix/kyc/face-scan",
+    "sourcePath": "src/app/aix/kyc/face-scan.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-kyc-launch",
+    "title": "Launch",
+    "category": "kyc",
+    "route": "/aix/kyc/launch",
+    "sourcePath": "src/app/aix/kyc/launch.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {
+      "targetPage": "/aix/home/home-page"
+    },
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-kyc-passport-guide",
+    "title": "Passport Guide",
+    "category": "kyc",
+    "route": "/aix/kyc/passport-guide",
+    "sourcePath": "src/app/aix/kyc/passport-guide.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-kyc-passport-scan",
+    "title": "Passport Scan",
+    "category": "kyc",
+    "route": "/aix/kyc/passport-scan",
+    "sourcePath": "src/app/aix/kyc/passport-scan.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-kyc-poa",
+    "title": "Poa",
+    "category": "kyc",
+    "route": "/aix/kyc/poa",
+    "sourcePath": "src/app/aix/kyc/poa.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-kyc-result-polling",
+    "title": "Result Polling",
+    "category": "kyc",
+    "route": "/aix/kyc/result-polling",
+    "sourcePath": "src/app/aix/kyc/result-polling.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-kyc-start",
+    "title": "Start",
+    "category": "kyc",
+    "route": "/aix/kyc/start",
+    "sourcePath": "src/app/aix/kyc/start.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-kyc-success",
+    "title": "Success",
+    "category": "kyc",
+    "route": "/aix/kyc/success",
+    "sourcePath": "src/app/aix/kyc/success.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-kyc-supported-region-select",
+    "title": "Supported Region Select",
+    "category": "kyc",
+    "route": "/aix/kyc/supported-region-select",
+    "sourcePath": "src/app/aix/kyc/supported-region-select.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-kyc-waitlist",
+    "title": "Waitlist",
+    "category": "kyc",
+    "route": "/aix/kyc/waitlist",
+    "sourcePath": "src/app/aix/kyc/waitlist.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {
+      "countryCode": "SG",
+      "targetPage": "/aix/home/home-page"
+    },
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-media-crop-photo",
+    "title": "Crop Photo",
+    "category": "media",
+    "route": "/aix/media/crop-photo",
+    "sourcePath": "src/app/aix/media/crop-photo.tsx",
+    "params": [
+      "uri"
+    ],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-message-message-center-page",
+    "title": "Message Center Page",
+    "category": "message",
+    "route": "/aix/message/message-center-page",
+    "sourcePath": "src/app/aix/message/message-center-page.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-message-message-detail-page",
+    "title": "Message Detail Page",
+    "category": "message",
+    "route": "/aix/message/message-detail-page",
+    "sourcePath": "src/app/aix/message/message-detail-page.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {
+      "messageId": "preview-message-001",
+      "title": "Card application approved",
+      "createTime": "1784637000000"
+    },
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-splash",
+    "title": "Splash",
+    "category": "splash",
+    "route": "/aix/splash",
+    "sourcePath": "src/app/aix/splash.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-transaction-card-detail",
+    "title": "Card Detail",
+    "category": "transaction",
+    "route": "/aix/transaction/card-detail",
+    "sourcePath": "src/app/aix/transaction/card-detail.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-transaction-crypto-detail",
+    "title": "Crypto Detail",
+    "category": "transaction",
+    "route": "/aix/transaction/crypto-detail",
+    "sourcePath": "src/app/aix/transaction/crypto-detail.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-transaction-otc-detail",
+    "title": "Otc Detail",
+    "category": "transaction",
+    "route": "/aix/transaction/otc-detail",
+    "sourcePath": "src/app/aix/transaction/otc-detail.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-transaction-transaction-history",
+    "title": "Transaction History",
+    "category": "transaction",
+    "route": "/aix/transaction/transaction-history",
+    "sourcePath": "src/app/aix/transaction/transaction-history.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-user-about-us",
+    "title": "About Us",
+    "category": "user",
+    "route": "/aix/user/about-us",
+    "sourcePath": "src/app/aix/user/about-us.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-user-about-us-webview",
+    "title": "About Us Webview",
+    "category": "user",
+    "route": "/aix/user/about-us-webview",
+    "sourcePath": "src/app/aix/user/about-us-webview.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {
+      "url": "about:blank",
+      "title": "About AIX Pay"
+    },
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-user-change-password",
+    "title": "Change Password",
+    "category": "user",
+    "route": "/aix/user/change-password",
+    "sourcePath": "src/app/aix/user/change-password.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-user-enable-biometric",
+    "title": "Enable Biometric",
+    "category": "user",
+    "route": "/aix/user/enable-biometric",
+    "sourcePath": "src/app/aix/user/enable-biometric.tsx",
+    "params": [],
+    "nativeCapabilities": [
+      "biometric"
+    ],
+    "previewParams": {
+      "type": "Login"
+    },
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-user-forgot-password",
+    "title": "Forgot Password",
+    "category": "user",
+    "route": "/aix/user/forgot-password",
+    "sourcePath": "src/app/aix/user/forgot-password.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {
+      "email": "preview@aixpay.co"
+    },
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-user-login-guide",
+    "title": "Login Guide",
+    "category": "user",
+    "route": "/aix/user/login-guide",
+    "sourcePath": "src/app/aix/user/login-guide.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-user-login-page",
+    "title": "Login Page",
+    "category": "user",
+    "route": "/aix/user/login-page",
+    "sourcePath": "src/app/aix/user/login-page.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {
+      "showLockout": "false"
+    },
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-user-me-page",
+    "title": "Me Page",
+    "category": "user",
+    "route": "/aix/user/me-page",
+    "sourcePath": "src/app/aix/user/me-page.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-user-nick-name",
+    "title": "Nick Name",
+    "category": "user",
+    "route": "/aix/user/nick-name",
+    "sourcePath": "src/app/aix/user/nick-name.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-user-notifications",
+    "title": "Notifications",
+    "category": "user",
+    "route": "/aix/user/notifications",
+    "sourcePath": "src/app/aix/user/notifications.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-user-personal",
+    "title": "Personal",
+    "category": "user",
+    "route": "/aix/user/personal",
+    "sourcePath": "src/app/aix/user/personal.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-user-register",
+    "title": "Register",
+    "category": "user",
+    "route": "/aix/user/register",
+    "sourcePath": "src/app/aix/user/register.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-user-security",
+    "title": "Security",
+    "category": "user",
+    "route": "/aix/user/security",
+    "sourcePath": "src/app/aix/user/security.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-user-set-aix-tag",
+    "title": "Set Aix Tag",
+    "category": "user",
+    "route": "/aix/user/set-aix-tag",
+    "sourcePath": "src/app/aix/user/set-aix-tag.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-user-set-language",
+    "title": "Set Language",
+    "category": "user",
+    "route": "/aix/user/set-language",
+    "sourcePath": "src/app/aix/user/set-language.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-user-set-password",
+    "title": "Set Password",
+    "category": "user",
+    "route": "/aix/user/set-password",
+    "sourcePath": "src/app/aix/user/set-password.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {
+      "otpSessionId": "preview-otp-session"
+    },
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-user-set-phone",
+    "title": "Set Phone",
+    "category": "user",
+    "route": "/aix/user/set-phone",
+    "sourcePath": "src/app/aix/user/set-phone.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {
+      "isUpdate": "true",
+      "_PageOptionId": "preview-page-option"
+    },
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-wallet-convert-confirm",
+    "title": "Confirm",
+    "category": "wallet",
+    "route": "/aix/wallet/convert/confirm",
+    "sourcePath": "src/app/aix/wallet/convert/confirm.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-wallet-convert-input",
+    "title": "Input",
+    "category": "wallet",
+    "route": "/aix/wallet/convert/input",
+    "sourcePath": "src/app/aix/wallet/convert/input.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-wallet-convert-result",
+    "title": "Result",
+    "category": "wallet",
+    "route": "/aix/wallet/convert/result",
+    "sourcePath": "src/app/aix/wallet/convert/result.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-wallet-deposit-authentication-failed",
+    "title": "Authentication Failed",
+    "category": "wallet",
+    "route": "/aix/wallet/deposit/authentication-failed",
+    "sourcePath": "src/app/aix/wallet/deposit/authentication-failed.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-wallet-deposit-connect-wallet",
+    "title": "Connect Wallet",
+    "category": "wallet",
+    "route": "/aix/wallet/deposit/connect-wallet",
+    "sourcePath": "src/app/aix/wallet/deposit/connect-wallet.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-wallet-deposit-deposit-address",
+    "title": "Deposit Address",
+    "category": "wallet",
+    "route": "/aix/wallet/deposit/deposit-address",
+    "sourcePath": "src/app/aix/wallet/deposit/deposit-address.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-wallet-deposit-deposit-scenario",
+    "title": "Deposit Scenario",
+    "category": "wallet",
+    "route": "/aix/wallet/deposit/deposit-scenario",
+    "sourcePath": "src/app/aix/wallet/deposit/deposit-scenario.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-wallet-deposit-deposit-scenario-review-document",
+    "title": "Review Document",
+    "category": "wallet",
+    "route": "/aix/wallet/deposit/deposit-scenario/review-document",
+    "sourcePath": "src/app/aix/wallet/deposit/deposit-scenario/review-document.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-wallet-deposit-deposit-scenario-review-result",
+    "title": "Review Result",
+    "category": "wallet",
+    "route": "/aix/wallet/deposit/deposit-scenario/review-result",
+    "sourcePath": "src/app/aix/wallet/deposit/deposit-scenario/review-result.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-wallet-deposit-deposit-scenario-review-wallet-address",
+    "title": "Review Wallet Address",
+    "category": "wallet",
+    "route": "/aix/wallet/deposit/deposit-scenario/review-wallet-address",
+    "sourcePath": "src/app/aix/wallet/deposit/deposit-scenario/review-wallet-address.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-wallet-deposit-deposit-scenario-submit-history",
+    "title": "Submit History",
+    "category": "wallet",
+    "route": "/aix/wallet/deposit/deposit-scenario/submit-history",
+    "sourcePath": "src/app/aix/wallet/deposit/deposit-scenario/submit-history.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-wallet-deposit-payment-confirmation",
+    "title": "Payment Confirmation",
+    "category": "wallet",
+    "route": "/aix/wallet/deposit/payment-confirmation",
+    "sourcePath": "src/app/aix/wallet/deposit/payment-confirmation.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-wallet-deposit-select-deposit-method",
+    "title": "Select Deposit Method",
+    "category": "wallet",
+    "route": "/aix/wallet/deposit/select-deposit-method",
+    "sourcePath": "src/app/aix/wallet/deposit/select-deposit-method.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-wallet-deposit-supported-gtr-wallets",
+    "title": "Supported Gtr Wallets",
+    "category": "wallet",
+    "route": "/aix/wallet/deposit/supported-gtr-wallets",
+    "sourcePath": "src/app/aix/wallet/deposit/supported-gtr-wallets.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-wallet-deposit-wallet-deposit-input",
+    "title": "Wallet Deposit Input",
+    "category": "wallet",
+    "route": "/aix/wallet/deposit/wallet-deposit-input",
+    "sourcePath": "src/app/aix/wallet/deposit/wallet-deposit-input.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-wallet-deposit-wallet-deposit-result",
+    "title": "Wallet Deposit Result",
+    "category": "wallet",
+    "route": "/aix/wallet/deposit/wallet-deposit-result",
+    "sourcePath": "src/app/aix/wallet/deposit/wallet-deposit-result.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-wallet-select-currency",
+    "title": "Select Currency",
+    "category": "wallet",
+    "route": "/aix/wallet/select-currency",
+    "sourcePath": "src/app/aix/wallet/select-currency.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-wallet-select-network",
+    "title": "Select Network",
+    "category": "wallet",
+    "route": "/aix/wallet/select-network",
+    "sourcePath": "src/app/aix/wallet/select-network.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  },
+  {
+    "id": "aix-wallet-wallet-home",
+    "title": "Wallet Home",
+    "category": "wallet",
+    "route": "/aix/wallet/wallet-home",
+    "sourcePath": "src/app/aix/wallet/wallet-home.tsx",
+    "params": [],
+    "nativeCapabilities": [],
+    "previewParams": {},
+    "nonVisual": false,
+    "internal": false
+  }
+]

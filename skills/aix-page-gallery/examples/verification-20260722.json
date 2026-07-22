@@ -1,0 +1,40 @@
+{
+  "date": "2026-07-22",
+  "version": "1.0.0",
+  "serverValidation": {
+    "pythonCompile": "pass",
+    "jsonValidation": "pass",
+    "sensitiveDataScan": "pass",
+    "adapterDryRunOriginal": "apply",
+    "adapterDryRunAdapted": "applied",
+    "freshAixCopy": {
+      "overlayFiles": 35,
+      "businessRoutes": 87,
+      "nonVisualRoutes": ["/aix/ivs/ivs-begin-page"],
+      "typescript": "pass",
+      "expoExport": "pass",
+      "exportSize": "28MB",
+      "galleryHtml": "present"
+    },
+    "genericAudit": "pass",
+    "deliveryBuild": "pass",
+    "zipIntegrity": "pass",
+    "browserSmoke": "preflight stopped: system Chrome and websocket-client unavailable on server"
+  },
+  "macValidation": {
+    "aixFinalBaseline": {
+      "businessRoutes": 87,
+      "renderedVisualRoutes": 86,
+      "nonVisualRoutes": 1,
+      "runtimeErrors": 0,
+      "blankVisualRoutes": 0,
+      "pngFiles": 87,
+      "viewport": "390x844"
+    },
+    "directCdpFixtureCapture": {
+      "routes": 3,
+      "statuses": {"rendered": 2, "non-visual": 1},
+      "result": "pass"
+    }
+  }
+}

@@ -1,0 +1,351 @@
+{
+  "name": "aix-page-gallery",
+  "version": "1.0.0",
+  "files": [
+    {
+      "path": ".gitignore",
+      "sha256": "912f4aac3b9d47b7400b36843a25d4dec034448a8c2d7c92779ad828b7af057f",
+      "size": 96
+    },
+    {
+      "path": "CHANGELOG.md",
+      "sha256": "91fc0635d2b1ed5c5768bbe3f995a37c4fea8836e8862e425be28c95fc163e75",
+      "size": 435
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "919baaee7c803aec16974ff9d5f914f49ce2c9431472ace2e64778e24aa9a907",
+      "size": 414
+    },
+    {
+      "path": "README.md",
+      "sha256": "54d8e63440756794343fcb0b5a36649293f2d6a599bc52a19645b6e8632fe0cc",
+      "size": 1141
+    },
+    {
+      "path": "SKILL.md",
+      "sha256": "eb22acb27f6a28809a4854a7134b4837a2bb7c57b5520db42b23e143906dc2e6",
+      "size": 10434
+    },
+    {
+      "path": "TEST_STATUS.md",
+      "sha256": "9f88837f55322d4c5bb824d08aa7961e643f1a2627667471e0a0f8c129a0b940",
+      "size": 873
+    },
+    {
+      "path": "VERSION",
+      "sha256": "59854984853104df5c353e2f681a15fc7924742f9a2e468c29af248dce45ce03",
+      "size": 6
+    },
+    {
+      "path": "adapters/aix/README.md",
+      "sha256": "71a69c8ee3c11489c12ebd7f659de3f459d53a379ea515f217f265f4eb6aba19",
+      "size": 407
+    },
+    {
+      "path": "adapters/aix/aix-runtime.patch",
+      "sha256": "d0b62c92c94bb1f231c2990e058dd95f973a804ed7f80215813856cb0b55a8ba",
+      "size": 10986
+    },
+    {
+      "path": "adapters/aix/manifest.json",
+      "sha256": "ee433a8b6628a0d86c7a837c3dcf42789449a25bd1ed58c1748634b510cdd4e2",
+      "size": 6173
+    },
+    {
+      "path": "adapters/aix/overlay/packages/common/src/mmkv/MMKVHelper.web.ts",
+      "sha256": "08bae3f3511b290385feebd43232917551369d51869c44c1ed68b912db63da0b",
+      "size": 1659
+    },
+    {
+      "path": "adapters/aix/overlay/packages/pull-to-refresh/src/index.web.tsx",
+      "sha256": "dd8b200128635ba299af3ca1d86ef76b4ca87369d04893e81110d07ea09e52b0",
+      "size": 897
+    },
+    {
+      "path": "adapters/aix/overlay/public/preview/splash.png",
+      "sha256": "364651b851365c7ea7d70c554d4c3c29fb532fa4d067bfbda164b39b5f5d1ea4",
+      "size": 574927
+    },
+    {
+      "path": "adapters/aix/overlay/scripts/generate-page-gallery-registry.js",
+      "sha256": "8fee4fbdfa0cf3e47210c62545576da105cfff3dfd65502d246a92f1c7f8978d",
+      "size": 3439
+    },
+    {
+      "path": "adapters/aix/overlay/scripts/preview-route-presets.js",
+      "sha256": "14d50e639ea11185fef39edc95063ac66cb172a9681ada89d1c754df758468e7",
+      "size": 5616
+    },
+    {
+      "path": "adapters/aix/overlay/specs/NativeAIXDeviceInfo.web.ts",
+      "sha256": "e5d4fc22ef37ea88550caa69afe212ca22d3fc0bb889b37d46ba27493072d1b2",
+      "size": 440
+    },
+    {
+      "path": "adapters/aix/overlay/specs/NativeAIXFileUploader.web.ts",
+      "sha256": "6206f2f0462e3ddeda4f6dca37b8844daaaf16feb7686a89cd1868c87cbf8ce7",
+      "size": 316
+    },
+    {
+      "path": "adapters/aix/overlay/specs/NativeBiometricStrategy.web.ts",
+      "sha256": "4fa21b146b1b77f0b9f1ce9a6e155abe89a1e7a34f827951266b5ecf6994d5a7",
+      "size": 656
+    },
+    {
+      "path": "adapters/aix/overlay/specs/NativeGeneralMethods.web.ts",
+      "sha256": "89230c9777e03d20556113938b1c13fc1654a93d22adf28342bc58610e815d64",
+      "size": 448
+    },
+    {
+      "path": "adapters/aix/overlay/specs/NativeLocalStorage.web.ts",
+      "sha256": "ca972dddd14bc007d27b7227dd4efa2a3ca889c157d7877ea1e4b60f383e9c51",
+      "size": 848
+    },
+    {
+      "path": "adapters/aix/overlay/src/aix/debug/PageGalleryPage.tsx",
+      "sha256": "a030ad259e285cf6f46a4acca208b902a2d4cc3848877c320692ac012147c2b5",
+      "size": 5869
+    },
+    {
+      "path": "adapters/aix/overlay/src/aix/ivs/biometric/IvsBiometricPage.web.tsx",
+      "sha256": "b71d2bc4b1ca8908964f6d81174a28184e0fc8143404676a58541cd0c9751dfd",
+      "size": 357
+    },
+    {
+      "path": "adapters/aix/overlay/src/aix/splash/SplashPage.web.tsx",
+      "sha256": "da78fad2841918ee4f950f5ca72d523d031b6b7d8eaad19509feee5facd61c4c",
+      "size": 360
+    },
+    {
+      "path": "adapters/aix/overlay/src/app/aix/debug/page-gallery.tsx",
+      "sha256": "72109576d3aab03486129bc82f35d323b393fceabac60264c9c1ca4121de9a97",
+      "size": 96
+    },
+    {
+      "path": "adapters/aix/overlay/src/bootstrap/RootLayoutNative.tsx",
+      "sha256": "e92ddef31bc8fa6e46957608d9667ffb7c483018dede0e2dfbebed46f245ce09",
+      "size": 4554
+    },
+    {
+      "path": "adapters/aix/overlay/src/bootstrap/RootLayoutPlatform.native.tsx",
+      "sha256": "9c2cde1b89cd847d5f0bb0476b6f2c6a5fc189a4bc2d65b1a183a9dca1531a83",
+      "size": 46
+    },
+    {
+      "path": "adapters/aix/overlay/src/bootstrap/RootLayoutPlatform.tsx",
+      "sha256": "9c2cde1b89cd847d5f0bb0476b6f2c6a5fc189a4bc2d65b1a183a9dca1531a83",
+      "size": 46
+    },
+    {
+      "path": "adapters/aix/overlay/src/bootstrap/RootLayoutPlatform.web.tsx",
+      "sha256": "0ec1e0def73447872b68644ebaa2ba7d9b5bc9fb70864a21e7086971160c250f",
+      "size": 43
+    },
+    {
+      "path": "adapters/aix/overlay/src/bootstrap/RootLayoutWeb.tsx",
+      "sha256": "dfbe574d2b0acd630cd9d7f5ce43900433fdcf3b0f854363dffd690f12c3658a",
+      "size": 2052
+    },
+    {
+      "path": "adapters/aix/overlay/src/network/Api.web.ts",
+      "sha256": "25d019fecfe6a3e745f1808e586a57055c5405c590d3b082e5072d3e6ce8143b",
+      "size": 750
+    },
+    {
+      "path": "adapters/aix/overlay/src/preview/PreviewFixtures.ts",
+      "sha256": "38dabc74b470e39d3d610ca54e4c5324a9570db1c30b68a9cfda7c74e571fe44",
+      "size": 9339
+    },
+    {
+      "path": "adapters/aix/overlay/src/preview/PreviewSession.ts",
+      "sha256": "dd3a6253ffa1ce62853be8107c6468f7e69d0e0c5bd8be6f9b755367160b4f72",
+      "size": 1268
+    },
+    {
+      "path": "adapters/aix/overlay/src/preview/stubs/AppsFlyer.web.ts",
+      "sha256": "f38d5fd5da6e985e451f3a45015c6a275fffcdf6566eaa0911616fd6102a38f0",
+      "size": 826
+    },
+    {
+      "path": "adapters/aix/overlay/src/preview/stubs/Cookies.web.ts",
+      "sha256": "43a4bfa2f9bbbfbbf4b9e7a3cc990aef12fd3d73d34d843593f8f9dcc7bc5fba",
+      "size": 605
+    },
+    {
+      "path": "adapters/aix/overlay/src/preview/stubs/Crashlytics.web.ts",
+      "sha256": "8744896bae8e85330ba297a42db23321d94e281a748ee67c4992de141f2757c6",
+      "size": 270
+    },
+    {
+      "path": "adapters/aix/overlay/src/preview/stubs/DeviceInfo.web.ts",
+      "sha256": "ea82f9a1cdcdcf78d12e50a7bfbfd84b9f290abe10db88a3a720f3022c6bc9c3",
+      "size": 546
+    },
+    {
+      "path": "adapters/aix/overlay/src/preview/stubs/MoEngage.web.ts",
+      "sha256": "b7aeba548e58dd72a6c3fcc67f944a148d674dd52eb5781b4c329a3d2b7a5c29",
+      "size": 1018
+    },
+    {
+      "path": "adapters/aix/overlay/src/preview/stubs/RemoteConfig.web.ts",
+      "sha256": "e0057b0cf28596c631cb4ead75556f86f75eb0e24dcddd5878417c54b1f1f9d6",
+      "size": 695
+    },
+    {
+      "path": "adapters/aix/overlay/src/preview/stubs/Share.web.ts",
+      "sha256": "940e5d593ec38311589a1cc4863a547fb6f026de65bd7b83fc5b3290fef49374",
+      "size": 463
+    },
+    {
+      "path": "adapters/aix/overlay/src/preview/stubs/UIManager.web.ts",
+      "sha256": "5c58d4e84090e93bbc17cc1757106f375a462705ca5555d47c1aad56e7c741b0",
+      "size": 296
+    },
+    {
+      "path": "adapters/aix/overlay/src/preview/stubs/ViewShot.web.ts",
+      "sha256": "aa9b39f0ff7d42ffd1df236caeebad5974ab7adfe6c3070f189e2c1acdce594d",
+      "size": 201
+    },
+    {
+      "path": "adapters/aix/overlay/src/preview/stubs/WebView.web.tsx",
+      "sha256": "0c2253925b7feb6c711a3095374db37d84d28c8016b29b2c12594032b3d60637",
+      "size": 1641
+    },
+    {
+      "path": "adapters/aix/overlay/src/preview/stubs/codegenNativeCommands.web.ts",
+      "sha256": "6010362b82108a0ead9bce39c114e260d4734e9746831500e9f49274b62db1f1",
+      "size": 310
+    },
+    {
+      "path": "adapters/aix/overlay/src/preview/stubs/codegenNativeComponent.web.tsx",
+      "sha256": "2269040aced7e7c5d92f99bbbb2bcb07c97994ffce3e3a38bfc46ceaf0ec43cf",
+      "size": 283
+    },
+    {
+      "path": "adapters/aix/overlay/src/webivew/SaveFileMethods.web.ts",
+      "sha256": "d076863afba2768b190d873b64fa4d04c474695debb433b85b3e9a97f6665d89",
+      "size": 1259
+    },
+    {
+      "path": "adapters/aix/overlay-files.txt",
+      "sha256": "c971a049d1c880c26dc68f353189af44f018c7d710281a594d02a4ff95142956",
+      "size": 566
+    },
+    {
+      "path": "adapters/aix/package-changes.md",
+      "sha256": "1019d25c5d8eaf71c6666b43952eb9b520125f8e98cbe16ba413b840ea9eebb2",
+      "size": 487
+    },
+    {
+      "path": "adapters/aix/patched-files.txt",
+      "sha256": "194490d0b05376edd4eafa60f53e1f20ad86fa02953f5e6f02eaa40be7fabef6",
+      "size": 239
+    },
+    {
+      "path": "examples/aix-routes-verified.json",
+      "sha256": "655d525e40af733e09f209ea62bd3ba6a75a83b5790f6b476e88f5c2c2298dda",
+      "size": 38499
+    },
+    {
+      "path": "examples/verification-20260722.json",
+      "sha256": "3dbdec99f77bb1a344ef50397d4d02ff148f8668662879695481f7ae85d9915a",
+      "size": 1070
+    },
+    {
+      "path": "references/acceptance.md",
+      "sha256": "470851d665d580b943d5791674225cdddf3e6f883e33eafa97b45fe47dc683a4",
+      "size": 1393
+    },
+    {
+      "path": "references/aix-adapter.md",
+      "sha256": "56657de4cdae1fe4ab3e205c7b4c81326200fd305be4cdad0a89cadd93b321b4",
+      "size": 2073
+    },
+    {
+      "path": "references/architecture.md",
+      "sha256": "234e7ef3c2432a7a6769aa321d87a2bb7f5c58e53d8571822f9199008d56c658",
+      "size": 1576
+    },
+    {
+      "path": "references/troubleshooting.md",
+      "sha256": "7086d3a83656f3fe2be31ef23fc87e9d378b55a5caa611731d78789b5ed08e71",
+      "size": 2411
+    },
+    {
+      "path": "requirements.txt",
+      "sha256": "f8e7007b31f22d88deed45022b489cf6dabd4964b993a4ce67f2c1b711cc1ce6",
+      "size": 40
+    },
+    {
+      "path": "scripts/apply_aix_overlay.py",
+      "sha256": "cb42ea22f5ed57000004fa7884bf23c4aab55e3c3a553a39f3b039c76008f6c0",
+      "size": 4590
+    },
+    {
+      "path": "scripts/audit_gallery.py",
+      "sha256": "41ef6472398306558784fdad473e5e159faeee8b7e78d22c3e77e9087da93b4c",
+      "size": 3768
+    },
+    {
+      "path": "scripts/build_delivery.py",
+      "sha256": "be0ffc34967511a8c05ffb4de9dfb9927640c84b4f081c2419354e910e744af7",
+      "size": 3443
+    },
+    {
+      "path": "scripts/capture_cdp.py",
+      "sha256": "fde4284b96c9ff3ccd995d412385d1ec7f65a7821adcbce4f3160ebb3b887833",
+      "size": 11730
+    },
+    {
+      "path": "scripts/check_environment.py",
+      "sha256": "c9c8bebbe3a808a122edf7e8d407eb610ada82f46fe93a3ae5f9ccc6f040917e",
+      "size": 2077
+    },
+    {
+      "path": "scripts/run_gallery.py",
+      "sha256": "5c4a183589591d7ee7029d47c8411b931db3d7f306a6183b53ebb9f2e8733096",
+      "size": 5279
+    },
+    {
+      "path": "scripts/serve_static.py",
+      "sha256": "136f91d949d6e0699776cbb2208b136347f1a0116f7016904814dcf0e93c5452",
+      "size": 1009
+    },
+    {
+      "path": "scripts/validate_skill.py",
+      "sha256": "83995db1a9c819740e85752f5bcf6c63f0135f913ee408abca8c4ebaa316232b",
+      "size": 2386
+    },
+    {
+      "path": "tests/fixture-config/pageRegistry.json",
+      "sha256": "72846a09a2f1ec9ed0dcb526ef6afe83bc1ddaf7a4cb89fc244430648ba779c4",
+      "size": 574
+    },
+    {
+      "path": "tests/fixture-site/controller.html",
+      "sha256": "e684b50b1d8eb8c42240f64974a4de9f0ccb19f1ccb5382aedd7585dc9624443",
+      "size": 51
+    },
+    {
+      "path": "tests/fixture-site/index.html",
+      "sha256": "fbcc86342aee743ff4732f0ce9a0d4c8b79890a0797db76bc97f8b417a9fbac5",
+      "size": 105
+    },
+    {
+      "path": "tests/fixture-site/page-one.html",
+      "sha256": "aafc281796d5b7498f6e4354e228c5a86129aac83c4ea5b85fc965cd7f3eb3c4",
+      "size": 408
+    },
+    {
+      "path": "tests/fixture-site/page-two.html",
+      "sha256": "4e0abf56ea282bfef030e2e4e146e65553983456572f8c71add9e0723c6bd744",
+      "size": 418
+    },
+    {
+      "path": "tests/run_smoke_test.sh",
+      "sha256": "1fdf30e5e05fd4ba542d5b166a89fcab35fcb590d4f8810e5240acc2b69891e9",
+      "size": 618
+    }
+  ]
+}
