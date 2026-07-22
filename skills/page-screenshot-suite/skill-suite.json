@@ -1,0 +1,19 @@
+{
+  "name": "page-screenshot-suite",
+  "version": "1.0.0",
+  "skills": [
+    "aix-page-gallery-e2e",
+    "expo-router-page-gallery",
+    "chrome-cdp-page-capture",
+    "page-screenshot-audit",
+    "aix-preview-adapter"
+  ],
+  "verifiedBaseline": {
+    "routes": 87,
+    "visual": 86,
+    "nonVisual": 1,
+    "errors": 0,
+    "blanks": 0,
+    "viewport": "390x844"
+  }
+}
