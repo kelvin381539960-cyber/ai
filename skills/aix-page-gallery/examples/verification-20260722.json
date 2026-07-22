@@ -10,7 +10,9 @@
     "freshAixCopy": {
       "overlayFiles": 35,
       "businessRoutes": 87,
-      "nonVisualRoutes": ["/aix/ivs/ivs-begin-page"],
+      "nonVisualRoutes": [
+        "/aix/ivs/ivs-begin-page"
+      ],
       "typescript": "pass",
       "expoExport": "pass",
       "exportSize": "28MB",
@@ -33,8 +35,41 @@
     },
     "directCdpFixtureCapture": {
       "routes": 3,
-      "statuses": {"rendered": 2, "non-visual": 1},
+      "statuses": {
+        "rendered": 2,
+        "non-visual": 1
+      },
       "result": "pass"
+    },
+    "finalSkillFullAixRun": {
+      "result": "pass",
+      "businessRoutes": 87,
+      "renderedVisualRoutes": 86,
+      "nonVisualRoutes": [
+        "/aix/ivs/ivs-begin-page"
+      ],
+      "runtimeErrors": 0,
+      "blankVisualRoutes": 0,
+      "pngFiles": 87,
+      "viewport": "390x844",
+      "missingScreenshots": 0,
+      "nearBlankScreenshots": 0,
+      "duplicateGroups": [
+        [
+          "/aix/card/card_entrance",
+          "/aix/card/card-interduce"
+        ],
+        [
+          "/aix/ivs/ivs-liveness-start-page",
+          "/aix/kyc/face-guide"
+        ],
+        [
+          "/aix/kyc/launch",
+          "/aix/kyc/result-polling"
+        ]
+      ],
+      "deliveryZipSha256": "7fd3060460ef882eacd3bfba4165ec0e3b6423402294c3172827ebc5012de096",
+      "screenshotsZipSha256": "443382cae94364268e4460fb095b7b4450dc7fd5c2db62b04d729be6a8382070"
     }
   }
 }

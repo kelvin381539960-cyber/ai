@@ -17,6 +17,7 @@
 - ZIP integrity validation
 - Mac direct CDP fixture capture: 2 rendered + 1 non-visual
 - Existing AIX final baseline: 87 PNG, 0 runtime errors, 0 blank visual pages
+- Final Skill full AIX run on Mac: 87/87 routes, 86 rendered, 1 non-visual, 0 errors, 0 blanks, 87 PNG at 390x844
 
 ## Environment-specific limitation
 

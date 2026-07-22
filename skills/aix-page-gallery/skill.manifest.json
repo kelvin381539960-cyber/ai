@@ -29,8 +29,8 @@
     },
     {
       "path": "TEST_STATUS.md",
-      "sha256": "9f88837f55322d4c5bb824d08aa7961e643f1a2627667471e0a0f8c129a0b940",
-      "size": 873
+      "sha256": "b27b44cfff977c9f558d65fca903a13341e74fcec0d957afb6ae819b13ea0af9",
+      "size": 987
     },
     {
       "path": "VERSION",
@@ -249,8 +249,8 @@
     },
     {
       "path": "examples/verification-20260722.json",
-      "sha256": "3dbdec99f77bb1a344ef50397d4d02ff148f8668662879695481f7ae85d9915a",
-      "size": 1070
+      "sha256": "1916fe65bd53d94f235c377c2874348af10fb06f31e3a002fa4d96b9fa4a8cd1",
+      "size": 1981
     },
     {
       "path": "references/acceptance.md",
